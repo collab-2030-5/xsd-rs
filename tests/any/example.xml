@@ -1,5 +1,0 @@
-<exam:Foo xmlns:exam="http://example.com">
-  <exam:Name>abcd</exam:Name>
-  <!--You may enter ANY elements at this point-->
-  <AnyElement/>
-</exam:Foo>
