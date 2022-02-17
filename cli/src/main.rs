@@ -13,6 +13,10 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
     let data = std::fs::read_to_string(opt.input).unwrap();
-    let model = xsd_parser::parser::parse(&data).unwrap();
-    println!("{:#?}", model);
+    let model = xsd_parser::parse(&data);
+
+    println!("simple types:");
+    for (name, st) in model.simple_types {
+        println!("  {} -> {:?}", name, st);
+    }
 }
