@@ -11,6 +11,11 @@ pub struct Model {
 }
 
 #[derive(Default, Copy, Clone, Debug)]
+pub struct StringConstraint {
+    pub max_length: Option<usize>,
+}
+
+#[derive(Default, Copy, Clone, Debug)]
 pub struct NumericConstraint<T> {
     pub min: Option<T>,
     pub max: Option<T>,
@@ -19,6 +24,7 @@ pub struct NumericConstraint<T> {
 // maps to simple types with possible constraints
 #[derive(Copy, Clone, Debug)]
 pub enum SimpleType {
+    String(StringConstraint),
     I8(NumericConstraint<i8>),
     U8(NumericConstraint<u8>),
     I16(NumericConstraint<i16>),
@@ -120,7 +126,18 @@ where
             FacetType::MinInclusive(s) => {
                 constraint.min = Some(s.parse::<T>().unwrap());
             }
-            x => panic!("Unexpected {} facet: {:?}", std::any::type_name::<T>(), x),
+            x => panic!("Unsupported {} facet: {:?}", std::any::type_name::<T>(), x),
+        }
+    }
+    constraint
+}
+
+fn parse_string_type(ts: &TupleStruct) -> StringConstraint {
+    let mut constraint = StringConstraint::default();
+    for facet in ts.facets.iter() {
+        match &facet.facet_type {
+            FacetType::MaxLength(x) => constraint.max_length = Some(x.parse::<usize>().unwrap()),
+            _ => panic!("Unsupported string facet: {:?}", facet),
         }
     }
     constraint
@@ -129,7 +146,7 @@ where
 fn try_resolve_basic(ts: &TupleStruct) -> Option<SimpleType> {
     match ts.type_name.as_str() {
         "xs:hexBinary" => None,
-        "xs:string" => None,
+        "xs:string" => Some(SimpleType::String(parse_string_type(ts))),
         "xs:byte" => Some(SimpleType::I8(parse_numeric_type::<i8>(ts))),
         "xs:unsignedByte" => Some(SimpleType::U8(parse_numeric_type::<u8>(ts))),
         "xs:short" => Some(SimpleType::I16(parse_numeric_type::<i16>(ts))),
