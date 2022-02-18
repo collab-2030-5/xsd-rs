@@ -1,8 +1,10 @@
-use crate::parser::types::{RsEntity, RsFile, TupleStruct};
+use crate::parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct};
 use crate::parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::str::FromStr;
+
+pub(crate) mod parser;
 
 #[derive(Debug)]
 pub struct Model {
@@ -41,29 +43,91 @@ pub enum SimpleType {
 
 #[derive(Debug)]
 pub struct StructField {
+    pub comment: Option<String>,
     pub name: String,
     pub field_type: String,
 }
 
 #[derive(Debug)]
 pub struct Struct {
+    pub comment: Option<String>,
+    pub name: String,
     /// single optional base struct
-    pub base: Option<String>,
+    pub base_type: Option<String>,
     pub fields: Vec<StructField>,
 }
-
-pub(crate) mod parser;
 
 pub fn parse(path: &str) -> Model {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
     let simple_types = resolve_simple_types(&entity);
+    let structs = extract_structs(&entity);
 
     Model {
         simple_types,
-        structs: Vec::new(),
+        structs,
     }
+}
+
+fn extract_base_type(x: &parser::types::Struct) -> Option<String> {
+    let base_types: Vec<String> = x
+        .fields
+        .borrow()
+        .iter()
+        .filter_map(|x| match x.source {
+            StructFieldSource::Attribute => None,
+            StructFieldSource::Element => None,
+            StructFieldSource::Base => Some(x.type_name.clone()),
+            StructFieldSource::Choice => unimplemented!(),
+            StructFieldSource::NA => unimplemented!(),
+        })
+        .collect();
+
+    match base_types.as_slice() {
+        [] => None,
+        [x] => Some(x.clone()),
+        _ => panic!("Unexpected number of base types: {:#?}", base_types),
+    }
+}
+
+fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
+    x.fields
+        .borrow()
+        .iter()
+        .filter_map(|x| match x.source {
+            StructFieldSource::Attribute => Some(StructField {
+                comment: x.comment.clone(),
+                name: x.name.clone(),
+                field_type: x.type_name.clone(),
+            }),
+            StructFieldSource::Element => Some(StructField {
+                comment: x.comment.clone(),
+                name: x.name.clone(),
+                field_type: x.type_name.clone(),
+            }),
+            StructFieldSource::Base => None,
+            StructFieldSource::Choice => unimplemented!(),
+            StructFieldSource::NA => unimplemented!(),
+        })
+        .collect()
+}
+
+fn extract_structs(entity: &RsFile) -> Vec<Struct> {
+    let mut structs = Vec::new();
+    for st in entity.types.iter() {
+        if let RsEntity::Struct(x) = st {
+            let base_type = extract_base_type(x);
+            let fields = extract_fields(x);
+            structs.push(Struct {
+                comment: x.comment.clone(),
+                name: x.name.clone(),
+                base_type,
+                fields,
+            })
+        }
+    }
+    structs
 }
 
 // simple types can only reference each other
