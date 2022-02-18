@@ -1,4 +1,4 @@
-use crate::parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct};
+use crate::parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, TypeModifier};
 use crate::parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -46,6 +46,26 @@ pub struct StructField {
     pub comment: Option<String>,
     pub name: String,
     pub field_type: String,
+    pub info: StructFieldInfo,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ElementType {
+    Single,
+    Array,
+    Option,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum AttributeType {
+    Single,
+    Option,
+}
+
+#[derive(Clone, Debug)]
+pub enum StructFieldInfo {
+    Attribute(AttributeType),
+    Element(ElementType),
 }
 
 #[derive(Debug)]
@@ -91,6 +111,49 @@ fn extract_base_type(x: &parser::types::Struct) -> Option<String> {
     }
 }
 
+fn get_attribute_type(input: &Vec<TypeModifier>) -> AttributeType {
+    let modifiers: Vec<AttributeType> = input
+        .iter()
+        .filter_map(|x| match x {
+            TypeModifier::None => None,
+            TypeModifier::Array => unimplemented!(),
+            TypeModifier::Option => Some(AttributeType::Option),
+            TypeModifier::Recursive => unimplemented!(),
+            TypeModifier::Empty => unimplemented!(),
+        })
+        .collect();
+
+    match modifiers.as_slice() {
+        [] => AttributeType::Single,
+        [x] => *x,
+        _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
+    }
+}
+
+fn get_element_type(input: &Vec<TypeModifier>) -> ElementType {
+    let modifiers: Vec<ElementType> = input
+        .iter()
+        .filter_map(|x| match x {
+            TypeModifier::None => None,
+            TypeModifier::Array => Some(ElementType::Array),
+            TypeModifier::Option => Some(ElementType::Option),
+            TypeModifier::Recursive => {
+                // TODO
+                Some(ElementType::Option)
+            }
+            TypeModifier::Empty => {
+                unimplemented!()
+            }
+        })
+        .collect();
+
+    match modifiers.as_slice() {
+        [] => ElementType::Single,
+        [x] => *x,
+        _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
+    }
+}
+
 fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
     x.fields
         .borrow()
@@ -100,11 +163,13 @@ fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
+                info: StructFieldInfo::Attribute(get_attribute_type(&x.type_modifiers)),
             }),
             StructFieldSource::Element => Some(StructField {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
+                info: StructFieldInfo::Element(get_element_type(&x.type_modifiers)),
             }),
             StructFieldSource::Base => None,
             StructFieldSource::Choice => unimplemented!(),
