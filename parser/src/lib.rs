@@ -24,6 +24,10 @@ pub struct NumericConstraint<T> {
 // maps to simple types with possible constraints
 #[derive(Copy, Clone, Debug)]
 pub enum SimpleType {
+    // a single byte encoded as a hex (2 characters e.g. "FF")
+    HexByte,
+    // multiple bytes with a maximum length
+    HexBytes(usize),
     String(StringConstraint),
     I8(NumericConstraint<i8>),
     U8(NumericConstraint<u8>),
@@ -145,7 +149,22 @@ fn parse_string_type(ts: &TupleStruct) -> StringConstraint {
 
 fn try_resolve_basic(ts: &TupleStruct) -> Option<SimpleType> {
     match ts.type_name.as_str() {
-        "xs:hexBinary" => None,
+        "xs:hexBinary" => {
+            // 2030.5 only has one of these with a max length == 1
+            if ts.facets.len() != 1 {
+                panic!(
+                    "Unexpected # of facets for xs:hexBinary: {}",
+                    ts.facets.len()
+                );
+            }
+            match &ts.facets[0].facet_type {
+                FacetType::MaxLength(x) => match x.parse::<usize>().unwrap() {
+                    1 => Some(SimpleType::HexByte),
+                    len => Some(SimpleType::HexBytes(len)),
+                },
+                ft => panic!("Unexpected Facet type for xs:hexBinary: {:?}", ft),
+            }
+        }
         "xs:string" => Some(SimpleType::String(parse_string_type(ts))),
         "xs:byte" => Some(SimpleType::I8(parse_numeric_type::<i8>(ts))),
         "xs:unsignedByte" => Some(SimpleType::U8(parse_numeric_type::<u8>(ts))),

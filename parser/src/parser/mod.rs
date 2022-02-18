@@ -29,11 +29,9 @@ use crate::parser::types::RsFile;
 #[allow(clippy::result_unit_err)]
 pub(crate) fn parse(text: &str) -> Result<RsFile, ()> {
     let doc = roxmltree::Document::parse(text).expect("Parse document error");
-    let root = doc.root();
 
-    //let mut map = HashMap::new();
-
-    let schema = root
+    let schema = doc
+        .root()
         .children()
         .filter(|e| e.is_element())
         .last()

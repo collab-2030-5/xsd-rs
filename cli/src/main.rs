@@ -15,8 +15,5 @@ fn main() {
     let data = std::fs::read_to_string(opt.input).unwrap();
     let model = xsd_parser::parse(&data);
 
-    println!("simple types:");
-    for (name, st) in model.simple_types {
-        println!("  {} -> {:?}", name, st);
-    }
+    println!("{:#?}", model);
 }
