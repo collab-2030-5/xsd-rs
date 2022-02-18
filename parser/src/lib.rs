@@ -1,4 +1,4 @@
-use crate::parser::types::{RsEntity, TupleStruct};
+use crate::parser::types::{RsEntity, RsFile, TupleStruct};
 use crate::parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -58,32 +58,7 @@ pub fn parse(path: &str) -> Model {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
-    let mut simple_types: Vec<TupleStruct> = Vec::new();
-
-    // transform into the model types
-    for t in entity.types.iter() {
-        match t {
-            RsEntity::Struct(_) => {}
-            RsEntity::StructField(_) => {
-                unimplemented!()
-            }
-            RsEntity::TupleStruct(x) => {
-                simple_types.push(x.clone());
-            }
-            RsEntity::Enum(_) => {
-                unimplemented!()
-            }
-            RsEntity::EnumCase(_) => {
-                unimplemented!()
-            }
-            RsEntity::Alias(_) => {}
-            RsEntity::Import(_) => {
-                unimplemented!()
-            }
-        }
-    }
-
-    let simple_types = resolve_simple_types(simple_types);
+    let simple_types = resolve_simple_types(&entity);
 
     Model {
         simple_types,
@@ -92,7 +67,17 @@ pub fn parse(path: &str) -> Model {
 }
 
 // simple types can only reference each other
-fn resolve_simple_types(input: Vec<TupleStruct>) -> HashMap<String, SimpleType> {
+fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
+    let input: Vec<TupleStruct> = model
+        .types
+        .iter()
+        .filter_map(|x| match x {
+            RsEntity::TupleStruct(ts) => Some(ts),
+            _ => None,
+        })
+        .cloned()
+        .collect();
+
     let mut output = HashMap::new();
 
     for ts in input.iter() {
