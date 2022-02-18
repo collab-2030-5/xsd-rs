@@ -46,7 +46,7 @@ pub struct StructField {
     pub comment: Option<String>,
     pub name: String,
     pub field_type: String,
-    pub info: StructFieldInfo,
+    pub info: FieldTypeInfo,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -63,7 +63,7 @@ pub enum AttributeType {
 }
 
 #[derive(Clone, Debug)]
-pub enum StructFieldInfo {
+pub enum FieldTypeInfo {
     Attribute(AttributeType),
     Element(ElementType),
 }
@@ -111,7 +111,7 @@ fn extract_base_type(x: &parser::types::Struct) -> Option<String> {
     }
 }
 
-fn get_attribute_type(input: &Vec<TypeModifier>) -> AttributeType {
+fn get_attribute_type(input: &[TypeModifier]) -> AttributeType {
     let modifiers: Vec<AttributeType> = input
         .iter()
         .filter_map(|x| match x {
@@ -130,7 +130,7 @@ fn get_attribute_type(input: &Vec<TypeModifier>) -> AttributeType {
     }
 }
 
-fn get_element_type(input: &Vec<TypeModifier>) -> ElementType {
+fn get_element_type(input: &[TypeModifier]) -> ElementType {
     let modifiers: Vec<ElementType> = input
         .iter()
         .filter_map(|x| match x {
@@ -163,13 +163,13 @@ fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
-                info: StructFieldInfo::Attribute(get_attribute_type(&x.type_modifiers)),
+                info: FieldTypeInfo::Attribute(get_attribute_type(&x.type_modifiers)),
             }),
             StructFieldSource::Element => Some(StructField {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
-                info: StructFieldInfo::Element(get_element_type(&x.type_modifiers)),
+                info: FieldTypeInfo::Element(get_element_type(&x.type_modifiers)),
             }),
             StructFieldSource::Base => None,
             StructFieldSource::Choice => unimplemented!(),
