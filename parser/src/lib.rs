@@ -98,12 +98,14 @@ fn resolve_simple_types(input: Vec<TupleStruct>) -> HashMap<String, SimpleType> 
     for ts in input.iter() {
         match try_resolve_basic(ts) {
             None => {
-                match input.iter().find(|s| s.name == ts.name) {
+                match input.iter().find(|s| ts.type_name == s.name) {
                     None => {
                         panic!("Unknown simple type: {} in {}", ts.type_name, ts.name)
                     }
-                    Some(_base) => {
-                        //println!("{} resolved to {:?}", ts.name, base)
+                    Some(base) => {
+                        // try to resolve by going 1 level down
+                        let resolved = try_resolve_basic(base).unwrap();
+                        output.insert(ts.name.clone(), resolved);
                     }
                 }
             }
