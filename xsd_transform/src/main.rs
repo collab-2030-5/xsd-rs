@@ -29,9 +29,9 @@ fn main() {
     let data = std::fs::read_to_string(opt.input).unwrap();
     let model = transform(&data);
 
-    let file = std::fs::File::open(opt.output).unwrap();
+    let file = std::fs::File::create(opt.output).unwrap();
     let writer = std::io::BufWriter::new(file);
-    serde_json::to_writer(writer, &model).unwrap();
+    serde_json::to_writer_pretty(writer, &model).unwrap();
 }
 
 fn transform(path: &str) -> Model {
