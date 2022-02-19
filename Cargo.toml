@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "parser",
-    "cli",
     "model",
+    "xsd_transform",
 ]

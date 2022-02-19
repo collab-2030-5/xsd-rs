@@ -3,11 +3,29 @@ use crate::parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::str::FromStr;
+use std::path::PathBuf;
 use xml_model::*;
+
+use structopt::StructOpt;
 
 pub(crate) mod parser;
 
-pub fn transform(path: &str) -> Model {
+#[derive(Debug, StructOpt)]
+#[structopt(name = "xsd-cli", about = "XSD xsd_transform generator")]
+struct Opt {
+    /// Input file
+    #[structopt(short = "i", long = "input", parse(from_os_str))]
+    input: PathBuf,
+}
+
+fn main() {
+    let opt = Opt::from_args();
+    let data = std::fs::read_to_string(opt.input).unwrap();
+    let _model = transform(&data);
+}
+
+
+fn transform(path: &str) -> Model {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
