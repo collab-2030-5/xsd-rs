@@ -2,5 +2,6 @@
 
 members = [
     "parser",
-    "cli"
+    "cli",
+    "model",
 ]
