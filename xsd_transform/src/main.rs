@@ -2,8 +2,8 @@ use crate::parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, Typ
 use crate::parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::str::FromStr;
 use std::path::PathBuf;
+use std::str::FromStr;
 use xml_model::*;
 
 use structopt::StructOpt;
@@ -11,19 +11,28 @@ use structopt::StructOpt;
 pub(crate) mod parser;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "xsd-cli", about = "XSD xsd_transform generator")]
+#[structopt(
+    name = "xsd-transform",
+    about = "Transforms subset of XSD into a simplified JSON model"
+)]
 struct Opt {
     /// Input file
     #[structopt(short = "i", long = "input", parse(from_os_str))]
     input: PathBuf,
+    /// Input file
+    #[structopt(short = "o", long = "output", parse(from_os_str))]
+    output: PathBuf,
 }
 
 fn main() {
     let opt = Opt::from_args();
     let data = std::fs::read_to_string(opt.input).unwrap();
-    let _model = transform(&data);
-}
+    let model = transform(&data);
 
+    let file = std::fs::File::open(opt.output).unwrap();
+    let writer = std::io::BufWriter::new(file);
+    serde_json::to_writer(writer, &model).unwrap();
+}
 
 fn transform(path: &str) -> Model {
     //  parse using the underlying library

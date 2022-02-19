@@ -12,7 +12,8 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+xml-model = { path = "../model" }
 structopt = { version = "0.3" }
 roxmltree = "0.14.0"
-xml-model = { path = "../model" }
+serde_json = "1.0.79"
 
