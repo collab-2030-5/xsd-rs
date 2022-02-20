@@ -16,10 +16,10 @@ pub(crate) mod parser;
     about = "Transforms subset of XSD into a simplified JSON model"
 )]
 struct Opt {
-    /// Input file
+    /// xsd input file
     #[structopt(short = "i", long = "input", parse(from_os_str))]
     input: PathBuf,
-    /// Input file
+    /// json output file
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
 }

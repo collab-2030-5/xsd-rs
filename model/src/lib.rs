@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
@@ -19,13 +20,29 @@ pub struct NumericConstraint<T> {
     pub max: Option<T>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Variant {
+    pub comment: Option<String>,
+    pub name: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Enumeration<T>
+where
+    T: Copy + Clone + Eq + Hash,
+{
+    pub variants: HashMap<T, String>,
+}
+
 // maps to simple types with possible constraints
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleType {
-    // a single byte encoded as a hex (2 characters e.g. "FF")
+    /// a single byte encoded as a hex (2 characters e.g. "FF")
     HexByte,
-    // multiple bytes with a maximum length
+    /// multiple bytes with a maximum length
     HexBytes(usize),
+    /// number -> enum
+    Enum(Enumeration<u8>),
     String(StringConstraint),
     I8(NumericConstraint<i8>),
     U8(NumericConstraint<u8>),
