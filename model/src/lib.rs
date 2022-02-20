@@ -62,11 +62,12 @@ pub struct StructField {
     pub info: FieldTypeInfo,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ElementType {
     Single,
     Array,
     Option,
+    Error(String),
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]

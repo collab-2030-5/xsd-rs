@@ -95,8 +95,7 @@ fn get_element_type(input: &[TypeModifier]) -> ElementType {
             TypeModifier::Array => Some(ElementType::Array),
             TypeModifier::Option => Some(ElementType::Option),
             TypeModifier::Recursive => {
-                // TODO
-                Some(ElementType::Option)
+                Some(ElementType::Error("Unsupported 'Recursive' type".to_string()))
             }
             TypeModifier::Empty => {
                 unimplemented!()
@@ -106,7 +105,7 @@ fn get_element_type(input: &[TypeModifier]) -> ElementType {
 
     match modifiers.as_slice() {
         [] => ElementType::Single,
-        [x] => *x,
+        [x] => x.clone(),
         _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
     }
 }
