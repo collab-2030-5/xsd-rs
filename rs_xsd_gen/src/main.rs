@@ -4,7 +4,7 @@ use heck::{ToSnakeCase, ToUpperCamelCase};
 use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
-use xml_model::{Model, SimpleType, Struct};
+use xml_model::{AttributeType, ElementType, FieldTypeInfo, Model, SimpleType, Struct};
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -87,7 +87,16 @@ fn get_rust_type(model: &Model, t: Type) -> String {
             BasicType::AnyUri => "String".to_string(),
         },
         Type::Simple(x) => resolve_rust_simple_type(model, &x),
-        Type::Struct(x) => x,
+        Type::Struct(x) => x.to_upper_camel_case(),
+    }
+}
+
+fn get_rust_field_name(name: &str) -> String {
+    let snake = name.to_snake_case();
+    match snake.as_str() {
+        // have to rename reserved identifiers
+        "type" => "typ".to_string(),
+        _ => snake,
     }
 }
 
@@ -114,7 +123,27 @@ where
                 writeln!(writer, "  // {}", line)?;
             }
         }
-        writeln!(writer, "  {}: {},", field.name.to_snake_case(), rust_type)?;
+        let rust_type = match &field.info {
+            FieldTypeInfo::Attribute(x) => match x {
+                AttributeType::Single => rust_type,
+                AttributeType::Option => format!("Option<{}>", rust_type),
+            },
+            FieldTypeInfo::Element(x) => match x {
+                ElementType::Single => rust_type,
+                ElementType::Array => format!("Vec<{}>", rust_type),
+                ElementType::Option => format!("Option<{}>", rust_type),
+                ElementType::Error(x) => {
+                    panic!("{}", x);
+                }
+            },
+        };
+
+        writeln!(
+            writer,
+            "  pub {}: {},",
+            get_rust_field_name(&field.name),
+            rust_type
+        )?;
     }
     writeln!(writer)
 }

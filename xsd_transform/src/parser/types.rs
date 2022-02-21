@@ -94,7 +94,6 @@ pub enum TypeModifier {
     None,
     Array,
     Option,
-    Recursive,
     Empty,
 }
 

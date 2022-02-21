@@ -98,7 +98,6 @@ fn get_attribute_type(input: &[TypeModifier]) -> AttributeType {
             TypeModifier::None => None,
             TypeModifier::Array => unimplemented!(),
             TypeModifier::Option => Some(AttributeType::Option),
-            TypeModifier::Recursive => unimplemented!(),
             TypeModifier::Empty => unimplemented!(),
         })
         .collect();
@@ -110,16 +109,13 @@ fn get_attribute_type(input: &[TypeModifier]) -> AttributeType {
     }
 }
 
-fn get_element_type(input: &[TypeModifier]) -> ElementType {
+fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
     let modifiers: Vec<ElementType> = input
         .iter()
         .filter_map(|x| match x {
             TypeModifier::None => None,
             TypeModifier::Array => Some(ElementType::Array),
             TypeModifier::Option => Some(ElementType::Option),
-            TypeModifier::Recursive => Some(ElementType::Error(
-                "Unsupported 'Recursive' type".to_string(),
-            )),
             TypeModifier::Empty => {
                 unimplemented!()
             }
@@ -127,14 +123,14 @@ fn get_element_type(input: &[TypeModifier]) -> ElementType {
         .collect();
 
     match modifiers.as_slice() {
-        [] => ElementType::Single,
-        [x] => x.clone(),
+        [] => None,
+        [x] => Some(x.clone()),
         _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
     }
 }
 
-fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
-    x.fields
+fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
+    st.fields
         .borrow()
         .iter()
         .filter_map(|x| match x.source {
@@ -144,12 +140,23 @@ fn extract_fields(x: &parser::types::Struct) -> Vec<StructField> {
                 field_type: x.type_name.clone(),
                 info: FieldTypeInfo::Attribute(get_attribute_type(&x.type_modifiers)),
             }),
-            StructFieldSource::Element => Some(StructField {
-                comment: x.comment.clone(),
-                name: x.name.clone(),
-                field_type: x.type_name.clone(),
-                info: FieldTypeInfo::Element(get_element_type(&x.type_modifiers)),
-            }),
+            StructFieldSource::Element => {
+                let element_type = match get_element_type(&x.type_modifiers) {
+                    None => {
+                        //println!("In {} element {} has no modifiers, assuming single", st.name, x.name);
+                        //println!("info : {:#?}", x);
+                        ElementType::Single
+                    }
+                    Some(x) => x,
+                };
+
+                Some(StructField {
+                    comment: x.comment.clone(),
+                    name: x.name.clone(),
+                    field_type: x.type_name.clone(),
+                    info: FieldTypeInfo::Element(element_type),
+                })
+            }
             StructFieldSource::Base => None,
             StructFieldSource::Choice => unimplemented!(),
             StructFieldSource::NA => unimplemented!(),

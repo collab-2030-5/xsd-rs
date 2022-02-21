@@ -154,24 +154,20 @@ pub fn element_modifier(node: &Node) -> TypeModifier {
         0 => match max {
             MaxOccurs::None => TypeModifier::Option,
             MaxOccurs::Unbounded => TypeModifier::Array,
-            MaxOccurs::Bounded(val) => {
-                if val > 1 {
-                    TypeModifier::Array
-                } else {
-                    TypeModifier::None
-                }
-            }
+            MaxOccurs::Bounded(size) => match size {
+                0 => panic!("max size cannot be zero"),
+                1 => TypeModifier::Option,
+                _ => TypeModifier::Array,
+            },
         },
         1 => match max {
             MaxOccurs::None => TypeModifier::None,
             MaxOccurs::Unbounded => TypeModifier::Array,
-            MaxOccurs::Bounded(val) => {
-                if val > 1 {
-                    TypeModifier::Array
-                } else {
-                    TypeModifier::None
-                }
-            }
+            MaxOccurs::Bounded(size) => match size {
+                0 => panic!("max size cannot be zero"),
+                1 => TypeModifier::None,
+                _ => TypeModifier::Array,
+            },
         },
         _ => TypeModifier::Array,
     }
