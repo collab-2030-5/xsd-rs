@@ -10,4 +10,5 @@ xml-model = { path = "../model" }
 structopt = { version = "0.3" }
 serde_json = "1.0.79"
 heck = "0.4.0"
+indent_write = "2.2.0"
 

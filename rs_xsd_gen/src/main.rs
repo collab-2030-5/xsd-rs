@@ -1,6 +1,7 @@
 use structopt::StructOpt;
 
 use heck::{ToSnakeCase, ToUpperCamelCase};
+use indent_write::io::IndentWriter;
 use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
@@ -30,6 +31,15 @@ enum Type {
     Basic(BasicType),
     Simple(SimpleType),
     Struct(String),
+}
+
+fn indent<W, F>(w: &mut W, f: F) -> std::io::Result<()>
+where
+    W: Write,
+    F: Fn(&mut IndentWriter<&mut W>) -> std::io::Result<()>,
+{
+    let mut w = IndentWriter::new("    ", w);
+    f(&mut w)
 }
 
 fn resolve_basic_type(name: &str) -> Option<BasicType> {
@@ -114,13 +124,13 @@ where
     }
 
     writeln!(writer)?;
-    writeln!(writer, "  // --- these fields come from {} --- ", st.name)?;
+    writeln!(writer, "// --- these fields come from {} --- ", st.name)?;
     writeln!(writer)?;
     for field in &st.fields {
         let rust_type = get_rust_type(model, resolve(model, &field.field_type));
         if let Some(x) = &field.comment {
             for line in x.lines() {
-                writeln!(writer, "  // {}", line)?;
+                writeln!(writer, "// {}", line)?;
             }
         }
         let rust_type = match &field.info {
@@ -140,7 +150,7 @@ where
 
         writeln!(
             writer,
-            "  pub {}: {},",
+            "pub {}: {},",
             get_rust_field_name(&field.name),
             rust_type
         )?;
@@ -148,15 +158,30 @@ where
     writeln!(writer)
 }
 
-fn write_model<W>(mut writer: W, model: &Model) -> std::io::Result<()>
+fn write_model<W>(mut w: W, model: &Model) -> std::io::Result<()>
 where
     W: Write,
 {
     for st in &model.structs {
-        writeln!(writer, "pub struct {} {{", st.name.to_upper_camel_case())?;
-        write_struct_fields(&mut writer, model, st)?;
-        writeln!(writer, "}}")?;
+        writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
+        indent(&mut w, |w| write_struct_fields(w, model, st))?;
+        writeln!(w, "}}")?;
     }
+
+    // write the serializers
+    for st in &model.structs {
+        writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
+        indent(&mut w, |w| {
+            writeln!(w, "const NAME: &'static [u8] = b\"{}\";", st.name)?;
+            writeln!(w)?;
+            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+            indent(w, |w| writeln!(w, "Ok(())"))?;
+            writeln!(w, "}}")
+        })?;
+
+        writeln!(w, "}}")?;
+    }
+
     Ok(())
 }
 
