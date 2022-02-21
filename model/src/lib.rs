@@ -37,6 +37,8 @@ where
 // maps to simple types with possible constraints
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleType {
+    /// alias for another simple type
+    Alias(String),
     /// a single byte encoded as a hex (2 characters e.g. "FF")
     HexByte,
     /// multiple bytes with a maximum length

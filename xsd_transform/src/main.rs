@@ -38,8 +38,31 @@ fn transform(path: &str) -> Model {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
-    let simple_types = resolve_simple_types(&entity);
-    let structs = extract_structs(&entity);
+    let mut simple_types = resolve_simple_types(&entity);
+    let mut structs = extract_structs(&entity);
+
+    // find struct that are mis-classified - some are just inherited from basic types
+    let base_structs: HashMap<String, String> = structs
+        .iter()
+        .filter_map(|x| match &x.base_type {
+            Some(bt) => {
+                if simple_types.contains_key(bt) {
+                    Some((x.name.clone(), bt.clone()))
+                } else {
+                    None
+                }
+            }
+            None => None,
+        })
+        .collect();
+
+    // remove these structs from the struct list
+    structs.retain(|f| !base_structs.contains_key(&f.name));
+
+    // add these aliases to the simple types list
+    for (k, v) in base_structs.iter() {
+        simple_types.insert(k.clone(), SimpleType::Alias(v.clone()));
+    }
 
     Model {
         simple_types,
@@ -94,9 +117,9 @@ fn get_element_type(input: &[TypeModifier]) -> ElementType {
             TypeModifier::None => None,
             TypeModifier::Array => Some(ElementType::Array),
             TypeModifier::Option => Some(ElementType::Option),
-            TypeModifier::Recursive => {
-                Some(ElementType::Error("Unsupported 'Recursive' type".to_string()))
-            }
+            TypeModifier::Recursive => Some(ElementType::Error(
+                "Unsupported 'Recursive' type".to_string(),
+            )),
             TypeModifier::Empty => {
                 unimplemented!()
             }
