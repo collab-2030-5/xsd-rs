@@ -196,22 +196,22 @@ enum AttributeTransform {
 }
 
 impl AttributeTransform {
-    fn write_value<W>(&self, w: &mut W) -> std::io::Result<()>
+    fn write_value<W>(&self, name: &str, w: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
         match self {
             AttributeTransform::String => Ok(()),
             AttributeTransform::Number => {
-                writeln!(w, "let value = attr.to_string();")
+                writeln!(w, "let value = {}.to_string();", name)
             }
         }
     }
 
-    fn transform_value(&self) -> &'static str {
+    fn transform_value(&self, name: &str) -> String {
         match self {
-            AttributeTransform::String => "attr.as_str()",
-            AttributeTransform::Number => "value.as_str()",
+            AttributeTransform::String => format!("{}.as_str()", name),
+            AttributeTransform::Number => "value.as_str()".to_string(),
         }
     }
 }
@@ -251,7 +251,20 @@ where
 {
     match att.info {
         AttributeType::Single => {
-            writeln!(w, "// TODO write attribute {}", &att.name)?;
+            let transform = get_transform(model, &att.field_type);
+            writeln!(w, "{{")?;
+            indent(w, |w| {
+                let name = format!("self.{}", att.name.to_snake_case());
+                transform.write_value(&name, w)?;
+                writeln!(
+                    w,
+                    "start.push_attribute((\"{}\", {}));",
+                    att.name,
+                    transform.transform_value(&name)
+                )?;
+                Ok(())
+            })?;
+            writeln!(w, "}}")?;
         }
         AttributeType::Option => {
             let transform = get_transform(model, &att.field_type);
@@ -261,12 +274,12 @@ where
                 &att.name.to_snake_case()
             )?;
             indent(w, |w| {
-                transform.write_value(w)?;
+                transform.write_value("attr", w)?;
                 writeln!(
                     w,
                     "start.push_attribute((\"{}\", {}));",
                     att.name,
-                    transform.transform_value()
+                    transform.transform_value("attr")
                 )?;
                 Ok(())
             })?;
