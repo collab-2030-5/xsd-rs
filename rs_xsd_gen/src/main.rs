@@ -164,30 +164,49 @@ struct Attribute {
     info: AttributeType,
 }
 
-fn get_attribute_fields(model: &Model, st: &Struct) -> Vec<Attribute> {
-    let mut attr = Vec::new();
+struct Element {
+    name: String,
+    field_type: String,
+    info: ElementType,
+}
+
+fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
+    let mut attrs = Vec::new();
+    let mut elems = Vec::new();
 
     if let Some(base_name) = &st.base_type {
         let base = model.structs.iter().find(|x| &x.name == base_name).unwrap();
-        for field in get_attribute_fields(model, base) {
-            attr.push(field);
+        let (attr, elem) = split_fields(model, base);
+        for field in attr {
+            attrs.push(field);
+        }
+        for field in elem {
+            elems.push(field);
         }
     }
 
-    let attributes = st.fields.iter().filter_map(|x| match x.info {
-        FieldTypeInfo::Attribute(att) => Some(Attribute {
-            name: x.name.clone(),
-            field_type: x.field_type.clone(),
-            info: att,
-        }),
-        FieldTypeInfo::Element(_) => None,
-    });
-
-    for att in attributes {
-        attr.push(att);
+    for field in &st.fields {
+        match &field.info {
+            FieldTypeInfo::Attribute(x) => {
+                let x = Attribute {
+                    name: field.name.clone(),
+                    field_type: field.field_type.clone(),
+                    info: x.clone(),
+                };
+                attrs.push(x);
+            }
+            FieldTypeInfo::Element(x) => {
+                let x = Element {
+                    name: field.name.clone(),
+                    field_type: field.field_type.clone(),
+                    info: x.clone(),
+                };
+                elems.push(x);
+            },
+        }
     }
 
-    attr
+   (attrs, elems)
 }
 
 enum AttributeTransform {
@@ -216,7 +235,7 @@ impl AttributeTransform {
     }
 }
 
-fn get_transform(model: &Model, attr_type: &str) -> AttributeTransform {
+fn get_attr_transform(model: &Model, attr_type: &str) -> AttributeTransform {
     match attr_type {
         "xs:anyURI" => AttributeTransform::String,
         _ => {
@@ -226,7 +245,7 @@ fn get_transform(model: &Model, attr_type: &str) -> AttributeTransform {
                     panic!("unknown attribute type: {}", attr_type)
                 }
                 Some(st) => match st {
-                    SimpleType::Alias(x) => get_transform(model, x),
+                    SimpleType::Alias(x) => get_attr_transform(model, x),
                     SimpleType::HexByte => AttributeTransform::Number,
                     SimpleType::HexBytes(_) => AttributeTransform::String,
                     SimpleType::Enum(_) => unimplemented!(),
@@ -245,13 +264,128 @@ fn get_transform(model: &Model, attr_type: &str) -> AttributeTransform {
     }
 }
 
+enum ElementTransform {
+    Struct,
+    Number,
+    String,
+    HexBytes,
+}
+
+impl ElementTransform {
+    fn write_value<W>(&self, w: &mut W, name: &str) -> std::io::Result<()>
+        where
+            W: Write,
+    {
+        match self {
+            ElementTransform::Struct => {
+                writeln!(w, "{}.write(writer)?;", name)
+            },
+            ElementTransform::String => {
+                writeln!(w, "writer.write({}.as_bytes())?;", name)
+            }
+            ElementTransform::Number => {
+                writeln!(w, "let value = {}.to_string();", name)?;
+                writeln!(w, "writer.write(value.as_bytes())?;")
+            }
+            ElementTransform::HexBytes => {
+                writeln!(w, "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();", name)?;
+                writeln!(w, "writer.write(hex.as_bytes())?;")
+            }
+        }
+    }
+}
+
+fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform {
+    match st {
+        SimpleType::Alias(x) => {
+            get_simple_type_transform(model, model.simple_types.get(x).unwrap())
+        }
+        SimpleType::HexByte => ElementTransform::Number,
+        SimpleType::HexBytes(_) => ElementTransform::HexBytes,
+        SimpleType::Enum(_) => unimplemented!(),
+        SimpleType::String(_) => ElementTransform::String,
+        SimpleType::I8(_) => ElementTransform::Number,
+        SimpleType::U8(_) => ElementTransform::Number,
+        SimpleType::I16(_) => ElementTransform::Number,
+        SimpleType::U16(_) => ElementTransform::Number,
+        SimpleType::I32(_) => ElementTransform::Number,
+        SimpleType::U32(_) => ElementTransform::Number,
+        SimpleType::I64(_) => ElementTransform::Number,
+        SimpleType::U64(_) => ElementTransform::Number,
+    }
+}
+
+fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
+    match elem_type {
+        "xs:string" => ElementTransform::String,
+        "xs:anyURI" => ElementTransform::String,
+        "xs:boolean" => ElementTransform::Number,
+        _ => {
+            // is it a struct?
+            match model.structs.iter().find(|st| &st.name == elem_type) {
+                None => {
+                    match model.simple_types.get(elem_type) {
+                        None => {
+                            panic!("unknown element type: {}", elem_type)
+                        }
+                        Some(x) => {
+                            get_simple_type_transform(model, x)
+                        },
+                    }
+                }
+                Some(_) => {
+                    ElementTransform::Struct
+                }
+            }
+
+        }
+    }
+}
+
+fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result<()>
+    where
+        W: Write,
+{
+    let transform = get_elem_transform(model, &elem.field_type);
+
+    match &elem.info {
+        ElementType::Single => {
+            let name = format!("self.{}", get_rust_field_name(&elem.name));
+            transform.write_value(w, &name)?;
+        }
+        ElementType::Array => {
+            writeln!(w, "for item in &self.{} {{", get_rust_field_name(&elem.name))?;
+            indent(w, |w| {
+                writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
+                transform.write_value(w, "item")?;
+                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(b\"{}\")))?;", elem.name)
+            })?;
+            writeln!(w, "}}")?;
+        }
+        ElementType::Option => {
+            writeln!(w, "if let Some(elem) = &self.{} {{", elem.name.to_snake_case())?;
+            indent(w, |w| {
+                writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
+                transform.write_value(w, "elem")?;
+                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(b\"{}\")))?;", elem.name)
+            })?;
+            writeln!(w, "}}")?;
+        }
+        ElementType::Error(s) => {
+            panic!("error: {}", s)
+        }
+    }
+
+    Ok(())
+}
+
 fn write_attribute<W>(w: &mut W, model: &Model, att: &Attribute) -> std::io::Result<()>
 where
     W: Write,
 {
     match att.info {
         AttributeType::Single => {
-            let transform = get_transform(model, &att.field_type);
+            let transform = get_attr_transform(model, &att.field_type);
             writeln!(w, "{{")?;
             indent(w, |w| {
                 let name = format!("self.{}", att.name.to_snake_case());
@@ -267,7 +401,7 @@ where
             writeln!(w, "}}")?;
         }
         AttributeType::Option => {
-            let transform = get_transform(model, &att.field_type);
+            let transform = get_attr_transform(model, &att.field_type);
             writeln!(
                 w,
                 "if let Some(attr) = &self.{} {{",
@@ -307,7 +441,7 @@ where
     // write the serializers
     for st in &model.structs {
         // collect all the attribute fields
-        let attributes = get_attribute_fields(model, st);
+        let (attributes, elements) = split_fields(model, st);
 
         writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
         indent(&mut w, |w| {
@@ -332,7 +466,9 @@ where
                     "writer.write_event(quick_xml::events::Event::Start(start))?;"
                 )?;
 
-                // todo write the fields
+                for elem in &elements {
+                    write_element(w, model, elem)?;
+                }
 
                 writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed({})))?;", bytes(&st.name))?;
                 writeln!(w, "Ok(())")
