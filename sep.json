@@ -1,141 +1,15 @@
 {
+  "xsd_ns": {
+    "name": "xs",
+    "uri": "http://www.w3.org/2001/XMLSchema"
+  },
+  "target_ns": {
+    "name": null,
+    "uri": "urn:ieee:std:2030.5:ns"
+  },
   "simple_types": {
-    "FlowDirectionType": {
-      "Alias": "UInt8"
-    },
-    "PerCent": {
-      "Alias": "UInt16"
-    },
-    "LocaleType": {
-      "Alias": "String42"
-    },
-    "VersionType": {
-      "Alias": "UInt16"
-    },
-    "Int48": {
-      "I64": {
-        "min": -140737488355328,
-        "max": 140737488355328
-      }
-    },
-    "Int16": {
-      "I16": {
-        "min": null,
-        "max": null
-      }
-    },
-    "DataQualifierType": {
-      "Alias": "UInt8"
-    },
-    "ConsumptionBlockType": {
-      "Alias": "UInt8"
-    },
-    "PhaseCode": {
-      "Alias": "UInt8"
-    },
-    "DERType": {
-      "Alias": "UInt8"
-    },
-    "PowerOfTenMultiplierType": {
-      "Alias": "Int8"
-    },
-    "Int8": {
-      "I8": {
-        "min": null,
-        "max": null
-      }
-    },
-    "PowerSourceType": {
-      "Alias": "UInt8"
-    },
-    "ChargeKind": {
-      "Alias": "UInt8"
-    },
-    "CreditStatusType": {
-      "Alias": "UInt8"
-    },
-    "String20": {
-      "String": {
-        "max_length": 20
-      }
-    },
-    "ApplianceLoadReductionType": {
-      "Alias": "UInt8"
-    },
-    "TimeType": {
-      "Alias": "Int64"
-    },
-    "PrepayModeType": {
-      "Alias": "UInt8"
-    },
-    "PrimacyType": {
-      "Alias": "UInt8"
-    },
-    "DstRuleType": {
-      "Alias": "HexBinary32"
-    },
-    "CurrencyCode": {
-      "Alias": "UInt16"
-    },
-    "UomType": {
-      "Alias": "UInt8"
-    },
-    "UInt8": {
-      "U8": {
-        "min": null,
-        "max": null
-      }
-    },
-    "HexBinary48": {
-      "HexBytes": 6
-    },
     "RoleFlagsType": {
       "Alias": "HexBinary16"
-    },
-    "CommodityType": {
-      "Alias": "UInt8"
-    },
-    "PINType": {
-      "Alias": "UInt32"
-    },
-    "Int32": {
-      "I32": {
-        "min": null,
-        "max": null
-      }
-    },
-    "CostKindType": {
-      "Alias": "UInt8"
-    },
-    "HexBinary16": {
-      "HexBytes": 2
-    },
-    "HexBinary128": {
-      "HexBytes": 16
-    },
-    "UInt48": {
-      "U64": {
-        "min": null,
-        "max": 281474976710655
-      }
-    },
-    "DeviceCategoryType": {
-      "Alias": "HexBinary32"
-    },
-    "TOUType": {
-      "Alias": "UInt8"
-    },
-    "DERUnitRefType": {
-      "Alias": "UInt8"
-    },
-    "CreditTypeType": {
-      "Alias": "UInt8"
-    },
-    "KindType": {
-      "Alias": "UInt8"
-    },
-    "SignedPerCent": {
-      "Alias": "Int16"
     },
     "OneHourRangeType": {
       "Alias": "Int16"
@@ -145,8 +19,26 @@
         "max_length": 16
       }
     },
-    "PriorityType": {
+    "HexBinary160": {
+      "HexBytes": 20
+    },
+    "mRIDType": {
+      "Alias": "HexBinary128"
+    },
+    "DERUnitRefType": {
       "Alias": "UInt8"
+    },
+    "LocaleType": {
+      "Alias": "String42"
+    },
+    "PINType": {
+      "Alias": "UInt32"
+    },
+    "PerCent": {
+      "Alias": "UInt16"
+    },
+    "TimeType": {
+      "Alias": "Int64"
     },
     "UInt32": {
       "U32": {
@@ -154,50 +46,90 @@
         "max": null
       }
     },
-    "DERCurveType": {
+    "PrepayModeType": {
       "Alias": "UInt8"
     },
-    "mRIDType": {
-      "Alias": "HexBinary128"
+    "PowerSourceType": {
+      "Alias": "UInt8"
     },
-    "HexBinary8": "HexByte",
-    "String32": {
-      "String": {
-        "max_length": 32
+    "PhaseCode": {
+      "Alias": "UInt8"
+    },
+    "CostKindType": {
+      "Alias": "UInt8"
+    },
+    "Int48": {
+      "I64": {
+        "min": -140737488355328,
+        "max": 140737488355328
       }
     },
-    "String192": {
-      "String": {
-        "max_length": 192
-      }
-    },
-    "TimeOffsetType": {
-      "Alias": "Int32"
-    },
-    "UnitType": {
+    "ApplianceLoadReductionType": {
       "Alias": "UInt8"
     },
-    "ServiceKind": {
+    "HexBinary32": {
+      "HexBytes": 4
+    },
+    "CreditTypeType": {
       "Alias": "UInt8"
+    },
+    "HexBinary128": {
+      "HexBytes": 16
     },
     "String42": {
       "String": {
         "max_length": 42
       }
     },
-    "SubscribableType": {
+    "TOUType": {
+      "Alias": "UInt8"
+    },
+    "PowerOfTenMultiplierType": {
+      "Alias": "Int8"
+    },
+    "DERControlType": {
+      "Alias": "HexBinary32"
+    },
+    "Int64": {
+      "I64": {
+        "min": null,
+        "max": null
+      }
+    },
+    "ConsumptionBlockType": {
+      "Alias": "UInt8"
+    },
+    "UInt40": {
+      "U64": {
+        "min": null,
+        "max": 281474976710655
+      }
+    },
+    "SignedPerCent": {
+      "Alias": "Int16"
+    },
+    "DataQualifierType": {
+      "Alias": "UInt8"
+    },
+    "DstRuleType": {
+      "Alias": "HexBinary32"
+    },
+    "PrimacyType": {
+      "Alias": "UInt8"
+    },
+    "UInt16": {
+      "U16": {
+        "min": null,
+        "max": null
+      }
+    },
+    "UInt8": {
       "U8": {
         "min": null,
         "max": null
       }
     },
-    "ServiceStatusType": {
-      "Alias": "UInt8"
-    },
-    "HexBinary64": {
-      "HexBytes": 8
-    },
-    "UInt40": {
+    "UInt48": {
       "U64": {
         "min": null,
         "max": 281474976710655
@@ -206,43 +138,119 @@
     "SFDIType": {
       "Alias": "UInt40"
     },
-    "AccumulationBehaviourType": {
-      "Alias": "UInt8"
-    },
-    "HexBinary32": {
-      "HexBytes": 4
-    },
-    "UInt16": {
-      "U16": {
+    "UInt64": {
+      "U64": {
         "min": null,
         "max": null
       }
     },
-    "DERControlType": {
+    "String192": {
+      "String": {
+        "max_length": 192
+      }
+    },
+    "String32": {
+      "String": {
+        "max_length": 32
+      }
+    },
+    "CommodityType": {
+      "Alias": "UInt8"
+    },
+    "SubscribableType": {
+      "U8": {
+        "min": null,
+        "max": null
+      }
+    },
+    "DERType": {
+      "Alias": "UInt8"
+    },
+    "HexBinary48": {
+      "HexBytes": 6
+    },
+    "KindType": {
+      "Alias": "UInt8"
+    },
+    "Int8": {
+      "I8": {
+        "min": null,
+        "max": null
+      }
+    },
+    "HexBinary16": {
+      "HexBytes": 2
+    },
+    "ServiceStatusType": {
+      "Alias": "UInt8"
+    },
+    "FlowDirectionType": {
+      "Alias": "UInt8"
+    },
+    "DeviceCategoryType": {
       "Alias": "HexBinary32"
+    },
+    "Int16": {
+      "I16": {
+        "min": null,
+        "max": null
+      }
     },
     "String6": {
       "String": {
         "max_length": 6
       }
     },
-    "Int64": {
-      "I64": {
+    "PriorityType": {
+      "Alias": "UInt8"
+    },
+    "DERCurveType": {
+      "Alias": "UInt8"
+    },
+    "VersionType": {
+      "Alias": "UInt16"
+    },
+    "UomType": {
+      "Alias": "UInt8"
+    },
+    "HexBinary64": {
+      "HexBytes": 8
+    },
+    "HexBinary8": "HexByte",
+    "TimeOffsetType": {
+      "Alias": "Int32"
+    },
+    "CreditStatusType": {
+      "Alias": "UInt8"
+    },
+    "ChargeKind": {
+      "Alias": "UInt8"
+    },
+    "CurrencyCode": {
+      "Alias": "UInt16"
+    },
+    "ServiceKind": {
+      "Alias": "UInt8"
+    },
+    "Int32": {
+      "I32": {
         "min": null,
         "max": null
       }
     },
-    "HexBinary160": {
-      "HexBytes": 20
+    "AccumulationBehaviourType": {
+      "Alias": "UInt8"
+    },
+    "UnitType": {
+      "Alias": "UInt8"
+    },
+    "String20": {
+      "String": {
+        "max_length": 20
+      }
     },
     "PENType": {
       "Alias": "UInt32"
-    },
-    "UInt64": {
-      "U64": {
-        "min": null,
-        "max": null
-      }
     }
   },
   "structs": [

@@ -65,6 +65,14 @@ fn transform(path: &str) -> Model {
     }
 
     Model {
+        xsd_ns: entity.xsd_ns.map(|x| Namespace {
+            name: x.name().map(|x| x.to_string()),
+            uri: x.uri().to_string(),
+        }),
+        target_ns: entity.target_ns.map(|x| Namespace {
+            name: x.name().map(|x| x.to_string()),
+            uri: x.uri().to_string(),
+        }),
         simple_types,
         structs,
     }

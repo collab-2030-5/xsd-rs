@@ -4,7 +4,15 @@ use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct Namespace {
+    pub name: Option<String>,
+    pub uri: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
+    pub xsd_ns: Option<Namespace>,
+    pub target_ns: Option<Namespace>,
     pub simple_types: HashMap<String, SimpleType>,
     pub structs: Vec<Struct>,
 }

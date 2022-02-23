@@ -278,7 +278,11 @@ impl ElementTransform {
     {
         match self {
             ElementTransform::Struct => {
-                writeln!(w, "{}.write(writer, \"{}\")?;", rust_name, xsd_name)
+                writeln!(
+                    w,
+                    "{}.write_with_name(writer, \"{}\", false)?;",
+                    rust_name, xsd_name
+                )
             }
             ElementTransform::String => {
                 writeln!(w, "writer.write({}.as_bytes())?;", rust_name)
@@ -425,6 +429,41 @@ fn write_model<W>(mut w: W, model: &Model) -> std::io::Result<()>
 where
     W: Write,
 {
+    let target_ns = model.target_ns.as_ref().expect("requires target namespace");
+
+    writeln!(
+        w,
+        "fn add_xsi_attr(start: &mut quick_xml::events::BytesStart) {{"
+    )?;
+    indent(&mut w, |w| {
+        writeln!(
+            w,
+            "start.push_attribute((\"xmlns:xsi\", \"http://www.w3.org/2001/XMLSchema-instance\"));"
+        )?;
+        writeln!(
+            w,
+            "start.push_attribute((\"xmlns:xsd\", \"http://www.w3.org/2001/XMLSchema\"));"
+        )
+    })?;
+    writeln!(w, "}}")?;
+
+    writeln!(w)?;
+
+    writeln!(
+        w,
+        "fn add_target_ns_attr(start: &mut quick_xml::events::BytesStart) {{"
+    )?;
+    indent(&mut w, |w| {
+        writeln!(
+            w,
+            "start.push_attribute((\"xmlns\", \"{}\"));",
+            target_ns.uri
+        )
+    })?;
+    writeln!(w, "}}")?;
+
+    writeln!(w)?;
+
     for st in &model.structs {
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
         indent(&mut w, |w| write_struct_fields(w, model, st))?;
@@ -470,19 +509,28 @@ where
                 writeln!(w)?;
             }
 
-            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>, name: &str) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
             indent(w, |w| {
-                let attr_start_mod = if attributes.is_empty() { " " } else { " mut " };
+                writeln!(w, "self.write_with_name(writer, \"{}\", true)", st.name)
+            })?;
+            writeln!(w, "}}")?;
+            writeln!(w)?;
 
-                writeln!(
-                    w,
-                    "let{}start = quick_xml::events::BytesStart::borrowed_name(name.as_bytes());",
-                    attr_start_mod
-                )?;
+            writeln!(w, "fn write_with_name<W>(&self, writer: &mut quick_xml::Writer<W>, name: &str, top_level: bool) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+            indent(w, |w| {
+                writeln!(w, "let mut start = quick_xml::events::BytesStart::borrowed_name(name.as_bytes());")?;
+
+                writeln!(w, "if top_level {{")?;
+                indent(w, |w| writeln!(w, "add_xsi_attr(&mut start);"))?;
+                writeln!(w, "}}")?;
 
                 if !attributes.is_empty() {
                     writeln!(w, "self.write_attr(&mut start);")?;
                 }
+
+                writeln!(w, "if top_level {{")?;
+                indent(w, |w| writeln!(w, "add_target_ns_attr(&mut start);"))?;
+                writeln!(w, "}}")?;
 
                 writeln!(
                     w,
