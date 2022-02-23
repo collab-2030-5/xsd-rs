@@ -202,11 +202,11 @@ fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
                     info: x.clone(),
                 };
                 elems.push(x);
-            },
+            }
         }
     }
 
-   (attrs, elems)
+    (attrs, elems)
 }
 
 enum AttributeTransform {
@@ -273,13 +273,13 @@ enum ElementTransform {
 
 impl ElementTransform {
     fn write_value<W>(&self, w: &mut W, name: &str) -> std::io::Result<()>
-        where
-            W: Write,
+    where
+        W: Write,
     {
         match self {
             ElementTransform::Struct => {
                 writeln!(w, "{}.write(writer)?;", name)
-            },
+            }
             ElementTransform::String => {
                 writeln!(w, "writer.write({}.as_bytes())?;", name)
             }
@@ -288,7 +288,11 @@ impl ElementTransform {
                 writeln!(w, "writer.write(value.as_bytes())?;")
             }
             ElementTransform::HexBytes => {
-                writeln!(w, "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();", name)?;
+                writeln!(
+                    w,
+                    "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
+                    name
+                )?;
                 writeln!(w, "writer.write(hex.as_bytes())?;")
             }
         }
@@ -323,28 +327,21 @@ fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
         _ => {
             // is it a struct?
             match model.structs.iter().find(|st| &st.name == elem_type) {
-                None => {
-                    match model.simple_types.get(elem_type) {
-                        None => {
-                            panic!("unknown element type: {}", elem_type)
-                        }
-                        Some(x) => {
-                            get_simple_type_transform(model, x)
-                        },
+                None => match model.simple_types.get(elem_type) {
+                    None => {
+                        panic!("unknown element type: {}", elem_type)
                     }
-                }
-                Some(_) => {
-                    ElementTransform::Struct
-                }
+                    Some(x) => get_simple_type_transform(model, x),
+                },
+                Some(_) => ElementTransform::Struct,
             }
-
         }
     }
 }
 
 fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result<()>
-    where
-        W: Write,
+where
+    W: Write,
 {
     let transform = get_elem_transform(model, &elem.field_type);
 
@@ -354,7 +351,11 @@ fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result
             transform.write_value(w, &name)?;
         }
         ElementType::Array => {
-            writeln!(w, "for item in &self.{} {{", get_rust_field_name(&elem.name))?;
+            writeln!(
+                w,
+                "for item in &self.{} {{",
+                get_rust_field_name(&elem.name)
+            )?;
             indent(w, |w| {
                 writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
                 transform.write_value(w, "item")?;
@@ -363,7 +364,11 @@ fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result
             writeln!(w, "}}")?;
         }
         ElementType::Option => {
-            writeln!(w, "if let Some(elem) = &self.{} {{", elem.name.to_snake_case())?;
+            writeln!(
+                w,
+                "if let Some(elem) = &self.{} {{",
+                elem.name.to_snake_case()
+            )?;
             indent(w, |w| {
                 writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
                 transform.write_value(w, "elem")?;
@@ -445,6 +450,38 @@ where
 
         writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
         indent(&mut w, |w| {
+            // write the attribute serializer
+            if !attributes.is_empty() {
+                writeln!(
+                    w,
+                    "fn write_attr(&self, start: &mut quick_xml::events::BytesStart) {{"
+                )?;
+                indent(w, |w| {
+                    // write the attributes
+                    for att in &attributes {
+                        write_attribute(w, model, att)?;
+                    }
+                    Ok(())
+                })?;
+                writeln!(w, "}}")?;
+
+                writeln!(w)?;
+            }
+
+            if !elements.is_empty() {
+                writeln!(w, "pub fn write_elem<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+                indent(w, |w| {
+                    // write the elements
+                    for elem in &elements {
+                        write_element(w, model, elem)?;
+                    }
+                    writeln!(w, "Ok(())")
+                })?;
+                writeln!(w, "}}")?;
+
+                writeln!(w)?;
+            }
+
             writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
             indent(w, |w| {
                 let attr_start_mod = if attributes.is_empty() { " " } else { " mut " };
@@ -456,9 +493,8 @@ where
                     bytes(&st.name)
                 )?;
 
-                // write the attributes
-                for att in &attributes {
-                    write_attribute(w, model, att)?;
+                if !attributes.is_empty() {
+                    writeln!(w, "self.write_attr(&mut start);")?;
                 }
 
                 writeln!(
@@ -466,8 +502,8 @@ where
                     "writer.write_event(quick_xml::events::Event::Start(start))?;"
                 )?;
 
-                for elem in &elements {
-                    write_element(w, model, elem)?;
+                if !elements.is_empty() {
+                    writeln!(w, "self.write_elem(writer)?;")?;
                 }
 
                 writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed({})))?;", bytes(&st.name))?;
