@@ -33,6 +33,18 @@ enum Type {
     Struct(String),
 }
 
+fn write_comment<W>(w: &mut W, comment: &Option<String>) -> std::io::Result<()>
+where
+    W: Write,
+{
+    if let Some(comment) = comment {
+        for line in comment.lines() {
+            writeln!(w, "/// {}", line)?;
+        }
+    }
+    Ok(())
+}
+
 fn indent<W, F>(w: &mut W, f: F) -> std::io::Result<()>
 where
     W: Write,
@@ -128,11 +140,9 @@ where
     writeln!(writer)?;
     for field in &st.fields {
         let rust_type = get_rust_type(model, resolve(model, &field.field_type));
-        if let Some(x) = &field.comment {
-            for line in x.lines() {
-                writeln!(writer, "// {}", line)?;
-            }
-        }
+
+        write_comment(writer, &field.comment)?;
+
         let rust_type = match &field.info {
             FieldTypeInfo::Attribute(x) => match x {
                 AttributeType::Single => rust_type,
@@ -465,6 +475,7 @@ where
     writeln!(w)?;
 
     for st in &model.structs {
+        write_comment(&mut w, &st.comment)?;
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
         indent(&mut w, |w| write_struct_fields(w, model, st))?;
         writeln!(w, "}}")?;

@@ -1,6 +1,9 @@
+/// errors that can occur when writing XML
 #[derive(Debug)]
 pub enum WriteError {
+    /// I/O errors
     Io(::std::io::Error),
+    /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
 
