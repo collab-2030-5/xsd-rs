@@ -496,7 +496,7 @@ where
             }
 
             if !elements.is_empty() {
-                writeln!(w, "pub fn write_elem<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+                writeln!(w, "fn write_elem<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
                 indent(w, |w| {
                     // write the elements
                     for elem in &elements {
@@ -509,9 +509,15 @@ where
                 writeln!(w)?;
             }
 
-            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+            writeln!(w, "pub fn write<W>(&self, writer: &mut W) -> Result<(), WriteError> where W: std::io::Write {{")?;
             indent(w, |w| {
-                writeln!(w, "self.write_with_name(writer, \"{}\", true)", st.name)
+                writeln!(w, "let mut writer = quick_xml::Writer::new(writer);")?;
+                writeln!(
+                    w,
+                    "self.write_with_name(&mut writer, \"{}\", true)?;",
+                    st.name
+                )?;
+                writeln!(w, "Ok(())")
             })?;
             writeln!(w, "}}")?;
             writeln!(w)?;
@@ -547,6 +553,14 @@ where
             writeln!(w, "}}")
         })?;
         writeln!(w, "}}")?;
+    }
+
+    writeln!(w)?;
+
+    let error = include_str!("../snippets/error.rs");
+
+    for line in error.lines() {
+        writeln!(w, "{}", line)?;
     }
 
     Ok(())
