@@ -191,7 +191,7 @@ fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
                 let x = Attribute {
                     name: field.name.clone(),
                     field_type: field.field_type.clone(),
-                    info: x.clone(),
+                    info: *x,
                 };
                 attrs.push(x);
             }
@@ -272,26 +272,26 @@ enum ElementTransform {
 }
 
 impl ElementTransform {
-    fn write_value<W>(&self, w: &mut W, name: &str) -> std::io::Result<()>
+    fn write_value<W>(&self, w: &mut W, rust_name: &str, xsd_name: &str) -> std::io::Result<()>
     where
         W: Write,
     {
         match self {
             ElementTransform::Struct => {
-                writeln!(w, "{}.write(writer)?;", name)
+                writeln!(w, "{}.write(writer, \"{}\")?;", rust_name, xsd_name)
             }
             ElementTransform::String => {
-                writeln!(w, "writer.write({}.as_bytes())?;", name)
+                writeln!(w, "writer.write({}.as_bytes())?;", rust_name)
             }
             ElementTransform::Number => {
-                writeln!(w, "let value = {}.to_string();", name)?;
+                writeln!(w, "let value = {}.to_string();", rust_name)?;
                 writeln!(w, "writer.write(value.as_bytes())?;")
             }
             ElementTransform::HexBytes => {
                 writeln!(
                     w,
                     "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
-                    name
+                    rust_name
                 )?;
                 writeln!(w, "writer.write(hex.as_bytes())?;")
             }
@@ -326,7 +326,7 @@ fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
         "xs:boolean" => ElementTransform::Number,
         _ => {
             // is it a struct?
-            match model.structs.iter().find(|st| &st.name == elem_type) {
+            match model.structs.iter().find(|st| st.name == elem_type) {
                 None => match model.simple_types.get(elem_type) {
                     None => {
                         panic!("unknown element type: {}", elem_type)
@@ -348,7 +348,7 @@ where
     match &elem.info {
         ElementType::Single => {
             let name = format!("self.{}", get_rust_field_name(&elem.name));
-            transform.write_value(w, &name)?;
+            transform.write_value(w, &name, &elem.name)?;
         }
         ElementType::Array => {
             writeln!(
@@ -356,11 +356,7 @@ where
                 "for item in &self.{} {{",
                 get_rust_field_name(&elem.name)
             )?;
-            indent(w, |w| {
-                writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
-                transform.write_value(w, "item")?;
-                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(b\"{}\")))?;", elem.name)
-            })?;
+            indent(w, |w| transform.write_value(w, "item", &elem.name))?;
             writeln!(w, "}}")?;
         }
         ElementType::Option => {
@@ -369,11 +365,7 @@ where
                 "if let Some(elem) = &self.{} {{",
                 elem.name.to_snake_case()
             )?;
-            indent(w, |w| {
-                writeln!(w, "writer.write_event(quick_xml::events::Event::Start(quick_xml::events::BytesStart::borrowed_name(b\"{}\")))?;", elem.name)?;
-                transform.write_value(w, "elem")?;
-                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(b\"{}\")))?;", elem.name)
-            })?;
+            indent(w, |w| transform.write_value(w, "elem", &elem.name))?;
             writeln!(w, "}}")?;
         }
         ElementType::Error(s) => {
@@ -429,10 +421,6 @@ where
     Ok(())
 }
 
-fn bytes(s: &str) -> String {
-    format!("b\"{}\"", s)
-}
-
 fn write_model<W>(mut w: W, model: &Model) -> std::io::Result<()>
 where
     W: Write,
@@ -482,15 +470,14 @@ where
                 writeln!(w)?;
             }
 
-            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+            writeln!(w, "pub fn write<W>(&self, writer: &mut quick_xml::Writer<W>, name: &str) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
             indent(w, |w| {
                 let attr_start_mod = if attributes.is_empty() { " " } else { " mut " };
 
                 writeln!(
                     w,
-                    "let{}start = quick_xml::events::BytesStart::borrowed_name({});",
-                    attr_start_mod,
-                    bytes(&st.name)
+                    "let{}start = quick_xml::events::BytesStart::borrowed_name(name.as_bytes());",
+                    attr_start_mod
                 )?;
 
                 if !attributes.is_empty() {
@@ -506,7 +493,7 @@ where
                     writeln!(w, "self.write_elem(writer)?;")?;
                 }
 
-                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed({})))?;", bytes(&st.name))?;
+                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(name.as_bytes())))?;")?;
                 writeln!(w, "Ok(())")
             })?;
             writeln!(w, "}}")
