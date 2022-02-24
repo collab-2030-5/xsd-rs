@@ -7,10 +7,10 @@ pub enum WriteError {
     Other(Box<dyn std::error::Error>),
 }
 
-impl From<quick_xml::Error> for WriteError {
-    fn from(err: quick_xml::Error) -> Self {
+impl From<xml::writer::Error> for WriteError {
+    fn from(err: xml::writer::Error) -> Self {
         match err {
-            quick_xml::Error::Io(x) => Self::Io(x),
+            xml::writer::Error::Io(x) => Self::Io(x),
             _ => WriteError::Other(err.into()),
         }
     }

@@ -39,7 +39,7 @@ where
 {
     if let Some(comment) = comment {
         for line in comment.lines() {
-            writeln!(w, "/// {}", line)?;
+            writeln!(w, "/// {}", line.replace('\t', "    "))?;
         }
     }
     Ok(())
@@ -220,34 +220,20 @@ fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
 }
 
 enum AttributeTransform {
-    String,
     Number,
 }
 
 impl AttributeTransform {
-    fn write_value<W>(&self, name: &str, w: &mut W) -> std::io::Result<()>
-    where
-        W: Write,
-    {
+    fn transform_to_string(&self, name: &str) -> String {
         match self {
-            AttributeTransform::String => Ok(()),
-            AttributeTransform::Number => {
-                writeln!(w, "let value = {}.to_string();", name)
-            }
-        }
-    }
-
-    fn transform_value(&self, name: &str) -> String {
-        match self {
-            AttributeTransform::String => format!("{}.as_str()", name),
-            AttributeTransform::Number => "value.as_str()".to_string(),
+            AttributeTransform::Number => format!("{}.to_string()", name),
         }
     }
 }
 
-fn get_attr_transform(model: &Model, attr_type: &str) -> AttributeTransform {
+fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransform> {
     match attr_type {
-        "xs:anyURI" => AttributeTransform::String,
+        "xs:anyURI" => None,
         _ => {
             // try to resolve as a simple type
             match model.simple_types.get(attr_type) {
@@ -256,18 +242,18 @@ fn get_attr_transform(model: &Model, attr_type: &str) -> AttributeTransform {
                 }
                 Some(st) => match st {
                     SimpleType::Alias(x) => get_attr_transform(model, x),
-                    SimpleType::HexByte => AttributeTransform::Number,
-                    SimpleType::HexBytes(_) => AttributeTransform::String,
+                    SimpleType::HexByte => Some(AttributeTransform::Number),
+                    SimpleType::HexBytes(_) => None,
                     SimpleType::Enum(_) => unimplemented!(),
-                    SimpleType::String(_) => AttributeTransform::String,
-                    SimpleType::I8(_) => AttributeTransform::Number,
-                    SimpleType::U8(_) => AttributeTransform::Number,
-                    SimpleType::I16(_) => AttributeTransform::Number,
-                    SimpleType::U16(_) => AttributeTransform::Number,
-                    SimpleType::I32(_) => AttributeTransform::Number,
-                    SimpleType::U32(_) => AttributeTransform::Number,
-                    SimpleType::I64(_) => AttributeTransform::Number,
-                    SimpleType::U64(_) => AttributeTransform::Number,
+                    SimpleType::String(_) => None,
+                    SimpleType::I8(_) => Some(AttributeTransform::Number),
+                    SimpleType::U8(_) => Some(AttributeTransform::Number),
+                    SimpleType::I16(_) => Some(AttributeTransform::Number),
+                    SimpleType::U16(_) => Some(AttributeTransform::Number),
+                    SimpleType::I32(_) => Some(AttributeTransform::Number),
+                    SimpleType::U32(_) => Some(AttributeTransform::Number),
+                    SimpleType::I64(_) => Some(AttributeTransform::Number),
+                    SimpleType::U64(_) => Some(AttributeTransform::Number),
                 },
             }
         }
@@ -295,11 +281,11 @@ impl ElementTransform {
                 )
             }
             ElementTransform::String => {
-                writeln!(w, "writer.write({}.as_bytes())?;", rust_name)
+                writeln!(w, "writer.write({}.as_str())?;", rust_name)
             }
             ElementTransform::Number => {
                 writeln!(w, "let value = {}.to_string();", rust_name)?;
-                writeln!(w, "writer.write(value.as_bytes())?;")
+                writeln!(w, "writer.write(value.as_str())?;")
             }
             ElementTransform::HexBytes => {
                 writeln!(
@@ -307,7 +293,7 @@ impl ElementTransform {
                     "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
                     rust_name
                 )?;
-                writeln!(w, "writer.write(hex.as_bytes())?;")
+                writeln!(w, "writer.write(hex.as_str())?;")
             }
         }
     }
@@ -394,90 +380,107 @@ fn write_attribute<W>(w: &mut W, model: &Model, att: &Attribute) -> std::io::Res
 where
     W: Write,
 {
+    let name = get_rust_field_name(&att.name);
+    let self_name = format!("self.{}", &name);
+    let transform = get_attr_transform(model, &att.field_type);
+
     match att.info {
         AttributeType::Single => {
-            let transform = get_attr_transform(model, &att.field_type);
-            writeln!(w, "{{")?;
-            indent(w, |w| {
-                let name = format!("self.{}", att.name.to_snake_case());
-                transform.write_value(&name, w)?;
+            if let Some(tx) = &transform {
+                writeln!(w, "let {} = {};", &name, tx.transform_to_string(&self_name))?;
                 writeln!(
                     w,
-                    "start.push_attribute((\"{}\", {}));",
-                    att.name,
-                    transform.transform_value(&name)
+                    "let start = start.attr(\"{}\", &{}.as_str());",
+                    att.name, &name
                 )?;
-                Ok(())
-            })?;
-            writeln!(w, "}}")?;
+            } else {
+                writeln!(
+                    w,
+                    "let start = start.attr(\"{}\", &{}.as_str());",
+                    att.name, &self_name
+                )?;
+            }
         }
         AttributeType::Option => {
-            let transform = get_attr_transform(model, &att.field_type);
-            writeln!(
-                w,
-                "if let Some(attr) = &self.{} {{",
-                &att.name.to_snake_case()
-            )?;
-            indent(w, |w| {
-                transform.write_value("attr", w)?;
+            let match_name = if let Some(tx) = &transform {
                 writeln!(
                     w,
-                    "start.push_attribute((\"{}\", {}));",
-                    att.name,
-                    transform.transform_value("attr")
+                    "let {} = self.{}.map(|x| {});",
+                    &name,
+                    &name,
+                    tx.transform_to_string("x")
                 )?;
+                &name
+            } else {
+                &self_name
+            };
+            writeln!(w, "let start = match &{} {{", match_name)?;
+            indent(w, |w| {
+                writeln!(w, "Some(attr) => {{")?;
+                indent(w, |w| {
+                    writeln!(w, "start.attr(\"{}\", attr.as_str())", att.name)
+                })?;
+                writeln!(w, "}},")?;
+                writeln!(w, "None => start,")?;
+
                 Ok(())
             })?;
-            writeln!(w, "}}")?;
+            writeln!(w, "}};")?;
         }
     }
 
     Ok(())
 }
 
-fn write_model<W>(mut w: W, model: &Model) -> std::io::Result<()>
+fn write_lines<W>(w: &mut W, s: &str) -> std::io::Result<()>
 where
     W: Write,
 {
+    for line in s.lines() {
+        writeln!(w, "{}", line)?;
+    }
+    Ok(())
+}
+
+fn write_model<W>(w: &mut W, model: &Model) -> std::io::Result<()>
+where
+    W: Write,
+{
+    // write all the snippets
+    write_lines(w, include_str!("../snippets/use_statements.rs"))?;
+    writeln!(w)?;
+    write_lines(w, include_str!("../snippets/write_to_xml.rs"))?;
+    writeln!(w)?;
+
     let target_ns = model.target_ns.as_ref().expect("requires target namespace");
 
     writeln!(
         w,
-        "fn add_xsi_attr(start: &mut quick_xml::events::BytesStart) {{"
+        "fn add_schema_attr(start: events::StartElementBuilder) -> events::StartElementBuilder {{"
     )?;
-    indent(&mut w, |w| {
-        writeln!(
-            w,
-            "start.push_attribute((\"xmlns:xsi\", \"http://www.w3.org/2001/XMLSchema-instance\"));"
-        )?;
-        writeln!(
-            w,
-            "start.push_attribute((\"xmlns:xsd\", \"http://www.w3.org/2001/XMLSchema\"));"
-        )
-    })?;
-    writeln!(w, "}}")?;
-
-    writeln!(w)?;
-
-    writeln!(
-        w,
-        "fn add_target_ns_attr(start: &mut quick_xml::events::BytesStart) {{"
-    )?;
-    indent(&mut w, |w| {
-        writeln!(
-            w,
-            "start.push_attribute((\"xmlns\", \"{}\"));",
-            target_ns.uri
-        )
+    indent(w, |w| {
+        writeln!(w, "start")?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                ".attr(\"xmlns:xsi\", \"http://www.w3.org/2001/XMLSchema-instance\")"
+            )?;
+            writeln!(
+                w,
+                ".attr(\"xmlns:xsd\", \"http://www.w3.org/2001/XMLSchema\")"
+            )?;
+            writeln!(w, ".attr(\"xmlns\", \"{}\")", target_ns.uri)
+        })?;
+        Ok(())
     })?;
     writeln!(w, "}}")?;
 
     writeln!(w)?;
 
     for st in &model.structs {
-        write_comment(&mut w, &st.comment)?;
+        write_comment(w, &st.comment)?;
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
-        indent(&mut w, |w| write_struct_fields(w, model, st))?;
+        indent(w, |w| write_struct_fields(w, model, st))?;
         writeln!(w, "}}")?;
     }
 
@@ -487,27 +490,9 @@ where
         let (attributes, elements) = split_fields(model, st);
 
         writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
-        indent(&mut w, |w| {
-            // write the attribute serializer
-            if !attributes.is_empty() {
-                writeln!(
-                    w,
-                    "fn write_attr(&self, start: &mut quick_xml::events::BytesStart) {{"
-                )?;
-                indent(w, |w| {
-                    // write the attributes
-                    for att in &attributes {
-                        write_attribute(w, model, att)?;
-                    }
-                    Ok(())
-                })?;
-                writeln!(w, "}}")?;
-
-                writeln!(w)?;
-            }
-
+        indent(w, |w| {
             if !elements.is_empty() {
-                writeln!(w, "fn write_elem<W>(&self, writer: &mut quick_xml::Writer<W>) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
+                writeln!(w, "fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
                 indent(w, |w| {
                     // write the elements
                     for elem in &elements {
@@ -520,9 +505,45 @@ where
                 writeln!(w)?;
             }
 
-            writeln!(w, "pub fn write<W>(&self, writer: &mut W) -> Result<(), WriteError> where W: std::io::Write {{")?;
+            writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
             indent(w, |w| {
-                writeln!(w, "let mut writer = quick_xml::Writer::new(writer);")?;
+                writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
+
+                if !attributes.is_empty() {
+                    writeln!(w, "// ---- start attributes ---- ")?;
+                    for att in &attributes {
+                        write_attribute(w, model, att)?;
+                    }
+                    writeln!(w, "// ---- end attributes ---- ")?;
+                }
+
+                writeln!(w, "writer.write(start)?;")?;
+
+                if !elements.is_empty() {
+                    writeln!(w, "self.write_elem(writer)?;")?;
+                }
+
+                writeln!(w, "writer.write(events::XmlEvent::end_element())?;")?;
+                writeln!(w, "Ok(())")
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")?;
+
+        writeln!(w)?;
+
+        writeln!(
+            w,
+            "impl WriteToXml for {} {{",
+            st.name.to_upper_camel_case()
+        )?;
+        indent(w, |w| {
+            writeln!(w, "fn write_to_xml<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
+            indent(w, |w| {
+                writeln!(
+                    w,
+                    "let mut writer = EmitterConfig::new().create_writer(writer);"
+                )?;
                 writeln!(
                     w,
                     "self.write_with_name(&mut writer, \"{}\", true)?;",
@@ -531,48 +552,16 @@ where
                 writeln!(w, "Ok(())")
             })?;
             writeln!(w, "}}")?;
-            writeln!(w)?;
-
-            writeln!(w, "fn write_with_name<W>(&self, writer: &mut quick_xml::Writer<W>, name: &str, top_level: bool) -> Result<(), quick_xml::Error> where W: std::io::Write {{")?;
-            indent(w, |w| {
-                writeln!(w, "let mut start = quick_xml::events::BytesStart::borrowed_name(name.as_bytes());")?;
-
-                writeln!(w, "if top_level {{")?;
-                indent(w, |w| writeln!(w, "add_xsi_attr(&mut start);"))?;
-                writeln!(w, "}}")?;
-
-                if !attributes.is_empty() {
-                    writeln!(w, "self.write_attr(&mut start);")?;
-                }
-
-                writeln!(w, "if top_level {{")?;
-                indent(w, |w| writeln!(w, "add_target_ns_attr(&mut start);"))?;
-                writeln!(w, "}}")?;
-
-                writeln!(
-                    w,
-                    "writer.write_event(quick_xml::events::Event::Start(start))?;"
-                )?;
-
-                if !elements.is_empty() {
-                    writeln!(w, "self.write_elem(writer)?;")?;
-                }
-
-                writeln!(w, "writer.write_event(quick_xml::events::Event::End(quick_xml::events::BytesEnd::borrowed(name.as_bytes())))?;")?;
-                writeln!(w, "Ok(())")
-            })?;
-            writeln!(w, "}}")
+            Ok(())
         })?;
         writeln!(w, "}}")?;
+
+        writeln!(w)?;
     }
 
     writeln!(w)?;
 
-    let error = include_str!("../snippets/error.rs");
-
-    for line in error.lines() {
-        writeln!(w, "{}", line)?;
-    }
+    write_lines(w, include_str!("../snippets/error.rs"))?;
 
     Ok(())
 }
@@ -583,7 +572,7 @@ fn main() {
     let model: Model = serde_json::from_str(&input).unwrap();
 
     let output = std::fs::File::create(opt.output).unwrap();
-    let writer = LineWriter::new(output);
+    let mut writer = LineWriter::new(output);
 
-    write_model(writer, &model).unwrap();
+    write_model(&mut writer, &model).unwrap();
 }
