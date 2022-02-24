@@ -136,7 +136,7 @@ where
     }
 
     writeln!(writer)?;
-    writeln!(writer, "// --- these fields come from {} --- ", st.name)?;
+    writeln!(writer, "// --- these fields come from {} ---", st.name)?;
     writeln!(writer)?;
     for field in &st.fields {
         let rust_type = get_rust_type(model, resolve(model, &field.field_type));
@@ -390,13 +390,13 @@ where
                 writeln!(w, "let {} = {};", &name, tx.transform_to_string(&self_name))?;
                 writeln!(
                     w,
-                    "let start = start.attr(\"{}\", &{}.as_str());",
+                    "let start = start.attr(\"{}\", {}.as_str());",
                     att.name, &name
                 )?;
             } else {
                 writeln!(
                     w,
-                    "let start = start.attr(\"{}\", &{}.as_str());",
+                    "let start = start.attr(\"{}\", {}.as_str());",
                     att.name, &self_name
                 )?;
             }
@@ -510,11 +510,11 @@ where
                 writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
 
                 if !attributes.is_empty() {
-                    writeln!(w, "// ---- start attributes ---- ")?;
+                    writeln!(w, "// ---- start attributes ----")?;
                     for att in &attributes {
                         write_attribute(w, model, att)?;
                     }
-                    writeln!(w, "// ---- end attributes ---- ")?;
+                    writeln!(w, "// ---- end attributes ----")?;
                 }
 
                 writeln!(w, "writer.write(start)?;")?;
