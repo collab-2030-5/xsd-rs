@@ -615,11 +615,11 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
         let rust_var = get_rust_field_name(&field.name);
         match &field.info {
             FieldTypeInfo::Attribute(x) => match x {
-                AttributeType::Single => writeln!(w, "{} : {}.expect()?,", &rust_var, &rust_var),
+                AttributeType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
                 AttributeType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
             },
             FieldTypeInfo::Element(x) => match x {
-                ElementType::Single => writeln!(w, "{} : {}.expect()?,", &rust_var, &rust_var),
+                ElementType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
                 ElementType::Array => writeln!(w, "{},", &rust_var),
                 ElementType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
                 ElementType::Error(x) => panic!("{}", x),
@@ -643,8 +643,12 @@ fn write_deserializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
-            writeln!(w, "// TODO - parse the values!")?;
             writeln!(w)?;
+            writeln!(w, "// TODO - parse the attributes")?;
+            writeln!(w)?;
+            writeln!(w, "// TODO - parse the elements")?;
+            writeln!(w)?;
+            writeln!(w, "// construct the type from the cells")?;
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;
             indent(w, |w| write_struct_initializer(w, st, model))?;
             writeln!(w, "}})")

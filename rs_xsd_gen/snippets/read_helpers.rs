@@ -20,7 +20,7 @@ impl<T> SetOnce<T> {
         Ok(())
     }
 
-    fn expect(self) -> core::result::Result<T, ReadError> {
+    fn require(self) -> core::result::Result<T, ReadError> {
         match self.inner {
             Some(x) => Ok(x),
             None => Err(ReadError::MissingMandatoryField),
