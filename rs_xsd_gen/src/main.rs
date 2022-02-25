@@ -33,10 +33,7 @@ enum Type {
     Struct(String),
 }
 
-fn write_comment<W>(w: &mut W, comment: &Option<String>) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_comment(w: &mut dyn Write, comment: &Option<String>) -> std::io::Result<()> {
     if let Some(comment) = comment {
         for line in comment.lines() {
             writeln!(w, "/// {}", line.replace('\t', "    "))?;
@@ -45,10 +42,9 @@ where
     Ok(())
 }
 
-fn indent<W, F>(w: &mut W, f: F) -> std::io::Result<()>
+fn indent<F>(w: &mut dyn Write, f: F) -> std::io::Result<()>
 where
-    W: Write,
-    F: Fn(&mut IndentWriter<&mut W>) -> std::io::Result<()>,
+    F: Fn(&mut IndentWriter<&mut dyn Write>) -> std::io::Result<()>,
 {
     let mut w = IndentWriter::new("    ", w);
     f(&mut w)
@@ -122,10 +118,7 @@ fn get_rust_field_name(name: &str) -> String {
     }
 }
 
-fn write_struct_fields<W>(writer: &mut W, model: &Model, st: &Struct) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> std::io::Result<()> {
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
             None => panic!("cannot resolve base type {} in {}", bt, st.name),
@@ -432,20 +425,14 @@ where
     Ok(())
 }
 
-fn write_lines<W>(w: &mut W, s: &str) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_lines(w: &mut dyn Write, s: &str) -> std::io::Result<()> {
     for line in s.lines() {
         writeln!(w, "{}", line)?;
     }
     Ok(())
 }
 
-fn write_model<W>(w: &mut W, model: &Model) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     // write all the snippets
     write_lines(w, include_str!("../snippets/use_statements.rs"))?;
     writeln!(w)?;
