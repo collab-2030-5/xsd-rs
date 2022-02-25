@@ -449,7 +449,7 @@ where
     // write all the snippets
     write_lines(w, include_str!("../snippets/use_statements.rs"))?;
     writeln!(w)?;
-    write_lines(w, include_str!("../snippets/write_to_xml.rs"))?;
+    write_lines(w, include_str!("../snippets/traits.rs"))?;
     writeln!(w)?;
 
     let target_ns = model.target_ns.as_ref().expect("requires target namespace");
@@ -562,6 +562,8 @@ where
     writeln!(w)?;
 
     write_lines(w, include_str!("../snippets/error.rs"))?;
+    writeln!(w)?;
+    write_lines(w, include_str!("../snippets/read_helpers.rs"))?;
 
     Ok(())
 }
