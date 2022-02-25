@@ -1,10 +1,17 @@
-#[derive(Default)]
 struct SetOnce<T> {
-    name: &'static str,
     inner: Option<T>
 }
 
+impl<T> Default for SetOnce<T> {
+    fn default() -> Self {
+        Self {
+            inner: None
+        }
+    }
+}
+
 impl<T> SetOnce<T> {
+
     fn set(&mut self, value: T) -> core::result::Result<(), ReadError> {
         if self.inner.is_some() {
             return Err(ReadError::DuplicateField);
