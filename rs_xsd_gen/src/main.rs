@@ -551,7 +551,7 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     for st in &model.structs {
         write_serializers(w, st, model)?;
         writeln!(w)?;
-        write_deserializers(w, st, model)?;
+        write_deserializer_impl(w, st, model)?;
     }
 
     writeln!(w)?;
@@ -630,16 +630,12 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
     Ok(())
 }
 
-fn write_deserializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
     // categorize the fields
     //let (attr, elem) = split_fields(model, st);
-    writeln!(
-        w,
-        "impl ReadFromXml for {} {{",
-        st.name.to_upper_camel_case()
-    )?;
+    writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read_from_xml<R>(_reader: &mut R) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(_reader: &mut xml::reader::EventReader<R>, _attr: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
