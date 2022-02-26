@@ -222,6 +222,11 @@ impl AttributeTransform {
             AttributeTransform::Number => format!("{}.to_string()", name),
         }
     }
+    fn parse_from_string(&self) -> String {
+        match self {
+            AttributeTransform::Number => "attr.value.parse()?".to_string(),
+        }
+    }
 }
 
 fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransform> {
@@ -591,7 +596,7 @@ fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io:
 
         writeln!(
             w,
-            "let {} : {} = Default::default();",
+            "let mut {} : {} = Default::default();",
             get_rust_field_name(&field.name),
             cell_type
         )?;
@@ -630,18 +635,34 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
     Ok(())
 }
 
+fn parse_attribute(model: &Model, attr: &Attribute) -> String {
+    match get_attr_transform(model, &attr.field_type) {
+        None => "attr.value.clone()".to_string(),
+        Some(x) => x.parse_from_string(),
+    }
+}
+
 fn write_attr_parse_loop(
     w: &mut dyn Write,
-    attr: &Vec<Attribute>,
+    attrs: &Vec<Attribute>,
     model: &Model,
 ) -> std::io::Result<()> {
     writeln!(w, "for attr in attrs.iter() {{")?;
     indent(w, |w| {
-        writeln!(w, "match &attr.name {{")?;
+        writeln!(w, "match attr.name.local_name.as_str() {{")?;
         indent(w, |w| {
+            for attr in attrs {
+                writeln!(
+                    w,
+                    "\"{}\" => {}.set({})?,",
+                    &attr.name,
+                    get_rust_field_name(&attr.name),
+                    parse_attribute(model, attr)
+                )?;
+            }
             writeln!(w, "_ => return Err(ReadError::UnknownAttribute)")
         })?;
-        writeln!(w, "}}")
+        writeln!(w, "}};")
     })?;
     writeln!(w, "}}")
 }
@@ -651,7 +672,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(_reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub fn read<R>(_reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;

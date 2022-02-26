@@ -18,6 +18,8 @@ pub enum ReadError {
     MissingMandatoryField,
     /// Unknown attribute
     UnknownAttribute,
+    /// String -> integer parsing failed
+    BadInteger,
     /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
@@ -28,6 +30,12 @@ impl From<xml::writer::Error> for WriteError {
             xml::writer::Error::Io(x) => Self::Io(x),
             _ => WriteError::Other(err.into()),
         }
+    }
+}
+
+impl From<std::num::ParseIntError> for ReadError {
+    fn from(_: std::num::ParseIntError) -> Self {
+        ReadError::BadInteger
     }
 }
 
@@ -48,6 +56,7 @@ impl std::fmt::Display for ReadError {
             ReadError::Other(x) => write!(f, "{}", x),
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
             ReadError::UnknownAttribute => write!(f, "unknown attribute"),
+            ReadError::BadInteger => write!(f, "bad integer"),
         }
     }
 }
