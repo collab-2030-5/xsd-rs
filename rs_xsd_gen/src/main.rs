@@ -644,7 +644,7 @@ fn parse_attribute(model: &Model, attr: &Attribute) -> String {
 
 fn write_attr_parse_loop(
     w: &mut dyn Write,
-    attrs: &Vec<Attribute>,
+    attrs: &[Attribute],
     model: &Model,
 ) -> std::io::Result<()> {
     writeln!(w, "for attr in attrs.iter() {{")?;
@@ -667,19 +667,46 @@ fn write_attr_parse_loop(
     writeln!(w, "}}")
 }
 
+fn write_elem_parse_loop(
+    w: &mut dyn Write,
+    _elems: &[Element],
+    _model: &Model,
+) -> std::io::Result<()> {
+    writeln!(w, "loop {{")?;
+    indent(w, |w| {
+        writeln!(w, "match reader.next()? {{")?;
+        indent(w, |w| {
+            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::EndDocument => break,")?;
+            writeln!(
+                w,
+                "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => {{}}"
+            )?;
+            writeln!(w, "xml::reader::XmlEvent::StartElement {{ .. }} => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::EndElement {{ .. }} => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::CData(_) => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::Comment(_) => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::Characters(_) => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::Whitespace(_) => {{}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
 fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
     let (attr, elem) = split_fields(model, st);
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "pub fn read<R>(_reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
             writeln!(w)?;
             write_attr_parse_loop(w, &attr, model)?;
             writeln!(w)?;
-            writeln!(w, "// TODO - parse the elements")?;
+            write_elem_parse_loop(w, &elem, model)?;
             writeln!(w)?;
             writeln!(w, "// construct the type from the cells")?;
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;

@@ -11,7 +11,7 @@ pub enum WriteError {
 #[derive(Debug)]
 pub enum ReadError {
     /// I/O errors
-    Io(::std::io::Error),
+    Io,
     /// Duplicate field
     DuplicateField,
     /// Missing mandatory field
@@ -29,6 +29,15 @@ impl From<xml::writer::Error> for WriteError {
         match err {
             xml::writer::Error::Io(x) => Self::Io(x),
             _ => WriteError::Other(err.into()),
+        }
+    }
+}
+
+impl From<xml::reader::Error> for ReadError {
+    fn from(err: xml::reader::Error) -> Self {
+        match err.kind() {
+            xml::reader::ErrorKind::Io(_) => Self::Io,
+            _ => ReadError::Other(err.into()),
         }
     }
 }
@@ -51,7 +60,7 @@ impl std::fmt::Display for WriteError {
 impl std::fmt::Display for ReadError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            ReadError::Io(x) => write!(f, "{}", x),
+            ReadError::Io => write!(f, "io error"),
             ReadError::DuplicateField => write!(f, "duplicate field"),
             ReadError::Other(x) => write!(f, "{}", x),
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
