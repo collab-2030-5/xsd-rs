@@ -14,8 +14,10 @@ pub enum ReadError {
     Io(::std::io::Error),
     /// Duplicate field
     DuplicateField,
-    /// Duplicate field
+    /// Missing mandatory field
     MissingMandatoryField,
+    /// Unknown attribute
+    UnknownAttribute,
     /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
@@ -45,6 +47,7 @@ impl std::fmt::Display for ReadError {
             ReadError::DuplicateField => write!(f, "duplicate field"),
             ReadError::Other(x) => write!(f, "{}", x),
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
+            ReadError::UnknownAttribute => write!(f, "unknown attribute"),
         }
     }
 }

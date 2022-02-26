@@ -630,17 +630,33 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
     Ok(())
 }
 
+fn write_attr_parse_loop(
+    w: &mut dyn Write,
+    attr: &Vec<Attribute>,
+    model: &Model,
+) -> std::io::Result<()> {
+    writeln!(w, "for attr in attrs.iter() {{")?;
+    indent(w, |w| {
+        writeln!(w, "match &attr.name {{")?;
+        indent(w, |w| {
+            writeln!(w, "_ => return Err(ReadError::UnknownAttribute)")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
 fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
-    // categorize the fields
-    //let (attr, elem) = split_fields(model, st);
+    let (attr, elem) = split_fields(model, st);
+
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(_reader: &mut xml::reader::EventReader<R>, _attr: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(_reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
             writeln!(w)?;
-            writeln!(w, "// TODO - parse the attributes")?;
+            write_attr_parse_loop(w, &attr, model)?;
             writeln!(w)?;
             writeln!(w, "// TODO - parse the elements")?;
             writeln!(w)?;
