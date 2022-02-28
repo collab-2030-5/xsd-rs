@@ -50,6 +50,12 @@ impl From<std::num::ParseIntError> for ReadError {
     }
 }
 
+impl From<std::str::ParseBoolError> for ReadError {
+    fn from(_: std::str::ParseBoolError) -> Self {
+        ReadError::BadInteger
+    }
+}
+
 impl std::fmt::Display for WriteError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {

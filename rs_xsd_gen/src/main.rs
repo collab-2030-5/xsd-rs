@@ -677,9 +677,13 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
                 elem.field_type.to_upper_camel_case()
             )
         }
-        ElementTransform::Number => "unimplemented!()".to_string(),
-        ElementTransform::String => "unimplemented!()".to_string(),
-        ElementTransform::HexBytes => "unimplemented!()".to_string(),
+        ElementTransform::Number => {
+            format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
+        }
+        ElementTransform::String => {
+            format!("read_string(reader, \"{}\")?", &elem.name)
+        }
+        ElementTransform::HexBytes => "parse_hex_bytes(&read_string(reader, \"{}\")?)?".to_string(),
     };
 
     match &elem.info {
@@ -701,6 +705,28 @@ fn write_elem_parse_loop(
     elems: &[Element],
     model: &Model,
 ) -> std::io::Result<()> {
+    let start_elem_tag = {
+        if elems.is_empty() {
+            "xml::reader::XmlEvent::StartElement { .. }"
+        } else {
+            // are any of the elements structs?
+            let has_struct = elems
+                .iter()
+                .any(|e| match get_elem_transform(model, &e.field_type) {
+                    ElementTransform::Struct => true,
+                    ElementTransform::Number => false,
+                    ElementTransform::String => false,
+                    ElementTransform::HexBytes => false,
+                });
+
+            if has_struct {
+                "xml::reader::XmlEvent::StartElement { name, attributes, .. }"
+            } else {
+                "xml::reader::XmlEvent::StartElement { name, .. }"
+            }
+        }
+    };
+
     writeln!(w, "loop {{")?;
     indent(w, |w| {
         writeln!(w, "match reader.next()? {{")?;
@@ -720,10 +746,7 @@ fn write_elem_parse_loop(
                 writeln!(w, "}}")
             })?;
             writeln!(w, "}}")?;
-            writeln!(
-                w,
-                "xml::reader::XmlEvent::StartElement {{ name, attributes, .. }} => {{"
-            )?;
+            writeln!(w, "{} => {{", start_elem_tag)?;
             indent(w, |w| {
                 if elems.is_empty() {
                     indent(w, |w| {

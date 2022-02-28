@@ -31,3 +31,48 @@ impl<T> SetOnce<T> {
         self.inner
     }
 }
+
+fn read_string<R>(reader: &mut xml::reader::EventReader<R>, parent_name: &str) -> core::result::Result<String, ReadError> where R: std::io::Read {
+    let value = expect_string(reader)?;
+    expect_end_element(reader, parent_name)?;
+    Ok(value)
+}
+
+fn expect_string<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<String, ReadError> where R: std::io::Read {
+    loop {
+        match reader.next()? {
+            xml::reader::XmlEvent::Characters(value) => return Ok(value.to_string()),
+            // we can ignore these
+            xml::reader::XmlEvent::Comment(_) => {}
+            xml::reader::XmlEvent::Whitespace(_) => {}
+            // anything else is an error
+            _ => return Err(ReadError::UnexpectedEvent),
+        }
+    }
+}
+
+fn expect_end_element<R>(reader: &mut xml::reader::EventReader<R>, parent_name: &str) -> core::result::Result<(), ReadError> where R: std::io::Read {
+    loop {
+        match reader.next()? {
+            xml::reader::XmlEvent::EndElement { name } => {
+                if name.local_name.as_str() == parent_name {
+                    return Ok(())
+                } else {
+                    return Err(ReadError::UnexpectedEvent)
+                }
+            }
+            xml::reader::XmlEvent::Comment(_) => {}
+            xml::reader::XmlEvent::Whitespace(_) => {}
+            // anything else is an error
+            _ => return Err(ReadError::UnexpectedEvent),
+        }
+    }
+}
+
+fn parse_hex_bytes(_value: &str) -> core::result::Result<Vec<u8>, ReadError> {
+    let ret = Vec::new();
+    // TODO
+    Ok(ret)
+}
+
+
