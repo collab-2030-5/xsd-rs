@@ -667,21 +667,39 @@ fn write_attr_parse_loop(
     writeln!(w, "}}")
 }
 
-/**
-xml::reader::XmlEvent::EndElement { name } => {
-                    if name.local_name.as_str() == "DeviceCapability" {
-                        break;
-                    } else {
-                        return Err(ReadError::UnexpectedEvent);
-                    }
-                }
-*/
+fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> std::io::Result<()> {
+    let transform = get_elem_transform(model, &elem.field_type);
+
+    let tx: String = match transform {
+        ElementTransform::Struct => {
+            format!(
+                "{}::read(reader, &attributes)?",
+                elem.field_type.to_upper_camel_case()
+            )
+        }
+        ElementTransform::Number => "unimplemented!()".to_string(),
+        ElementTransform::String => "unimplemented!()".to_string(),
+        ElementTransform::HexBytes => "unimplemented!()".to_string(),
+    };
+
+    match &elem.info {
+        ElementType::Single | ElementType::Option => {
+            writeln!(w, "{}.set({})?", get_rust_field_name(&elem.name), tx)
+        }
+        ElementType::Array => {
+            writeln!(w, "{}.push({})", get_rust_field_name(&elem.name), tx)
+        }
+        ElementType::Error(err) => {
+            panic!("{}", err)
+        }
+    }
+}
 
 fn write_elem_parse_loop(
     w: &mut dyn Write,
     st: &Struct,
     elems: &[Element],
-    _model: &Model,
+    model: &Model,
 ) -> std::io::Result<()> {
     writeln!(w, "loop {{")?;
     indent(w, |w| {
@@ -707,16 +725,23 @@ fn write_elem_parse_loop(
                 "xml::reader::XmlEvent::StartElement {{ name, attributes, .. }} => {{"
             )?;
             indent(w, |w| {
-                writeln!(w, "match name.local_name.as_str() {{")?;
-                indent(w, |w| {
-                    for elem in elems {
-                        writeln!(w, "\"{}\" => {{", &elem.name)?;
-                        indent(w, |w| writeln!(w, "unimplemented!()"))?;
-                        writeln!(w, "}}")?;
-                    }
-                    writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
-                })?;
-                writeln!(w, "}}")
+                if elems.is_empty() {
+                    indent(w, |w| {
+                        writeln!(w, "// this struct has no elements")?;
+                        writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                    })
+                } else {
+                    writeln!(w, "match name.local_name.as_str() {{")?;
+                    indent(w, |w| {
+                        for elem in elems {
+                            writeln!(w, "\"{}\" => {{", &elem.name)?;
+                            indent(w, |w| write_element_handler(w, model, elem))?;
+                            writeln!(w, "}}")?;
+                        }
+                        writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
+                    })?;
+                    writeln!(w, "}}")
+                }
             })?;
             writeln!(w, "}}")?;
             writeln!(w, "// treat these events as errors")?;
