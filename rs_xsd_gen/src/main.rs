@@ -667,26 +667,72 @@ fn write_attr_parse_loop(
     writeln!(w, "}}")
 }
 
+/**
+xml::reader::XmlEvent::EndElement { name } => {
+                    if name.local_name.as_str() == "DeviceCapability" {
+                        break;
+                    } else {
+                        return Err(ReadError::UnexpectedEvent);
+                    }
+                }
+*/
+
 fn write_elem_parse_loop(
     w: &mut dyn Write,
-    _elems: &[Element],
+    st: &Struct,
+    elems: &[Element],
     _model: &Model,
 ) -> std::io::Result<()> {
     writeln!(w, "loop {{")?;
     indent(w, |w| {
         writeln!(w, "match reader.next()? {{")?;
         indent(w, |w| {
-            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => {{}}")?;
-            writeln!(w, "xml::reader::XmlEvent::EndDocument => break,")?;
+            writeln!(w, "xml::reader::XmlEvent::EndElement {{ name }} => {{")?;
+            indent(w, |w| {
+                writeln!(w, "if name.local_name.as_str() == \"{}\" {{", st.name)?;
+                indent(w, |w| {
+                    writeln!(w, "// try to construct struct")?;
+                    writeln!(w, "break;")
+                })?;
+                writeln!(w, "}} else {{")?;
+                indent(w, |w| {
+                    writeln!(w, "// TODO - make this more specific")?;
+                    writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                })?;
+                writeln!(w, "}}")
+            })?;
+            writeln!(w, "}}")?;
             writeln!(
                 w,
-                "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => {{}}"
+                "xml::reader::XmlEvent::StartElement {{ name, attributes, .. }} => {{"
             )?;
-            writeln!(w, "xml::reader::XmlEvent::StartElement {{ .. }} => {{}}")?;
-            writeln!(w, "xml::reader::XmlEvent::EndElement {{ .. }} => {{}}")?;
+            indent(w, |w| {
+                writeln!(w, "match name.local_name.as_str() {{")?;
+                indent(w, |w| {
+                    for elem in elems {
+                        writeln!(w, "\"{}\" => {{", &elem.name)?;
+                        indent(w, |w| writeln!(w, "unimplemented!()"))?;
+                        writeln!(w, "}}")?;
+                    }
+                    writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
+                })?;
+                writeln!(w, "}}")
+            })?;
+            writeln!(w, "}}")?;
+            writeln!(w, "// treat these events as errors")?;
+            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(
+                w,
+                "xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),"
+            )?;
+            writeln!(
+                w,
+                "xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),"
+            )?;
+            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(w, "// ignore these events")?;
             writeln!(w, "xml::reader::XmlEvent::CData(_) => {{}}")?;
             writeln!(w, "xml::reader::XmlEvent::Comment(_) => {{}}")?;
-            writeln!(w, "xml::reader::XmlEvent::Characters(_) => {{}}")?;
             writeln!(w, "xml::reader::XmlEvent::Whitespace(_) => {{}}")
         })?;
         writeln!(w, "}}")
@@ -706,7 +752,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
             writeln!(w)?;
             write_attr_parse_loop(w, &attr, model)?;
             writeln!(w)?;
-            write_elem_parse_loop(w, &elem, model)?;
+            write_elem_parse_loop(w, st, &elem, model)?;
             writeln!(w)?;
             writeln!(w, "// construct the type from the cells")?;
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;

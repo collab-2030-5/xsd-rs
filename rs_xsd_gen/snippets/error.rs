@@ -20,6 +20,8 @@ pub enum ReadError {
     UnknownAttribute,
     /// String -> integer parsing failed
     BadInteger,
+    /// Parser encountered an unexpected event
+    UnexpectedEvent,
     /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
@@ -66,6 +68,7 @@ impl std::fmt::Display for ReadError {
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
             ReadError::UnknownAttribute => write!(f, "unknown attribute"),
             ReadError::BadInteger => write!(f, "bad integer"),
+            ReadError::UnexpectedEvent => write!(f, "unexpected event"),
         }
     }
 }
