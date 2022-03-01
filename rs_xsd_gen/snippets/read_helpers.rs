@@ -91,5 +91,40 @@ fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> {
     Ok(ret)
 }
 
+fn read_start_tag<R>(reader: &mut xml::reader::EventReader<R>, type_name: &str) -> core::result::Result<Vec<xml::attribute::OwnedAttribute>, ReadError> where R: std::io::Read {
+    expect_start_doc(reader)?;
+    read_start_elem(reader, type_name)
+}
 
+fn expect_start_doc<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<(), ReadError> where R: std::io::Read {
+    loop {
+        match reader.next()? {
+            xml::reader::XmlEvent::StartDocument { .. } => return Ok(()),
+            // ignore
+            xml::reader::XmlEvent::Comment(_) => {}
+            xml::reader::XmlEvent::Whitespace(_) => {}
+            // errors
+            _ => return Err(ReadError::UnexpectedEvent),
+        }
+    }
+}
 
+fn read_start_elem<R>(reader: &mut xml::reader::EventReader<R>, type_name: &str) -> core::result::Result<Vec<xml::attribute::OwnedAttribute>, ReadError> where R: std::io::Read {
+    loop {
+        match reader.next()? {
+            xml::reader::XmlEvent::StartElement { name, attributes, .. } => {
+                if name.local_name.as_str() == type_name {
+                    return Ok(attributes);
+                } else {
+                    // TODO - more descriptive
+                    return Err(ReadError::UnexpectedEvent);
+                }
+            }
+            // ignore
+            xml::reader::XmlEvent::Comment(_) => {}
+            xml::reader::XmlEvent::Whitespace(_) => {}
+            // errors
+            _ => return Err(ReadError::UnexpectedEvent),
+        }
+    }
+}

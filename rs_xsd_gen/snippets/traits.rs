@@ -5,5 +5,5 @@ pub trait WriteToXml {
 
 /// XML types implement this trait to be read from any std::io::Read
 pub trait ReadFromXml : Sized {
-    fn read_from_xml<R>(r: &mut R) -> core::result::Result<Self, ReadError> where R: std::io::Read;
+    fn read_from_xml<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read;
 }

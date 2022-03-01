@@ -557,6 +557,8 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
         write_serializers(w, st, model)?;
         writeln!(w)?;
         write_deserializer_impl(w, st, model)?;
+        writeln!(w)?;
+        write_deserializer_trait_impl(w, st)?;
     }
 
     writeln!(w)?;
@@ -788,12 +790,47 @@ fn write_elem_parse_loop(
     writeln!(w, "}}")
 }
 
+fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
+    writeln!(
+        w,
+        "impl ReadFromXml for {} {{",
+        st.name.to_upper_camel_case()
+    )?;
+    indent(w, |w| {
+        writeln!(w, "fn read_from_xml<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "let mut reader = xml::reader::EventReader::new(r);")?;
+            writeln!(w)?;
+            writeln!(
+                w,
+                "match {}::read_top_level(&mut reader) {{",
+                st.name.to_upper_camel_case()
+            )?;
+            indent(w, |w| {
+                writeln!(w, "Ok(x) => Ok(x),")?;
+                writeln!(w, "Err(err) => {{")?;
+                indent(w, |w| {
+                    writeln!(w, "let pos = reader.position();")?;
+                    writeln!(
+                        w,
+                        "Err(ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
+                    )
+                })?;
+                writeln!(w, "}}")
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
 fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
     let (attr, elem) = split_fields(model, st);
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "pub fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
@@ -806,6 +843,13 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;
             indent(w, |w| write_struct_initializer(w, st, model))?;
             writeln!(w, "}})")
+        })?;
+        writeln!(w, "}}")?;
+        writeln!(w)?;
+        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "let attr = read_start_tag(reader, \"{}\")?;", &st.name)?;
+            writeln!(w, "{}::read(reader, &attr)", st.name.to_upper_camel_case())
         })?;
         writeln!(w, "}}")?;
         Ok(())

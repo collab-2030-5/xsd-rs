@@ -28,6 +28,22 @@ pub enum ReadError {
     Other(Box<dyn std::error::Error>),
 }
 
+/// provides ReadError with line/col info
+#[derive(Debug)]
+pub struct ErrorWithLocation {
+    pub err: ReadError,
+    pub line: u64,
+    pub col: u64,
+}
+
+impl std::fmt::Display for ErrorWithLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}:{} - {}", self.line, self.col, self.err)
+    }
+}
+
+impl std::error::Error for ErrorWithLocation {}
+
 impl From<xml::writer::Error> for WriteError {
     fn from(err: xml::writer::Error) -> Self {
         match err {
