@@ -69,10 +69,27 @@ fn expect_end_element<R>(reader: &mut xml::reader::EventReader<R>, parent_name: 
     }
 }
 
-fn parse_hex_bytes(_value: &str) -> core::result::Result<Vec<u8>, ReadError> {
-    let ret = Vec::new();
-    // TODO
+fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> {
+    let mut ret = Vec::new();
+    if value.len() % 2 != 0 {
+        return Err(ReadError::BadHexString);
+    }
+    let count = value.len() / 2;
+    for i in 0..count {
+        let start = 2*i;
+        let range = start..start+2;
+        match value.get(range) {
+            None => {
+                return Err(ReadError::BadHexString);
+            }
+            Some(s) => {
+                ret.push(u8::from_str_radix(s, 16)?)
+            }
+        }
+    }
+
     Ok(ret)
 }
+
 
 

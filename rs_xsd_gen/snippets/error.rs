@@ -20,6 +20,8 @@ pub enum ReadError {
     UnknownAttribute,
     /// String -> integer parsing failed
     BadInteger,
+    /// hex string bad format
+    BadHexString,
     /// Parser encountered an unexpected event
     UnexpectedEvent,
     /// other backend dependent errors
@@ -74,6 +76,7 @@ impl std::fmt::Display for ReadError {
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
             ReadError::UnknownAttribute => write!(f, "unknown attribute"),
             ReadError::BadInteger => write!(f, "bad integer"),
+            ReadError::BadHexString => write!(f, "bad hex string"),
             ReadError::UnexpectedEvent => write!(f, "unexpected event"),
         }
     }
