@@ -547,6 +547,7 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     // write the struct definitions
     for st in &model.structs {
         write_comment(w, &st.comment)?;
+        writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
         indent(w, |w| write_struct_fields(w, model, st))?;
         writeln!(w, "}}")?;
