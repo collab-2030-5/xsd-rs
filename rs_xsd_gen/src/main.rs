@@ -675,8 +675,9 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
     let tx: String = match transform {
         ElementTransform::Struct => {
             format!(
-                "{}::read(reader, &attributes)?",
-                elem.field_type.to_upper_camel_case()
+                "{}::read(reader, &attributes, \"{}\")?",
+                elem.field_type.to_upper_camel_case(),
+                &elem.name
             )
         }
         ElementTransform::Number => {
@@ -685,7 +686,7 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
         ElementTransform::String => {
             format!("read_string(reader, \"{}\")?", &elem.name)
         }
-        ElementTransform::HexBytes => "parse_hex_bytes(&read_string(reader, \"{}\")?)?".to_string(),
+        ElementTransform::HexBytes => format!("parse_hex_bytes(&read_string(reader, \"{}\")?)?", &elem.name),
     };
 
     match &elem.info {
@@ -703,7 +704,6 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
 
 fn write_elem_parse_loop(
     w: &mut dyn Write,
-    st: &Struct,
     elems: &[Element],
     model: &Model,
 ) -> std::io::Result<()> {
@@ -735,7 +735,7 @@ fn write_elem_parse_loop(
         indent(w, |w| {
             writeln!(w, "xml::reader::XmlEvent::EndElement {{ name }} => {{")?;
             indent(w, |w| {
-                writeln!(w, "if name.local_name.as_str() == \"{}\" {{", st.name)?;
+                writeln!(w, "if name.local_name.as_str() == parent_tag {{")?;
                 indent(w, |w| {
                     writeln!(w, "// try to construct struct")?;
                     writeln!(w, "break;")
@@ -830,14 +830,14 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st, model)?;
             writeln!(w)?;
             write_attr_parse_loop(w, &attr, model)?;
             writeln!(w)?;
-            write_elem_parse_loop(w, st, &elem, model)?;
+            write_elem_parse_loop(w, &elem, model)?;
             writeln!(w)?;
             writeln!(w, "// construct the type from the cells")?;
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;
@@ -849,7 +849,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
         writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "let attr = read_start_tag(reader, \"{}\")?;", &st.name)?;
-            writeln!(w, "{}::read(reader, &attr)", st.name.to_upper_camel_case())
+            writeln!(w, "{}::read(reader, &attr, \"{}\")", st.name.to_upper_camel_case(), &st.name)
         })?;
         writeln!(w, "}}")?;
         Ok(())
