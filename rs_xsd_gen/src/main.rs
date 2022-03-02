@@ -686,7 +686,10 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
         ElementTransform::String => {
             format!("read_string(reader, \"{}\")?", &elem.name)
         }
-        ElementTransform::HexBytes => format!("parse_hex_bytes(&read_string(reader, \"{}\")?)?", &elem.name),
+        ElementTransform::HexBytes => format!(
+            "parse_hex_bytes(&read_string(reader, \"{}\")?)?",
+            &elem.name
+        ),
     };
 
     match &elem.info {
@@ -849,7 +852,12 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
         writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "let attr = read_start_tag(reader, \"{}\")?;", &st.name)?;
-            writeln!(w, "{}::read(reader, &attr, \"{}\")", st.name.to_upper_camel_case(), &st.name)
+            writeln!(
+                w,
+                "{}::read(reader, &attr, \"{}\")",
+                st.name.to_upper_camel_case(),
+                &st.name
+            )
         })?;
         writeln!(w, "}}")?;
         Ok(())
