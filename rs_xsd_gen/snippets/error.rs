@@ -74,6 +74,12 @@ impl From<std::str::ParseBoolError> for ReadError {
     }
 }
 
+impl From<std::string::FromUtf8Error> for WriteError {
+    fn from(err: std::string::FromUtf8Error) -> Self {
+        WriteError::Other(err.into())
+    }
+}
+
 impl From<std::io::Error> for ErrorWithLocation {
     fn from(_: std::io::Error) -> Self {
         ErrorWithLocation {

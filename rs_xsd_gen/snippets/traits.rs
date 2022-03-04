@@ -12,6 +12,13 @@ pub trait WriteXml {
         self.write(&mut out)?;
         Ok(out)
     }
+
+    /// write to a String
+    fn write_string(&self) -> core::result::Result<String, WriteError> {
+        let bytes = self.write_bytes()?;
+        let ret = String::from_utf8(bytes)?;
+        Ok(ret)
+    }
 }
 
 /// XML types implement this trait to be read from any std::io::Read
