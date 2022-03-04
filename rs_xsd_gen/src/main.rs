@@ -33,10 +33,7 @@ enum Type {
     Struct(String),
 }
 
-fn write_comment<W>(w: &mut W, comment: &Option<String>) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_comment(w: &mut dyn Write, comment: &Option<String>) -> std::io::Result<()> {
     if let Some(comment) = comment {
         for line in comment.lines() {
             writeln!(w, "/// {}", line.replace('\t', "    "))?;
@@ -45,10 +42,9 @@ where
     Ok(())
 }
 
-fn indent<W, F>(w: &mut W, f: F) -> std::io::Result<()>
+fn indent<F>(w: &mut dyn Write, f: F) -> std::io::Result<()>
 where
-    W: Write,
-    F: Fn(&mut IndentWriter<&mut W>) -> std::io::Result<()>,
+    F: Fn(&mut IndentWriter<&mut dyn Write>) -> std::io::Result<()>,
 {
     let mut w = IndentWriter::new("    ", w);
     f(&mut w)
@@ -63,7 +59,7 @@ fn resolve_basic_type(name: &str) -> Option<BasicType> {
     }
 }
 
-fn resolve(model: &Model, name: &str) -> Type {
+fn resolve_type(model: &Model, name: &str) -> Type {
     if let Some(basic) = resolve_basic_type(name) {
         return Type::Basic(basic);
     }
@@ -122,10 +118,7 @@ fn get_rust_field_name(name: &str) -> String {
     }
 }
 
-fn write_struct_fields<W>(writer: &mut W, model: &Model, st: &Struct) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> std::io::Result<()> {
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
             None => panic!("cannot resolve base type {} in {}", bt, st.name),
@@ -139,7 +132,7 @@ where
     writeln!(writer, "// --- these fields come from {} ---", st.name)?;
     writeln!(writer)?;
     for field in &st.fields {
-        let rust_type = get_rust_type(model, resolve(model, &field.field_type));
+        let rust_type = get_rust_type(model, resolve_type(model, &field.field_type));
 
         write_comment(writer, &field.comment)?;
 
@@ -229,6 +222,11 @@ impl AttributeTransform {
             AttributeTransform::Number => format!("{}.to_string()", name),
         }
     }
+    fn parse_from_string(&self) -> String {
+        match self {
+            AttributeTransform::Number => "attr.value.parse()?".to_string(),
+        }
+    }
 }
 
 fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransform> {
@@ -281,11 +279,19 @@ impl ElementTransform {
                 )
             }
             ElementTransform::String => {
-                writeln!(w, "writer.write({}.as_str())?;", rust_name)
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    xsd_name, rust_name
+                )
             }
             ElementTransform::Number => {
                 writeln!(w, "let value = {}.to_string();", rust_name)?;
-                writeln!(w, "writer.write(value.as_str())?;")
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", value.as_str())?;",
+                    xsd_name
+                )
             }
             ElementTransform::HexBytes => {
                 writeln!(
@@ -293,7 +299,11 @@ impl ElementTransform {
                     "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
                     rust_name
                 )?;
-                writeln!(w, "writer.write(hex.as_str())?;")
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", hex.as_str())?;",
+                    xsd_name
+                )
             }
         }
     }
@@ -432,26 +442,14 @@ where
     Ok(())
 }
 
-fn write_lines<W>(w: &mut W, s: &str) -> std::io::Result<()>
-where
-    W: Write,
-{
+fn write_lines(w: &mut dyn Write, s: &str) -> std::io::Result<()> {
     for line in s.lines() {
         writeln!(w, "{}", line)?;
     }
     Ok(())
 }
 
-fn write_model<W>(w: &mut W, model: &Model) -> std::io::Result<()>
-where
-    W: Write,
-{
-    // write all the snippets
-    write_lines(w, include_str!("../snippets/use_statements.rs"))?;
-    writeln!(w)?;
-    write_lines(w, include_str!("../snippets/write_to_xml.rs"))?;
-    writeln!(w)?;
-
+fn write_add_schema_attr(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     let target_ns = model.target_ns.as_ref().expect("requires target namespace");
 
     writeln!(
@@ -473,97 +471,403 @@ where
         })?;
         Ok(())
     })?;
+    writeln!(w, "}}")
+}
+
+fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+    // collect all the attribute fields
+    let (attributes, elements) = split_fields(model, st);
+
+    writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
+    indent(w, |w| {
+        if !elements.is_empty() {
+            writeln!(w, "fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+            indent(w, |w| {
+                // write the elements
+                for elem in &elements {
+                    write_element(w, model, elem)?;
+                }
+                writeln!(w, "Ok(())")
+            })?;
+            writeln!(w, "}}")?;
+
+            writeln!(w)?;
+        }
+
+        writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+        indent(w, |w| {
+            writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
+
+            if !attributes.is_empty() {
+                writeln!(w, "// ---- start attributes ----")?;
+                for att in &attributes {
+                    write_attribute(w, model, att)?;
+                }
+                writeln!(w, "// ---- end attributes ----")?;
+            }
+
+            writeln!(w, "writer.write(start)?;")?;
+
+            if !elements.is_empty() {
+                writeln!(w, "self.write_elem(writer)?;")?;
+            }
+
+            writeln!(w, "writer.write(events::XmlEvent::end_element())?;")?;
+            writeln!(w, "Ok(())")
+        })?;
+        writeln!(w, "}}")
+    })?;
     writeln!(w, "}}")?;
 
     writeln!(w)?;
 
+    writeln!(w, "impl WriteXml for {} {{", st.name.to_upper_camel_case())?;
+    indent(w, |w| {
+        writeln!(w, "fn write<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                "let mut writer = EmitterConfig::new().create_writer(writer);"
+            )?;
+            writeln!(
+                w,
+                "self.write_with_name(&mut writer, \"{}\", true)?;",
+                st.name
+            )?;
+            writeln!(w, "Ok(())")
+        })?;
+        writeln!(w, "}}")?;
+        Ok(())
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+    // write all the snippets
+    write_lines(w, include_str!("../snippets/use_statements.rs"))?;
+    writeln!(w)?;
+    write_lines(w, include_str!("../snippets/traits.rs"))?;
+    writeln!(w)?;
+
+    write_add_schema_attr(w, model)?;
+    writeln!(w)?;
+
+    // write the struct definitions
     for st in &model.structs {
         write_comment(w, &st.comment)?;
+        writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
         indent(w, |w| write_struct_fields(w, model, st))?;
         writeln!(w, "}}")?;
     }
 
-    // write the serializers
+    // write the serialization impl and trait
     for st in &model.structs {
-        // collect all the attribute fields
-        let (attributes, elements) = split_fields(model, st);
-
-        writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
-        indent(w, |w| {
-            if !elements.is_empty() {
-                writeln!(w, "fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
-                indent(w, |w| {
-                    // write the elements
-                    for elem in &elements {
-                        write_element(w, model, elem)?;
-                    }
-                    writeln!(w, "Ok(())")
-                })?;
-                writeln!(w, "}}")?;
-
-                writeln!(w)?;
-            }
-
-            writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
-            indent(w, |w| {
-                writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
-
-                if !attributes.is_empty() {
-                    writeln!(w, "// ---- start attributes ----")?;
-                    for att in &attributes {
-                        write_attribute(w, model, att)?;
-                    }
-                    writeln!(w, "// ---- end attributes ----")?;
-                }
-
-                writeln!(w, "writer.write(start)?;")?;
-
-                if !elements.is_empty() {
-                    writeln!(w, "self.write_elem(writer)?;")?;
-                }
-
-                writeln!(w, "writer.write(events::XmlEvent::end_element())?;")?;
-                writeln!(w, "Ok(())")
-            })?;
-            writeln!(w, "}}")
-        })?;
-        writeln!(w, "}}")?;
-
+        write_serializers(w, st, model)?;
         writeln!(w)?;
-
-        writeln!(
-            w,
-            "impl WriteToXml for {} {{",
-            st.name.to_upper_camel_case()
-        )?;
-        indent(w, |w| {
-            writeln!(w, "fn write_to_xml<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
-            indent(w, |w| {
-                writeln!(
-                    w,
-                    "let mut writer = EmitterConfig::new().create_writer(writer);"
-                )?;
-                writeln!(
-                    w,
-                    "self.write_with_name(&mut writer, \"{}\", true)?;",
-                    st.name
-                )?;
-                writeln!(w, "Ok(())")
-            })?;
-            writeln!(w, "}}")?;
-            Ok(())
-        })?;
-        writeln!(w, "}}")?;
-
+        write_deserializer_impl(w, st, model)?;
         writeln!(w)?;
+        write_deserializer_trait_impl(w, st)?;
     }
 
     writeln!(w)?;
 
     write_lines(w, include_str!("../snippets/error.rs"))?;
+    writeln!(w)?;
+    write_lines(w, include_str!("../snippets/helpers.rs"))?;
 
     Ok(())
+}
+
+fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+    // do this recursively depth-first
+    if let Some(bt) = &st.base_type {
+        match model.structs.iter().find(|st| &st.name == bt) {
+            None => panic!("cannot resolve base type {} in {}", bt, st.name),
+            Some(st) => {
+                write_struct_cells(w, st, model)?;
+            }
+        }
+    }
+
+    for field in &st.fields {
+        let rust_type = get_rust_type(model, resolve_type(model, &field.field_type));
+        let cell_type = match &field.info {
+            FieldTypeInfo::Attribute(x) => match x {
+                AttributeType::Single => format!("SetOnce<{}>", rust_type),
+                AttributeType::Option => format!("SetOnce<{}>", rust_type),
+            },
+            FieldTypeInfo::Element(x) => match x {
+                ElementType::Single => format!("SetOnce<{}>", rust_type),
+                ElementType::Array => format!("Vec<{}>", rust_type),
+                ElementType::Option => format!("SetOnce<{}>", rust_type),
+                ElementType::Error(x) => panic!("{}", x),
+            },
+        };
+
+        writeln!(
+            w,
+            "let mut {} : {} = Default::default();",
+            get_rust_field_name(&field.name),
+            cell_type
+        )?;
+    }
+
+    Ok(())
+}
+
+fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+    // do this recursively depth-first
+    if let Some(bt) = &st.base_type {
+        match model.structs.iter().find(|st| &st.name == bt) {
+            None => panic!("cannot resolve base type {} in {}", bt, st.name),
+            Some(st) => {
+                write_struct_initializer(w, st, model)?;
+            }
+        }
+    }
+
+    for field in &st.fields {
+        let rust_var = get_rust_field_name(&field.name);
+        match &field.info {
+            FieldTypeInfo::Attribute(x) => match x {
+                AttributeType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
+                AttributeType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
+            },
+            FieldTypeInfo::Element(x) => match x {
+                ElementType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
+                ElementType::Array => writeln!(w, "{},", &rust_var),
+                ElementType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
+                ElementType::Error(x) => panic!("{}", x),
+            },
+        }?;
+    }
+
+    Ok(())
+}
+
+fn parse_attribute(model: &Model, attr: &Attribute) -> String {
+    match get_attr_transform(model, &attr.field_type) {
+        None => "attr.value.clone()".to_string(),
+        Some(x) => x.parse_from_string(),
+    }
+}
+
+fn write_attr_parse_loop(
+    w: &mut dyn Write,
+    attrs: &[Attribute],
+    model: &Model,
+) -> std::io::Result<()> {
+    writeln!(w, "for attr in attrs.iter() {{")?;
+    indent(w, |w| {
+        writeln!(w, "match attr.name.local_name.as_str() {{")?;
+        indent(w, |w| {
+            for attr in attrs {
+                writeln!(
+                    w,
+                    "\"{}\" => {}.set({})?,",
+                    &attr.name,
+                    get_rust_field_name(&attr.name),
+                    parse_attribute(model, attr)
+                )?;
+            }
+            writeln!(w, "_ => return Err(ReadError::UnknownAttribute)")
+        })?;
+        writeln!(w, "}};")
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> std::io::Result<()> {
+    let transform = get_elem_transform(model, &elem.field_type);
+
+    let tx: String = match transform {
+        ElementTransform::Struct => {
+            format!(
+                "{}::read(reader, &attributes, \"{}\")?",
+                elem.field_type.to_upper_camel_case(),
+                &elem.name
+            )
+        }
+        ElementTransform::Number => {
+            format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
+        }
+        ElementTransform::String => {
+            format!("read_string(reader, \"{}\")?", &elem.name)
+        }
+        ElementTransform::HexBytes => format!(
+            "parse_hex_bytes(&read_string(reader, \"{}\")?)?",
+            &elem.name
+        ),
+    };
+
+    match &elem.info {
+        ElementType::Single | ElementType::Option => {
+            writeln!(w, "{}.set({})?", get_rust_field_name(&elem.name), tx)
+        }
+        ElementType::Array => {
+            writeln!(w, "{}.push({})", get_rust_field_name(&elem.name), tx)
+        }
+        ElementType::Error(err) => {
+            panic!("{}", err)
+        }
+    }
+}
+
+fn write_elem_parse_loop(
+    w: &mut dyn Write,
+    elems: &[Element],
+    model: &Model,
+) -> std::io::Result<()> {
+    let start_elem_tag = {
+        if elems.is_empty() {
+            "xml::reader::XmlEvent::StartElement { .. }"
+        } else {
+            // are any of the elements structs?
+            let has_struct = elems
+                .iter()
+                .any(|e| match get_elem_transform(model, &e.field_type) {
+                    ElementTransform::Struct => true,
+                    ElementTransform::Number => false,
+                    ElementTransform::String => false,
+                    ElementTransform::HexBytes => false,
+                });
+
+            if has_struct {
+                "xml::reader::XmlEvent::StartElement { name, attributes, .. }"
+            } else {
+                "xml::reader::XmlEvent::StartElement { name, .. }"
+            }
+        }
+    };
+
+    writeln!(w, "loop {{")?;
+    indent(w, |w| {
+        writeln!(w, "match reader.next()? {{")?;
+        indent(w, |w| {
+            writeln!(w, "xml::reader::XmlEvent::EndElement {{ name }} => {{")?;
+            indent(w, |w| {
+                writeln!(w, "if name.local_name.as_str() == parent_tag {{")?;
+                indent(w, |w| {
+                    writeln!(w, "// try to construct struct")?;
+                    writeln!(w, "break;")
+                })?;
+                writeln!(w, "}} else {{")?;
+                indent(w, |w| {
+                    writeln!(w, "// TODO - make this more specific")?;
+                    writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                })?;
+                writeln!(w, "}}")
+            })?;
+            writeln!(w, "}}")?;
+            writeln!(w, "{} => {{", start_elem_tag)?;
+            indent(w, |w| {
+                if elems.is_empty() {
+                    indent(w, |w| {
+                        writeln!(w, "// this struct has no elements")?;
+                        writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                    })
+                } else {
+                    writeln!(w, "match name.local_name.as_str() {{")?;
+                    indent(w, |w| {
+                        for elem in elems {
+                            writeln!(w, "\"{}\" => {{", &elem.name)?;
+                            indent(w, |w| write_element_handler(w, model, elem))?;
+                            writeln!(w, "}}")?;
+                        }
+                        writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
+                    })?;
+                    writeln!(w, "}}")
+                }
+            })?;
+            writeln!(w, "}}")?;
+            writeln!(w, "// treat these events as errors")?;
+            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(
+                w,
+                "xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),"
+            )?;
+            writeln!(
+                w,
+                "xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),"
+            )?;
+            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(w, "// ignore these events")?;
+            writeln!(w, "xml::reader::XmlEvent::CData(_) => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::Comment(_) => {{}}")?;
+            writeln!(w, "xml::reader::XmlEvent::Whitespace(_) => {{}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
+    writeln!(w, "impl ReadXml for {} {{", st.name.to_upper_camel_case())?;
+    indent(w, |w| {
+        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "let mut reader = xml::reader::EventReader::new(r);")?;
+            writeln!(w)?;
+            writeln!(
+                w,
+                "match {}::read_top_level(&mut reader) {{",
+                st.name.to_upper_camel_case()
+            )?;
+            indent(w, |w| {
+                writeln!(w, "Ok(x) => Ok(x),")?;
+                writeln!(w, "Err(err) => {{")?;
+                indent(w, |w| {
+                    writeln!(w, "let pos = reader.position();")?;
+                    writeln!(
+                        w,
+                        "Err(ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
+                    )
+                })?;
+                writeln!(w, "}}")
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+    let (attr, elem) = split_fields(model, st);
+
+    writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
+    indent(w, |w| {
+        writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "// one variable for each attribute and element")?;
+            write_struct_cells(w, st, model)?;
+            writeln!(w)?;
+            write_attr_parse_loop(w, &attr, model)?;
+            writeln!(w)?;
+            write_elem_parse_loop(w, &elem, model)?;
+            writeln!(w)?;
+            writeln!(w, "// construct the type from the cells")?;
+            writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;
+            indent(w, |w| write_struct_initializer(w, st, model))?;
+            writeln!(w, "}})")
+        })?;
+        writeln!(w, "}}")?;
+        writeln!(w)?;
+        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "let attr = read_start_tag(reader, \"{}\")?;", &st.name)?;
+            writeln!(
+                w,
+                "{}::read(reader, &attr, \"{}\")",
+                st.name.to_upper_camel_case(),
+                &st.name
+            )
+        })?;
+        writeln!(w, "}}")?;
+        Ok(())
+    })?;
+    writeln!(w, "}}")
 }
 
 fn main() {
