@@ -279,11 +279,19 @@ impl ElementTransform {
                 )
             }
             ElementTransform::String => {
-                writeln!(w, "writer.write({}.as_str())?;", rust_name)
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    xsd_name, rust_name
+                )
             }
             ElementTransform::Number => {
                 writeln!(w, "let value = {}.to_string();", rust_name)?;
-                writeln!(w, "writer.write(value.as_str())?;")
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", value.as_str())?;",
+                    xsd_name
+                )
             }
             ElementTransform::HexBytes => {
                 writeln!(
@@ -291,7 +299,11 @@ impl ElementTransform {
                     "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
                     rust_name
                 )?;
-                writeln!(w, "writer.write(hex.as_str())?;")
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", hex.as_str())?;",
+                    xsd_name
+                )
             }
         }
     }
@@ -509,13 +521,9 @@ fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::
 
     writeln!(w)?;
 
-    writeln!(
-        w,
-        "impl WriteToXml for {} {{",
-        st.name.to_upper_camel_case()
-    )?;
+    writeln!(w, "impl WriteXml for {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn write_to_xml<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
+        writeln!(w, "fn write<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
         indent(w, |w| {
             writeln!(
                 w,
@@ -566,7 +574,7 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
 
     write_lines(w, include_str!("../snippets/error.rs"))?;
     writeln!(w)?;
-    write_lines(w, include_str!("../snippets/read_helpers.rs"))?;
+    write_lines(w, include_str!("../snippets/helpers.rs"))?;
 
     Ok(())
 }
@@ -795,13 +803,9 @@ fn write_elem_parse_loop(
 }
 
 fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
-    writeln!(
-        w,
-        "impl ReadFromXml for {} {{",
-        st.name.to_upper_camel_case()
-    )?;
+    writeln!(w, "impl ReadXml for {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read_from_xml<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "let mut reader = xml::reader::EventReader::new(r);")?;
             writeln!(w)?;

@@ -74,6 +74,16 @@ impl From<std::str::ParseBoolError> for ReadError {
     }
 }
 
+impl From<std::io::Error> for ErrorWithLocation {
+    fn from(_: std::io::Error) -> Self {
+        ErrorWithLocation {
+            err: ReadError::Io,
+            line: 0,
+            col: 0
+        }
+    }
+}
+
 impl std::fmt::Display for WriteError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {

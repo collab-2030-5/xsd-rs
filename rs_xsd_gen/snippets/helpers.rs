@@ -145,3 +145,17 @@ fn read_start_elem<R>(reader: &mut xml::reader::EventReader<R>, type_name: &str)
         }
     }
 }
+
+fn write_simple_tag<W>(
+    writer: &mut EventWriter<W>,
+    tag_name: &str,
+    data: &str,
+) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+{
+    writer.write(xml::writer::XmlEvent::start_element(tag_name))?;
+    writer.write(data)?;
+    writer.write(xml::writer::XmlEvent::end_element())
+}
+
