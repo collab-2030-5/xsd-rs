@@ -523,11 +523,11 @@ fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::
 
     writeln!(w, "impl WriteXml for {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn write<W>(&self, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
+        writeln!(w, "fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
         indent(w, |w| {
             writeln!(
                 w,
-                "let mut writer = EmitterConfig::new().create_writer(writer);"
+                "let mut writer = config.to_xml_rs().create_writer(writer);"
             )?;
             writeln!(
                 w,
@@ -547,6 +547,8 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     write_lines(w, include_str!("../snippets/use_statements.rs"))?;
     writeln!(w)?;
     write_lines(w, include_str!("../snippets/traits.rs"))?;
+    writeln!(w)?;
+    write_lines(w, include_str!("../snippets/config.rs"))?;
     writeln!(w)?;
 
     write_add_schema_attr(w, model)?;
