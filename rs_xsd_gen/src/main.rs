@@ -5,7 +5,7 @@ use indent_write::io::IndentWriter;
 use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
-use xml_model::{AttributeType, ElementType, FieldTypeInfo, Model, SimpleType, Struct};
+use xml_model::json::{AttributeType, ElementType, FieldTypeInfo, Model, SimpleType, Struct};
 
 #[derive(Debug, StructOpt)]
 #[structopt(

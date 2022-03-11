@@ -4,9 +4,9 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use std::str::FromStr;
-use xml_model::*;
 
 use structopt::StructOpt;
+use xml_model::json::*;
 
 pub(crate) mod parser;
 
