@@ -77,7 +77,6 @@ pub enum ElementType {
     Single,
     Array,
     Option,
-    Error(String),
 }
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize)]

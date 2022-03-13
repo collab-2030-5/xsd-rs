@@ -145,9 +145,6 @@ fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> st
                 ElementType::Single => rust_type,
                 ElementType::Array => format!("Vec<{}>", rust_type),
                 ElementType::Option => format!("Option<{}>", rust_type),
-                ElementType::Error(x) => {
-                    panic!("{}", x);
-                }
             },
         };
 
@@ -378,9 +375,6 @@ where
             indent(w, |w| transform.write_value(w, "elem", &elem.name))?;
             writeln!(w, "}}")?;
         }
-        ElementType::Error(s) => {
-            panic!("error: {}", s)
-        }
     }
 
     Ok(())
@@ -603,7 +597,6 @@ fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io:
                 ElementType::Single => format!("SetOnce<{}>", rust_type),
                 ElementType::Array => format!("Vec<{}>", rust_type),
                 ElementType::Option => format!("SetOnce<{}>", rust_type),
-                ElementType::Error(x) => panic!("{}", x),
             },
         };
 
@@ -640,7 +633,6 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
                 ElementType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
                 ElementType::Array => writeln!(w, "{},", &rust_var),
                 ElementType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
-                ElementType::Error(x) => panic!("{}", x),
             },
         }?;
     }
@@ -709,9 +701,6 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
         }
         ElementType::Array => {
             writeln!(w, "{}.push({})", get_rust_field_name(&elem.name), tx)
-        }
-        ElementType::Error(err) => {
-            panic!("{}", err)
         }
     }
 }
