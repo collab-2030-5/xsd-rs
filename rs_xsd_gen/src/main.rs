@@ -5,7 +5,9 @@ use indent_write::io::IndentWriter;
 use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
-use xml_model::json::{AttributeType, ElementType, FieldTypeInfo, Model, SimpleType, Struct};
+use xml_model::unresolved::{
+    AttributeType, ElementType, FieldTypeInfo, SimpleType, Struct, UnresolvedModel,
+};
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -59,7 +61,7 @@ fn resolve_basic_type(name: &str) -> Option<BasicType> {
     }
 }
 
-fn resolve_type(model: &Model, name: &str) -> Type {
+fn resolve_type(model: &UnresolvedModel, name: &str) -> Type {
     if let Some(basic) = resolve_basic_type(name) {
         return Type::Basic(basic);
     }
@@ -76,7 +78,7 @@ fn resolve_type(model: &Model, name: &str) -> Type {
     }
 }
 
-fn resolve_rust_simple_type(model: &Model, x: &SimpleType) -> String {
+fn resolve_rust_simple_type(model: &UnresolvedModel, x: &SimpleType) -> String {
     match x {
         SimpleType::Alias(x) => {
             let alias = model.simple_types.get(x).unwrap();
@@ -96,7 +98,7 @@ fn resolve_rust_simple_type(model: &Model, x: &SimpleType) -> String {
     }
 }
 
-fn get_rust_type(model: &Model, t: Type) -> String {
+fn get_rust_type(model: &UnresolvedModel, t: Type) -> String {
     match t {
         Type::Basic(x) => match x {
             BasicType::Boolean => "bool".to_string(),
@@ -117,7 +119,11 @@ fn get_rust_field_name(name: &str) -> String {
     }
 }
 
-fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> std::io::Result<()> {
+fn write_struct_fields(
+    writer: &mut dyn Write,
+    model: &UnresolvedModel,
+    st: &Struct,
+) -> std::io::Result<()> {
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
             None => panic!("cannot resolve base type {} in {}", bt, st.name),
@@ -169,7 +175,7 @@ struct Element {
     info: ElementType,
 }
 
-fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
+fn split_fields(model: &UnresolvedModel, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
     let mut attrs = Vec::new();
     let mut elems = Vec::new();
 
@@ -225,7 +231,7 @@ impl AttributeTransform {
     }
 }
 
-fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransform> {
+fn get_attr_transform(model: &UnresolvedModel, attr_type: &str) -> Option<AttributeTransform> {
     match attr_type {
         "xs:anyURI" => None,
         _ => {
@@ -304,7 +310,7 @@ impl ElementTransform {
     }
 }
 
-fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform {
+fn get_simple_type_transform(model: &UnresolvedModel, st: &SimpleType) -> ElementTransform {
     match st {
         SimpleType::Alias(x) => {
             get_simple_type_transform(model, model.simple_types.get(x).unwrap())
@@ -323,7 +329,7 @@ fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform
     }
 }
 
-fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
+fn get_elem_transform(model: &UnresolvedModel, elem_type: &str) -> ElementTransform {
     match elem_type {
         "xs:string" => ElementTransform::String,
         "xs:anyURI" => ElementTransform::String,
@@ -343,7 +349,7 @@ fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
     }
 }
 
-fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result<()>
+fn write_element<W>(w: &mut W, model: &UnresolvedModel, elem: &Element) -> std::io::Result<()>
 where
     W: Write,
 {
@@ -377,7 +383,7 @@ where
     Ok(())
 }
 
-fn write_attribute<W>(w: &mut W, model: &Model, att: &Attribute) -> std::io::Result<()>
+fn write_attribute<W>(w: &mut W, model: &UnresolvedModel, att: &Attribute) -> std::io::Result<()>
 where
     W: Write,
 {
@@ -440,7 +446,7 @@ fn write_lines(w: &mut dyn Write, s: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-fn write_add_schema_attr(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+fn write_add_schema_attr(w: &mut dyn Write, model: &UnresolvedModel) -> std::io::Result<()> {
     let target_ns = model.target_ns.as_ref().expect("requires target namespace");
 
     writeln!(
@@ -465,7 +471,11 @@ fn write_add_schema_attr(w: &mut dyn Write, model: &Model) -> std::io::Result<()
     writeln!(w, "}}")
 }
 
-fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_serializers(
+    w: &mut dyn Write,
+    st: &Struct,
+    model: &UnresolvedModel,
+) -> std::io::Result<()> {
     // collect all the attribute fields
     let (attributes, elements) = split_fields(model, st);
 
@@ -533,7 +543,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::
     writeln!(w, "}}")
 }
 
-fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+fn write_model(w: &mut dyn Write, model: &UnresolvedModel) -> std::io::Result<()> {
     // write all the snippets
     write_lines(w, include_str!("../snippets/use_statements.rs"))?;
     writeln!(w)?;
@@ -572,7 +582,11 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     Ok(())
 }
 
-fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_struct_cells(
+    w: &mut dyn Write,
+    st: &Struct,
+    model: &UnresolvedModel,
+) -> std::io::Result<()> {
     // do this recursively depth-first
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
@@ -608,7 +622,11 @@ fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io:
     Ok(())
 }
 
-fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_struct_initializer(
+    w: &mut dyn Write,
+    st: &Struct,
+    model: &UnresolvedModel,
+) -> std::io::Result<()> {
     // do this recursively depth-first
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
@@ -637,7 +655,7 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
     Ok(())
 }
 
-fn parse_attribute(model: &Model, attr: &Attribute) -> String {
+fn parse_attribute(model: &UnresolvedModel, attr: &Attribute) -> String {
     match get_attr_transform(model, &attr.field_type) {
         None => "attr.value.clone()".to_string(),
         Some(x) => x.parse_from_string(),
@@ -647,7 +665,7 @@ fn parse_attribute(model: &Model, attr: &Attribute) -> String {
 fn write_attr_parse_loop(
     w: &mut dyn Write,
     attrs: &[Attribute],
-    model: &Model,
+    model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     writeln!(w, "for attr in attrs.iter() {{")?;
     indent(w, |w| {
@@ -669,7 +687,11 @@ fn write_attr_parse_loop(
     writeln!(w, "}}")
 }
 
-fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> std::io::Result<()> {
+fn write_element_handler(
+    w: &mut dyn Write,
+    model: &UnresolvedModel,
+    elem: &Element,
+) -> std::io::Result<()> {
     let transform = get_elem_transform(model, &elem.field_type);
 
     let tx: String = match transform {
@@ -705,7 +727,7 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
 fn write_elem_parse_loop(
     w: &mut dyn Write,
     elems: &[Element],
-    model: &Model,
+    model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     let start_elem_tag = {
         if elems.is_empty() {
@@ -821,7 +843,11 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
     writeln!(w, "}}")
 }
 
-fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_deserializer_impl(
+    w: &mut dyn Write,
+    st: &Struct,
+    model: &UnresolvedModel,
+) -> std::io::Result<()> {
     let (attr, elem) = split_fields(model, st);
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
@@ -861,7 +887,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
 fn main() {
     let opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input).unwrap();
-    let model: Model = serde_json::from_str(&input).unwrap();
+    let model: UnresolvedModel = serde_json::from_str(&input).unwrap();
 
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);

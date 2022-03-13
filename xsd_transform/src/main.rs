@@ -6,7 +6,8 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use structopt::StructOpt;
-use xml_model::json::*;
+use xml_model::unresolved::*;
+use xml_model::{NumericConstraint, StringConstraint};
 
 pub(crate) mod parser;
 
@@ -34,7 +35,7 @@ fn main() {
     serde_json::to_writer_pretty(writer, &model).unwrap();
 }
 
-fn transform(path: &str) -> Model {
+fn transform(path: &str) -> UnresolvedModel {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
@@ -64,7 +65,7 @@ fn transform(path: &str) -> Model {
         simple_types.insert(k.clone(), SimpleType::Alias(v.clone()));
     }
 
-    Model {
+    UnresolvedModel {
         xsd_ns: entity.xsd_ns.map(|x| Namespace {
             name: x.name().map(|x| x.to_string()),
             uri: x.uri().to_string(),

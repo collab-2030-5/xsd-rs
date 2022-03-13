@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -9,22 +10,11 @@ pub struct Namespace {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Model {
+pub struct UnresolvedModel {
     pub xsd_ns: Option<Namespace>,
     pub target_ns: Option<Namespace>,
     pub simple_types: HashMap<String, SimpleType>,
     pub structs: Vec<Struct>,
-}
-
-#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize)]
-pub struct StringConstraint {
-    pub max_length: Option<usize>,
-}
-
-#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize)]
-pub struct NumericConstraint<T> {
-    pub min: Option<T>,
-    pub max: Option<T>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
