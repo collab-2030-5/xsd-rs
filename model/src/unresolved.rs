@@ -17,12 +17,6 @@ pub struct UnresolvedModel {
     pub structs: Vec<Struct>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Variant {
-    pub comment: Option<String>,
-    pub name: String,
-}
-
 // maps to simple types with possible constraints
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleType {
