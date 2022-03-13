@@ -84,7 +84,6 @@ fn resolve_rust_simple_type(model: &Model, x: &SimpleType) -> String {
         }
         SimpleType::HexByte => "u8".to_string(),
         SimpleType::HexBytes(_) => "Vec<u8>".to_string(),
-        SimpleType::Enum(_) => unimplemented!(),
         SimpleType::String(_) => "String".to_string(),
         SimpleType::I8(_) => "i8".to_string(),
         SimpleType::U8(_) => "u8".to_string(),
@@ -239,7 +238,6 @@ fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransfo
                     SimpleType::Alias(x) => get_attr_transform(model, x),
                     SimpleType::HexByte => Some(AttributeTransform::Number),
                     SimpleType::HexBytes(_) => None,
-                    SimpleType::Enum(_) => unimplemented!(),
                     SimpleType::String(_) => None,
                     SimpleType::I8(_) => Some(AttributeTransform::Number),
                     SimpleType::U8(_) => Some(AttributeTransform::Number),
@@ -313,7 +311,6 @@ fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform
         }
         SimpleType::HexByte => ElementTransform::Number,
         SimpleType::HexBytes(_) => ElementTransform::HexBytes,
-        SimpleType::Enum(_) => unimplemented!(),
         SimpleType::String(_) => ElementTransform::String,
         SimpleType::I8(_) => ElementTransform::Number,
         SimpleType::U8(_) => ElementTransform::Number,

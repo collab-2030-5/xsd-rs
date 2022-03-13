@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use std::hash::Hash;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Namespace {
@@ -34,14 +33,6 @@ pub struct Variant {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Enumeration<T>
-where
-    T: Copy + Clone + Eq + Hash,
-{
-    pub variants: HashMap<T, String>,
-}
-
 // maps to simple types with possible constraints
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleType {
@@ -51,8 +42,6 @@ pub enum SimpleType {
     HexByte,
     /// multiple bytes with a maximum length
     HexBytes(usize),
-    /// number -> enum
-    Enum(Enumeration<u8>),
     String(StringConstraint),
     I8(NumericConstraint<i8>),
     U8(NumericConstraint<u8>),
