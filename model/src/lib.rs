@@ -13,3 +13,21 @@ pub struct NumericConstraint<T> {
     pub min: Option<T>,
     pub max: Option<T>,
 }
+
+/// maps to simple types with possible constraints
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum SimpleType {
+    /// a single byte encoded as a hex (2 characters e.g. "FF")
+    HexByte,
+    /// multiple bytes with a maximum length
+    HexBytes(usize),
+    String(StringConstraint),
+    I8(NumericConstraint<i8>),
+    U8(NumericConstraint<u8>),
+    I16(NumericConstraint<i16>),
+    U16(NumericConstraint<u16>),
+    I32(NumericConstraint<i32>),
+    U32(NumericConstraint<u32>),
+    I64(NumericConstraint<i64>),
+    U64(NumericConstraint<u64>),
+}

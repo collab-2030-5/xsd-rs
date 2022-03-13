@@ -13,28 +13,16 @@ pub struct Namespace {
 pub struct UnresolvedModel {
     pub xsd_ns: Option<Namespace>,
     pub target_ns: Option<Namespace>,
-    pub simple_types: HashMap<String, SimpleType>,
-    pub structs: Vec<Struct>,
+    pub simple_types: HashMap<String, UnresolvedSimpleType>,
+    pub structs: Vec<UnresolvedStruct>,
 }
 
 // maps to simple types with possible constraints
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum SimpleType {
+pub enum UnresolvedSimpleType {
     /// alias for another simple type
-    Alias(String),
-    /// a single byte encoded as a hex (2 characters e.g. "FF")
-    HexByte,
-    /// multiple bytes with a maximum length
-    HexBytes(usize),
-    String(StringConstraint),
-    I8(NumericConstraint<i8>),
-    U8(NumericConstraint<u8>),
-    I16(NumericConstraint<i16>),
-    U16(NumericConstraint<u16>),
-    I32(NumericConstraint<i32>),
-    U32(NumericConstraint<u32>),
-    I64(NumericConstraint<i64>),
-    U64(NumericConstraint<u64>),
+    Unresolved(String),
+    Resolved(SimpleType),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,7 +53,7 @@ pub enum FieldTypeInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Struct {
+pub struct UnresolvedStruct {
     pub comment: Option<String>,
     pub name: String,
     /// single optional base struct

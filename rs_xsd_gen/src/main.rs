@@ -6,8 +6,10 @@ use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
 use xml_model::unresolved::{
-    AttributeType, ElementType, FieldTypeInfo, SimpleType, Struct, UnresolvedModel,
+    AttributeType, ElementType, FieldTypeInfo, UnresolvedModel, UnresolvedSimpleType,
+    UnresolvedStruct,
 };
+use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -31,7 +33,7 @@ enum BasicType {
 
 enum Type {
     Basic(BasicType),
-    Simple(SimpleType),
+    Simple(UnresolvedSimpleType),
     Struct(String),
 }
 
@@ -78,23 +80,25 @@ fn resolve_type(model: &UnresolvedModel, name: &str) -> Type {
     }
 }
 
-fn resolve_rust_simple_type(model: &UnresolvedModel, x: &SimpleType) -> String {
+fn resolve_rust_simple_type(model: &UnresolvedModel, x: &UnresolvedSimpleType) -> String {
     match x {
-        SimpleType::Alias(x) => {
+        UnresolvedSimpleType::Unresolved(x) => {
             let alias = model.simple_types.get(x).unwrap();
             resolve_rust_simple_type(model, alias)
         }
-        SimpleType::HexByte => "u8".to_string(),
-        SimpleType::HexBytes(_) => "Vec<u8>".to_string(),
-        SimpleType::String(_) => "String".to_string(),
-        SimpleType::I8(_) => "i8".to_string(),
-        SimpleType::U8(_) => "u8".to_string(),
-        SimpleType::I16(_) => "i16".to_string(),
-        SimpleType::U16(_) => "u16".to_string(),
-        SimpleType::I32(_) => "i32".to_string(),
-        SimpleType::U32(_) => "u32".to_string(),
-        SimpleType::I64(_) => "i64".to_string(),
-        SimpleType::U64(_) => "u64".to_string(),
+        UnresolvedSimpleType::Resolved(x) => match x {
+            SimpleType::HexByte => "u8".to_string(),
+            SimpleType::HexBytes(_) => "Vec<u8>".to_string(),
+            SimpleType::String(_) => "String".to_string(),
+            SimpleType::I8(_) => "i8".to_string(),
+            SimpleType::U8(_) => "u8".to_string(),
+            SimpleType::I16(_) => "i16".to_string(),
+            SimpleType::U16(_) => "u16".to_string(),
+            SimpleType::I32(_) => "i32".to_string(),
+            SimpleType::U32(_) => "u32".to_string(),
+            SimpleType::I64(_) => "i64".to_string(),
+            SimpleType::U64(_) => "u64".to_string(),
+        },
     }
 }
 
@@ -122,7 +126,7 @@ fn get_rust_field_name(name: &str) -> String {
 fn write_struct_fields(
     writer: &mut dyn Write,
     model: &UnresolvedModel,
-    st: &Struct,
+    st: &UnresolvedStruct,
 ) -> std::io::Result<()> {
     if let Some(bt) = &st.base_type {
         match model.structs.iter().find(|st| &st.name == bt) {
@@ -175,7 +179,7 @@ struct Element {
     info: ElementType,
 }
 
-fn split_fields(model: &UnresolvedModel, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
+fn split_fields(model: &UnresolvedModel, st: &UnresolvedStruct) -> (Vec<Attribute>, Vec<Element>) {
     let mut attrs = Vec::new();
     let mut elems = Vec::new();
 
@@ -241,18 +245,20 @@ fn get_attr_transform(model: &UnresolvedModel, attr_type: &str) -> Option<Attrib
                     panic!("unknown attribute type: {}", attr_type)
                 }
                 Some(st) => match st {
-                    SimpleType::Alias(x) => get_attr_transform(model, x),
-                    SimpleType::HexByte => Some(AttributeTransform::Number),
-                    SimpleType::HexBytes(_) => None,
-                    SimpleType::String(_) => None,
-                    SimpleType::I8(_) => Some(AttributeTransform::Number),
-                    SimpleType::U8(_) => Some(AttributeTransform::Number),
-                    SimpleType::I16(_) => Some(AttributeTransform::Number),
-                    SimpleType::U16(_) => Some(AttributeTransform::Number),
-                    SimpleType::I32(_) => Some(AttributeTransform::Number),
-                    SimpleType::U32(_) => Some(AttributeTransform::Number),
-                    SimpleType::I64(_) => Some(AttributeTransform::Number),
-                    SimpleType::U64(_) => Some(AttributeTransform::Number),
+                    UnresolvedSimpleType::Unresolved(alias) => get_attr_transform(model, alias),
+                    UnresolvedSimpleType::Resolved(x) => match x {
+                        SimpleType::HexByte => Some(AttributeTransform::Number),
+                        SimpleType::HexBytes(_) => None,
+                        SimpleType::String(_) => None,
+                        SimpleType::I8(_) => Some(AttributeTransform::Number),
+                        SimpleType::U8(_) => Some(AttributeTransform::Number),
+                        SimpleType::I16(_) => Some(AttributeTransform::Number),
+                        SimpleType::U16(_) => Some(AttributeTransform::Number),
+                        SimpleType::I32(_) => Some(AttributeTransform::Number),
+                        SimpleType::U32(_) => Some(AttributeTransform::Number),
+                        SimpleType::I64(_) => Some(AttributeTransform::Number),
+                        SimpleType::U64(_) => Some(AttributeTransform::Number),
+                    },
                 },
             }
         }
@@ -310,22 +316,27 @@ impl ElementTransform {
     }
 }
 
-fn get_simple_type_transform(model: &UnresolvedModel, st: &SimpleType) -> ElementTransform {
+fn get_simple_type_transform(
+    model: &UnresolvedModel,
+    st: &UnresolvedSimpleType,
+) -> ElementTransform {
     match st {
-        SimpleType::Alias(x) => {
-            get_simple_type_transform(model, model.simple_types.get(x).unwrap())
+        UnresolvedSimpleType::Unresolved(alias) => {
+            get_simple_type_transform(model, model.simple_types.get(alias).unwrap())
         }
-        SimpleType::HexByte => ElementTransform::Number,
-        SimpleType::HexBytes(_) => ElementTransform::HexBytes,
-        SimpleType::String(_) => ElementTransform::String,
-        SimpleType::I8(_) => ElementTransform::Number,
-        SimpleType::U8(_) => ElementTransform::Number,
-        SimpleType::I16(_) => ElementTransform::Number,
-        SimpleType::U16(_) => ElementTransform::Number,
-        SimpleType::I32(_) => ElementTransform::Number,
-        SimpleType::U32(_) => ElementTransform::Number,
-        SimpleType::I64(_) => ElementTransform::Number,
-        SimpleType::U64(_) => ElementTransform::Number,
+        UnresolvedSimpleType::Resolved(x) => match x {
+            SimpleType::HexByte => ElementTransform::Number,
+            SimpleType::HexBytes(_) => ElementTransform::HexBytes,
+            SimpleType::String(_) => ElementTransform::String,
+            SimpleType::I8(_) => ElementTransform::Number,
+            SimpleType::U8(_) => ElementTransform::Number,
+            SimpleType::I16(_) => ElementTransform::Number,
+            SimpleType::U16(_) => ElementTransform::Number,
+            SimpleType::I32(_) => ElementTransform::Number,
+            SimpleType::U32(_) => ElementTransform::Number,
+            SimpleType::I64(_) => ElementTransform::Number,
+            SimpleType::U64(_) => ElementTransform::Number,
+        },
     }
 }
 
@@ -473,7 +484,7 @@ fn write_add_schema_attr(w: &mut dyn Write, model: &UnresolvedModel) -> std::io:
 
 fn write_serializers(
     w: &mut dyn Write,
-    st: &Struct,
+    st: &UnresolvedStruct,
     model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     // collect all the attribute fields
@@ -584,7 +595,7 @@ fn write_model(w: &mut dyn Write, model: &UnresolvedModel) -> std::io::Result<()
 
 fn write_struct_cells(
     w: &mut dyn Write,
-    st: &Struct,
+    st: &UnresolvedStruct,
     model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     // do this recursively depth-first
@@ -624,7 +635,7 @@ fn write_struct_cells(
 
 fn write_struct_initializer(
     w: &mut dyn Write,
-    st: &Struct,
+    st: &UnresolvedStruct,
     model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     // do this recursively depth-first
@@ -812,7 +823,7 @@ fn write_elem_parse_loop(
     writeln!(w, "}}")
 }
 
-fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
+fn write_deserializer_trait_impl(w: &mut dyn Write, st: &UnresolvedStruct) -> std::io::Result<()> {
     writeln!(w, "impl ReadXml for {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
         writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
@@ -845,7 +856,7 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
 
 fn write_deserializer_impl(
     w: &mut dyn Write,
-    st: &Struct,
+    st: &UnresolvedStruct,
     model: &UnresolvedModel,
 ) -> std::io::Result<()> {
     let (attr, elem) = split_fields(model, st);

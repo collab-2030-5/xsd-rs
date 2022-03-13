@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use structopt::StructOpt;
 use xml_model::unresolved::*;
-use xml_model::{NumericConstraint, StringConstraint};
+use xml_model::{NumericConstraint, SimpleType, StringConstraint};
 
 pub(crate) mod parser;
 
@@ -62,7 +62,7 @@ fn transform(path: &str) -> UnresolvedModel {
 
     // add these aliases to the simple types list
     for (k, v) in base_structs.iter() {
-        simple_types.insert(k.clone(), SimpleType::Alias(v.clone()));
+        simple_types.insert(k.clone(), UnresolvedSimpleType::Unresolved(v.clone()));
     }
 
     UnresolvedModel {
@@ -173,13 +173,13 @@ fn extract_fields(st: &parser::types::Struct) -> Vec<UnresolvedField> {
         .collect()
 }
 
-fn extract_structs(entity: &RsFile) -> Vec<Struct> {
+fn extract_structs(entity: &RsFile) -> Vec<UnresolvedStruct> {
     let mut structs = Vec::new();
     for st in entity.types.iter() {
         if let RsEntity::Struct(x) = st {
             let base_type = extract_base_type(x);
             let fields = extract_fields(x);
-            structs.push(Struct {
+            structs.push(UnresolvedStruct {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 base_type,
@@ -191,7 +191,7 @@ fn extract_structs(entity: &RsFile) -> Vec<Struct> {
 }
 
 // simple types can only reference each other
-fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
+fn resolve_simple_types(model: &RsFile) -> HashMap<String, UnresolvedSimpleType> {
     let input: Vec<TupleStruct> = model
         .types
         .iter()
@@ -214,12 +214,12 @@ fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
                     Some(base) => {
                         // try to resolve by going 1 level down
                         let resolved = try_resolve_basic(base).unwrap();
-                        output.insert(ts.name.clone(), resolved);
+                        output.insert(ts.name.clone(), UnresolvedSimpleType::Resolved(resolved));
                     }
                 }
             }
             Some(st) => {
-                output.insert(ts.name.clone(), st);
+                output.insert(ts.name.clone(), UnresolvedSimpleType::Resolved(st));
             }
         }
     }
