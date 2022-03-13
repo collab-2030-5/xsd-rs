@@ -38,7 +38,7 @@ pub enum SimpleType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StructField {
+pub struct UnresolvedField {
     pub comment: Option<String>,
     pub name: String,
     pub field_type: String,
@@ -70,5 +70,5 @@ pub struct Struct {
     pub name: String,
     /// single optional base struct
     pub base_type: Option<String>,
-    pub fields: Vec<StructField>,
+    pub fields: Vec<UnresolvedField>,
 }

@@ -138,12 +138,12 @@ fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
     }
 }
 
-fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
+fn extract_fields(st: &parser::types::Struct) -> Vec<UnresolvedField> {
     st.fields
         .borrow()
         .iter()
         .filter_map(|x| match x.source {
-            StructFieldSource::Attribute => Some(StructField {
+            StructFieldSource::Attribute => Some(UnresolvedField {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
@@ -159,7 +159,7 @@ fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
                     Some(x) => x,
                 };
 
-                Some(StructField {
+                Some(UnresolvedField {
                     comment: x.comment.clone(),
                     name: x.name.clone(),
                     field_type: x.type_name.clone(),
