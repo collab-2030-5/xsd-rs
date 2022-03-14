@@ -43,16 +43,10 @@ fn transform(path: &str) -> UnresolvedModel {
     let mut structs = extract_structs(&entity);
 
     // find struct that are mis-classified - some are just inherited from basic types
-    let base_structs: HashMap<String, String> = structs
+    let base_structs: HashMap<String, SimpleType> = structs
         .iter()
         .filter_map(|x| match &x.base_type {
-            Some(bt) => {
-                if simple_types.contains_key(bt) {
-                    Some((x.name.clone(), bt.clone()))
-                } else {
-                    None
-                }
-            }
+            Some(bt) => simple_types.get(bt).map(|st| (x.name.clone(), st.clone())),
             None => None,
         })
         .collect();
@@ -62,7 +56,7 @@ fn transform(path: &str) -> UnresolvedModel {
 
     // add these aliases to the simple types list
     for (k, v) in base_structs.iter() {
-        simple_types.insert(k.clone(), UnresolvedSimpleType::Unresolved(v.clone()));
+        simple_types.insert(k.clone(), v.clone());
     }
 
     UnresolvedModel {
@@ -191,7 +185,7 @@ fn extract_structs(entity: &RsFile) -> Vec<UnresolvedStruct> {
 }
 
 // simple types can only reference each other
-fn resolve_simple_types(model: &RsFile) -> HashMap<String, UnresolvedSimpleType> {
+fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
     let input: Vec<TupleStruct> = model
         .types
         .iter()
@@ -214,12 +208,12 @@ fn resolve_simple_types(model: &RsFile) -> HashMap<String, UnresolvedSimpleType>
                     Some(base) => {
                         // try to resolve by going 1 level down
                         let resolved = try_resolve_basic(base).unwrap();
-                        output.insert(ts.name.clone(), UnresolvedSimpleType::Resolved(resolved));
+                        output.insert(ts.name.clone(), resolved);
                     }
                 }
             }
             Some(st) => {
-                output.insert(ts.name.clone(), UnresolvedSimpleType::Resolved(st));
+                output.insert(ts.name.clone(), st);
             }
         }
     }

@@ -13,16 +13,8 @@ pub struct Namespace {
 pub struct UnresolvedModel {
     pub xsd_ns: Option<Namespace>,
     pub target_ns: Option<Namespace>,
-    pub simple_types: HashMap<String, UnresolvedSimpleType>,
+    pub simple_types: HashMap<String, SimpleType>,
     pub structs: Vec<UnresolvedStruct>,
-}
-
-// maps to simple types with possible constraints
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum UnresolvedSimpleType {
-    /// alias for another simple type
-    Unresolved(String),
-    Resolved(SimpleType),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
