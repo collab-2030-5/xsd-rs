@@ -25,6 +25,8 @@ pub struct NumericConstraint<T> {
 /// maps to simple types with possible constraints
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SimpleType {
+    /// true or false
+    Boolean,
     /// a single byte encoded as a hex (2 characters e.g. "FF")
     HexByte,
     /// multiple bytes with a maximum length

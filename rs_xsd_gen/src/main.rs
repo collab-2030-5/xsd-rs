@@ -81,6 +81,7 @@ fn resolve_type(model: &UnresolvedModel, name: &str) -> Type {
 
 fn resolve_rust_simple_type(x: &SimpleType) -> String {
     match x {
+        SimpleType::Boolean => "bool".to_string(),
         SimpleType::HexByte => "u8".to_string(),
         SimpleType::HexBytes(_) => "Vec<u8>".to_string(),
         SimpleType::String(_) => "String".to_string(),
@@ -238,6 +239,7 @@ fn get_attr_transform(model: &UnresolvedModel, attr_type: &str) -> Option<Attrib
                     panic!("unknown attribute type: {}", attr_type)
                 }
                 Some(st) => match st {
+                    SimpleType::Boolean => Some(AttributeTransform::Number),
                     SimpleType::HexByte => Some(AttributeTransform::Number),
                     SimpleType::HexBytes(_) => None,
                     SimpleType::String(_) => None,
@@ -308,6 +310,7 @@ impl ElementTransform {
 
 fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
     match st {
+        SimpleType::Boolean => ElementTransform::Number,
         SimpleType::HexByte => ElementTransform::Number,
         SimpleType::HexBytes(_) => ElementTransform::HexBytes,
         SimpleType::String(_) => ElementTransform::String,
@@ -881,9 +884,15 @@ fn main() {
     let opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input).unwrap();
     let model: UnresolvedModel = serde_json::from_str(&input).unwrap();
+    let model = model.resolve();
 
+    println!("{:#?}", model);
+
+    /*
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);
 
     write_model(&mut writer, &model).unwrap();
+
+     */
 }

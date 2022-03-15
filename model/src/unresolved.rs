@@ -51,6 +51,8 @@ pub struct UnresolvedStruct {
 
 fn resolve_basic(name: &str) -> Option<SimpleType> {
     match name {
+        "xs:boolean" => Some(SimpleType::Boolean),
+        "xs:anyURI" => Some(SimpleType::String(StringConstraint::default())),
         "xs:hexBinary" => Some(SimpleType::HexBytes(None)),
         "xs:string" => Some(SimpleType::String(StringConstraint::default())),
         "xs:byte" => Some(SimpleType::I8(NumericConstraint::default())),
@@ -61,7 +63,12 @@ fn resolve_basic(name: &str) -> Option<SimpleType> {
         "xs:unsignedInt" => Some(SimpleType::U32(NumericConstraint::default())),
         "xs:long" => Some(SimpleType::I64(NumericConstraint::default())),
         "xs:unsignedLong" => Some(SimpleType::U64(NumericConstraint::default())),
-        _ => None,
+        _ => {
+            if name.starts_with("xs:") {
+                panic!("unhandled primitive: {}", name);
+            }
+            None
+        }
     }
 }
 
@@ -127,6 +134,46 @@ impl UnresolvedField {
     }
 }
 
+impl UnresolvedStruct {
+    fn resolve(
+        &self,
+        structs: &HashMap<String, Rc<Struct>>,
+        simple_types: &HashMap<String, SimpleType>,
+    ) -> Option<std::rc::Rc<Struct>> {
+        // resolve the base class
+        let base_type = if let Some(base) = &self.base_type {
+            match structs.get(base) {
+                None => {
+                    // base class isn't resolved yet, can't resolve this class
+                    return None;
+                }
+                Some(x) => Some(x.clone()),
+            }
+        } else {
+            None
+        };
+
+        // resolve the fields
+        let mut fields: Vec<Field> = Vec::new();
+        for field in self.fields.iter() {
+            match field.resolve(&structs, simple_types) {
+                None => {
+                    // can't resolve field yet
+                    return None;
+                }
+                Some(x) => fields.push(x),
+            }
+        }
+
+        Some(Rc::new(Struct {
+            comment: self.comment.clone(),
+            name: self.name.clone(),
+            base_type,
+            fields,
+        }))
+    }
+}
+
 impl UnresolvedModel {
     pub fn resolve(&self) -> crate::resolved::Model {
         let mut input: HashMap<String, UnresolvedStruct> = self
@@ -143,41 +190,14 @@ impl UnresolvedModel {
                 };
             }
 
-            if let Some(x) = input.iter().find_map(|(_, v)| {
-                // resolve the base class
-                let base_type = if let Some(base) = &v.base_type {
-                    match output.get(base) {
-                        None => {
-                            // base class isn't resolved yet, can't resolve this class
-                            return None;
-                        }
-                        Some(x) => Some(x.clone()),
-                    }
-                } else {
-                    None
-                };
-
-                // resolve the fields
-                let mut fields: Vec<Field> = Vec::new();
-                for field in v.fields.iter() {
-                    match field.resolve(&output, &self.simple_types) {
-                        None => {
-                            // can't resolve field yet
-                            return None;
-                        }
-                        Some(x) => fields.push(x),
-                    }
-                }
-
-                Some(Rc::new(Struct {
-                    comment: v.comment.clone(),
-                    name: v.name.clone(),
-                    base_type,
-                    fields,
-                }))
-            }) {
+            if let Some(x) = input
+                .iter()
+                .find_map(|(_, v)| v.resolve(&output, &self.simple_types))
+            {
                 input.remove(&x.name);
                 output.insert(x.name.clone(), x);
+            } else {
+                panic!("cannot resolve anything else");
             }
         }
     }
