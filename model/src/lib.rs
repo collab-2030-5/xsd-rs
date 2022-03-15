@@ -1,7 +1,15 @@
+/// resolved version of the model suitable for code-gen
+pub mod resolved;
 /// raw JSON representation of the model
 pub mod unresolved;
 
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Namespace {
+    pub name: Option<String>,
+    pub uri: String,
+}
 
 #[derive(Default, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct StringConstraint {
@@ -20,7 +28,7 @@ pub enum SimpleType {
     /// a single byte encoded as a hex (2 characters e.g. "FF")
     HexByte,
     /// multiple bytes with a maximum length
-    HexBytes(usize),
+    HexBytes(Option<usize>),
     String(StringConstraint),
     I8(NumericConstraint<i8>),
     U8(NumericConstraint<u8>),

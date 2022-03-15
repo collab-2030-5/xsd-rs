@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use structopt::StructOpt;
 use xml_model::unresolved::*;
-use xml_model::{NumericConstraint, SimpleType, StringConstraint};
+use xml_model::{Namespace, NumericConstraint, SimpleType, StringConstraint};
 
 pub(crate) mod parser;
 
@@ -127,7 +127,7 @@ fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
 
     match modifiers.as_slice() {
         [] => None,
-        [x] => Some(x.clone()),
+        [x] => Some(*x),
         _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
     }
 }
@@ -265,7 +265,7 @@ fn try_resolve_basic(ts: &TupleStruct) -> Option<SimpleType> {
             match &ts.facets[0].facet_type {
                 FacetType::MaxLength(x) => match x.parse::<usize>().unwrap() {
                     1 => Some(SimpleType::HexByte),
-                    len => Some(SimpleType::HexBytes(len)),
+                    len => Some(SimpleType::HexBytes(Some(len))),
                 },
                 ft => panic!("Unexpected Facet type for xs:hexBinary: {:?}", ft),
             }

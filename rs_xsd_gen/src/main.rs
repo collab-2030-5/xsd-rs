@@ -201,7 +201,7 @@ fn split_fields(model: &UnresolvedModel, st: &UnresolvedStruct) -> (Vec<Attribut
                 let x = Element {
                     name: field.name.clone(),
                     field_type: field.field_type.clone(),
-                    info: x.clone(),
+                    info: *x,
                 };
                 elems.push(x);
             }
