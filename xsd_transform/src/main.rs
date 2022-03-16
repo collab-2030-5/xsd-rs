@@ -4,9 +4,10 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use std::str::FromStr;
-use xml_model::*;
 
 use structopt::StructOpt;
+use xml_model::unresolved::*;
+use xml_model::{Namespace, NumericConstraint, SimpleType, StringConstraint};
 
 pub(crate) mod parser;
 
@@ -34,7 +35,7 @@ fn main() {
     serde_json::to_writer_pretty(writer, &model).unwrap();
 }
 
-fn transform(path: &str) -> Model {
+fn transform(path: &str) -> UnresolvedModel {
     //  parse using the underlying library
     let entity = parser::parse(path).unwrap();
 
@@ -42,16 +43,10 @@ fn transform(path: &str) -> Model {
     let mut structs = extract_structs(&entity);
 
     // find struct that are mis-classified - some are just inherited from basic types
-    let base_structs: HashMap<String, String> = structs
+    let base_structs: HashMap<String, SimpleType> = structs
         .iter()
         .filter_map(|x| match &x.base_type {
-            Some(bt) => {
-                if simple_types.contains_key(bt) {
-                    Some((x.name.clone(), bt.clone()))
-                } else {
-                    None
-                }
-            }
+            Some(bt) => simple_types.get(bt).map(|st| (x.name.clone(), st.clone())),
             None => None,
         })
         .collect();
@@ -61,10 +56,10 @@ fn transform(path: &str) -> Model {
 
     // add these aliases to the simple types list
     for (k, v) in base_structs.iter() {
-        simple_types.insert(k.clone(), SimpleType::Alias(v.clone()));
+        simple_types.insert(k.clone(), v.clone());
     }
 
-    Model {
+    UnresolvedModel {
         xsd_ns: entity.xsd_ns.map(|x| Namespace {
             name: x.name().map(|x| x.to_string()),
             uri: x.uri().to_string(),
@@ -132,17 +127,17 @@ fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
 
     match modifiers.as_slice() {
         [] => None,
-        [x] => Some(x.clone()),
+        [x] => Some(*x),
         _ => panic!("Unexpected field modifier count: {:#?}", modifiers),
     }
 }
 
-fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
+fn extract_fields(st: &parser::types::Struct) -> Vec<UnresolvedField> {
     st.fields
         .borrow()
         .iter()
         .filter_map(|x| match x.source {
-            StructFieldSource::Attribute => Some(StructField {
+            StructFieldSource::Attribute => Some(UnresolvedField {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 field_type: x.type_name.clone(),
@@ -158,7 +153,7 @@ fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
                     Some(x) => x,
                 };
 
-                Some(StructField {
+                Some(UnresolvedField {
                     comment: x.comment.clone(),
                     name: x.name.clone(),
                     field_type: x.type_name.clone(),
@@ -172,13 +167,13 @@ fn extract_fields(st: &parser::types::Struct) -> Vec<StructField> {
         .collect()
 }
 
-fn extract_structs(entity: &RsFile) -> Vec<Struct> {
+fn extract_structs(entity: &RsFile) -> Vec<UnresolvedStruct> {
     let mut structs = Vec::new();
     for st in entity.types.iter() {
         if let RsEntity::Struct(x) = st {
             let base_type = extract_base_type(x);
             let fields = extract_fields(x);
-            structs.push(Struct {
+            structs.push(UnresolvedStruct {
                 comment: x.comment.clone(),
                 name: x.name.clone(),
                 base_type,
@@ -270,7 +265,7 @@ fn try_resolve_basic(ts: &TupleStruct) -> Option<SimpleType> {
             match &ts.facets[0].facet_type {
                 FacetType::MaxLength(x) => match x.parse::<usize>().unwrap() {
                     1 => Some(SimpleType::HexByte),
-                    len => Some(SimpleType::HexBytes(len)),
+                    len => Some(SimpleType::HexBytes(Some(len))),
                 },
                 ft => panic!("Unexpected Facet type for xs:hexBinary: {:?}", ft),
             }

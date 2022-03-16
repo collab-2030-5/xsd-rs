@@ -1,3 +1,5 @@
+pub(crate) mod traits;
+
 use structopt::StructOpt;
 
 use heck::{ToSnakeCase, ToUpperCamelCase};
@@ -5,7 +7,12 @@ use indent_write::io::IndentWriter;
 use std::io::LineWriter;
 use std::io::Write;
 use std::path::PathBuf;
-use xml_model::{AttributeType, ElementType, FieldTypeInfo, Model, SimpleType, Struct};
+use xml_model::resolved::{
+    AttrMultiplicity, ElemMultiplicity, ElementType, FieldType, Model, Struct,
+};
+use xml_model::SimpleType;
+
+use crate::traits::RustType;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -19,18 +26,6 @@ struct Opt {
     // rust output file
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
-}
-
-enum BasicType {
-    Boolean,
-    String,
-    AnyUri,
-}
-
-enum Type {
-    Basic(BasicType),
-    Simple(SimpleType),
-    Struct(String),
 }
 
 fn write_comment(w: &mut dyn Write, comment: &Option<String>) -> std::io::Result<()> {
@@ -50,65 +45,6 @@ where
     f(&mut w)
 }
 
-fn resolve_basic_type(name: &str) -> Option<BasicType> {
-    match name {
-        "xs:boolean" => Some(BasicType::Boolean),
-        "xs:anyURI" => Some(BasicType::AnyUri),
-        "xs:string" => Some(BasicType::String),
-        _ => None,
-    }
-}
-
-fn resolve_type(model: &Model, name: &str) -> Type {
-    if let Some(basic) = resolve_basic_type(name) {
-        return Type::Basic(basic);
-    }
-
-    if let Some(x) = model.simple_types.get(name) {
-        return Type::Simple(x.clone());
-    }
-
-    match model.structs.iter().find(|st| st.name == name) {
-        None => {
-            panic!("No match for referenced type {}", name);
-        }
-        Some(st) => Type::Struct(st.name.clone()),
-    }
-}
-
-fn resolve_rust_simple_type(model: &Model, x: &SimpleType) -> String {
-    match x {
-        SimpleType::Alias(x) => {
-            let alias = model.simple_types.get(x).unwrap();
-            resolve_rust_simple_type(model, alias)
-        }
-        SimpleType::HexByte => "u8".to_string(),
-        SimpleType::HexBytes(_) => "Vec<u8>".to_string(),
-        SimpleType::Enum(_) => unimplemented!(),
-        SimpleType::String(_) => "String".to_string(),
-        SimpleType::I8(_) => "i8".to_string(),
-        SimpleType::U8(_) => "u8".to_string(),
-        SimpleType::I16(_) => "i16".to_string(),
-        SimpleType::U16(_) => "u16".to_string(),
-        SimpleType::I32(_) => "i32".to_string(),
-        SimpleType::U32(_) => "u32".to_string(),
-        SimpleType::I64(_) => "i64".to_string(),
-        SimpleType::U64(_) => "u64".to_string(),
-    }
-}
-
-fn get_rust_type(model: &Model, t: Type) -> String {
-    match t {
-        Type::Basic(x) => match x {
-            BasicType::Boolean => "bool".to_string(),
-            BasicType::String => "String".to_string(),
-            BasicType::AnyUri => "String".to_string(),
-        },
-        Type::Simple(x) => resolve_rust_simple_type(model, &x),
-        Type::Struct(x) => x.to_upper_camel_case(),
-    }
-}
-
 fn get_rust_field_name(name: &str) -> String {
     let snake = name.to_snake_case();
     match snake.as_str() {
@@ -118,38 +54,18 @@ fn get_rust_field_name(name: &str) -> String {
     }
 }
 
-fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> std::io::Result<()> {
+fn write_struct_fields(writer: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     if let Some(bt) = &st.base_type {
-        match model.structs.iter().find(|st| &st.name == bt) {
-            None => panic!("cannot resolve base type {} in {}", bt, st.name),
-            Some(st) => {
-                write_struct_fields(writer, model, st)?;
-            }
-        }
+        write_struct_fields(writer, bt)?;
     }
 
     writeln!(writer)?;
     writeln!(writer, "// --- these fields come from {} ---", st.name)?;
     writeln!(writer)?;
     for field in &st.fields {
-        let rust_type = get_rust_type(model, resolve_type(model, &field.field_type));
+        let rust_type = field.field_type.rust_struct_type();
 
         write_comment(writer, &field.comment)?;
-
-        let rust_type = match &field.info {
-            FieldTypeInfo::Attribute(x) => match x {
-                AttributeType::Single => rust_type,
-                AttributeType::Option => format!("Option<{}>", rust_type),
-            },
-            FieldTypeInfo::Element(x) => match x {
-                ElementType::Single => rust_type,
-                ElementType::Array => format!("Vec<{}>", rust_type),
-                ElementType::Option => format!("Option<{}>", rust_type),
-                ElementType::Error(x) => {
-                    panic!("{}", x);
-                }
-            },
-        };
 
         writeln!(
             writer,
@@ -163,23 +79,22 @@ fn write_struct_fields(writer: &mut dyn Write, model: &Model, st: &Struct) -> st
 
 struct Attribute {
     name: String,
-    field_type: String,
-    info: AttributeType,
+    field_type: SimpleType,
+    multiplicity: AttrMultiplicity,
 }
 
 struct Element {
     name: String,
-    field_type: String,
-    info: ElementType,
+    field_type: ElementType,
+    multiplicity: ElemMultiplicity,
 }
 
-fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
+fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
     let mut attrs = Vec::new();
     let mut elems = Vec::new();
 
-    if let Some(base_name) = &st.base_type {
-        let base = model.structs.iter().find(|x| &x.name == base_name).unwrap();
-        let (attr, elem) = split_fields(model, base);
+    if let Some(base) = &st.base_type {
+        let (attr, elem) = split_fields(base);
         for field in attr {
             attrs.push(field);
         }
@@ -189,20 +104,20 @@ fn split_fields(model: &Model, st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
     }
 
     for field in &st.fields {
-        match &field.info {
-            FieldTypeInfo::Attribute(x) => {
+        match &field.field_type {
+            FieldType::Attribute(m, t) => {
                 let x = Attribute {
                     name: field.name.clone(),
-                    field_type: field.field_type.clone(),
-                    info: *x,
+                    field_type: t.clone(),
+                    multiplicity: *m,
                 };
                 attrs.push(x);
             }
-            FieldTypeInfo::Element(x) => {
+            FieldType::Element(m, t) => {
                 let x = Element {
                     name: field.name.clone(),
-                    field_type: field.field_type.clone(),
-                    info: x.clone(),
+                    field_type: t.clone(),
+                    multiplicity: *m,
                 };
                 elems.push(x);
             }
@@ -229,37 +144,25 @@ impl AttributeTransform {
     }
 }
 
-fn get_attr_transform(model: &Model, attr_type: &str) -> Option<AttributeTransform> {
+fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
     match attr_type {
-        "xs:anyURI" => None,
-        _ => {
-            // try to resolve as a simple type
-            match model.simple_types.get(attr_type) {
-                None => {
-                    panic!("unknown attribute type: {}", attr_type)
-                }
-                Some(st) => match st {
-                    SimpleType::Alias(x) => get_attr_transform(model, x),
-                    SimpleType::HexByte => Some(AttributeTransform::Number),
-                    SimpleType::HexBytes(_) => None,
-                    SimpleType::Enum(_) => unimplemented!(),
-                    SimpleType::String(_) => None,
-                    SimpleType::I8(_) => Some(AttributeTransform::Number),
-                    SimpleType::U8(_) => Some(AttributeTransform::Number),
-                    SimpleType::I16(_) => Some(AttributeTransform::Number),
-                    SimpleType::U16(_) => Some(AttributeTransform::Number),
-                    SimpleType::I32(_) => Some(AttributeTransform::Number),
-                    SimpleType::U32(_) => Some(AttributeTransform::Number),
-                    SimpleType::I64(_) => Some(AttributeTransform::Number),
-                    SimpleType::U64(_) => Some(AttributeTransform::Number),
-                },
-            }
-        }
+        SimpleType::Boolean => Some(AttributeTransform::Number),
+        SimpleType::HexByte => Some(AttributeTransform::Number),
+        SimpleType::HexBytes(_) => None,
+        SimpleType::String(_) => None,
+        SimpleType::I8(_) => Some(AttributeTransform::Number),
+        SimpleType::U8(_) => Some(AttributeTransform::Number),
+        SimpleType::I16(_) => Some(AttributeTransform::Number),
+        SimpleType::U16(_) => Some(AttributeTransform::Number),
+        SimpleType::I32(_) => Some(AttributeTransform::Number),
+        SimpleType::U32(_) => Some(AttributeTransform::Number),
+        SimpleType::I64(_) => Some(AttributeTransform::Number),
+        SimpleType::U64(_) => Some(AttributeTransform::Number),
     }
 }
 
 enum ElementTransform {
-    Struct,
+    Struct(std::rc::Rc<Struct>),
     Number,
     String,
     HexBytes,
@@ -271,7 +174,7 @@ impl ElementTransform {
         W: Write,
     {
         match self {
-            ElementTransform::Struct => {
+            ElementTransform::Struct(_) => {
                 writeln!(
                     w,
                     "{}.write_with_name(writer, \"{}\", false)?;",
@@ -309,14 +212,11 @@ impl ElementTransform {
     }
 }
 
-fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform {
+fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
     match st {
-        SimpleType::Alias(x) => {
-            get_simple_type_transform(model, model.simple_types.get(x).unwrap())
-        }
+        SimpleType::Boolean => ElementTransform::Number,
         SimpleType::HexByte => ElementTransform::Number,
         SimpleType::HexBytes(_) => ElementTransform::HexBytes,
-        SimpleType::Enum(_) => unimplemented!(),
         SimpleType::String(_) => ElementTransform::String,
         SimpleType::I8(_) => ElementTransform::Number,
         SimpleType::U8(_) => ElementTransform::Number,
@@ -329,38 +229,25 @@ fn get_simple_type_transform(model: &Model, st: &SimpleType) -> ElementTransform
     }
 }
 
-fn get_elem_transform(model: &Model, elem_type: &str) -> ElementTransform {
+fn get_elem_transform(elem_type: &ElementType) -> ElementTransform {
     match elem_type {
-        "xs:string" => ElementTransform::String,
-        "xs:anyURI" => ElementTransform::String,
-        "xs:boolean" => ElementTransform::Number,
-        _ => {
-            // is it a struct?
-            match model.structs.iter().find(|st| st.name == elem_type) {
-                None => match model.simple_types.get(elem_type) {
-                    None => {
-                        panic!("unknown element type: {}", elem_type)
-                    }
-                    Some(x) => get_simple_type_transform(model, x),
-                },
-                Some(_) => ElementTransform::Struct,
-            }
-        }
+        ElementType::Simple(s) => get_simple_type_transform(s),
+        ElementType::Struct(s) => ElementTransform::Struct(s.clone()),
     }
 }
 
-fn write_element<W>(w: &mut W, model: &Model, elem: &Element) -> std::io::Result<()>
+fn write_element<W>(w: &mut W, elem: &Element) -> std::io::Result<()>
 where
     W: Write,
 {
-    let transform = get_elem_transform(model, &elem.field_type);
+    let transform = get_elem_transform(&elem.field_type);
 
-    match &elem.info {
-        ElementType::Single => {
+    match &elem.multiplicity {
+        ElemMultiplicity::Single => {
             let name = format!("self.{}", get_rust_field_name(&elem.name));
             transform.write_value(w, &name, &elem.name)?;
         }
-        ElementType::Array => {
+        ElemMultiplicity::Vec => {
             writeln!(
                 w,
                 "for item in &self.{} {{",
@@ -369,7 +256,7 @@ where
             indent(w, |w| transform.write_value(w, "item", &elem.name))?;
             writeln!(w, "}}")?;
         }
-        ElementType::Option => {
+        ElemMultiplicity::Optional => {
             writeln!(
                 w,
                 "if let Some(elem) = &self.{} {{",
@@ -378,40 +265,37 @@ where
             indent(w, |w| transform.write_value(w, "elem", &elem.name))?;
             writeln!(w, "}}")?;
         }
-        ElementType::Error(s) => {
-            panic!("error: {}", s)
-        }
     }
 
     Ok(())
 }
 
-fn write_attribute<W>(w: &mut W, model: &Model, att: &Attribute) -> std::io::Result<()>
+fn write_attribute<W>(w: &mut W, attr: &Attribute) -> std::io::Result<()>
 where
     W: Write,
 {
-    let name = get_rust_field_name(&att.name);
+    let name = get_rust_field_name(&attr.name);
     let self_name = format!("self.{}", &name);
-    let transform = get_attr_transform(model, &att.field_type);
+    let transform = get_attr_transform(&attr.field_type);
 
-    match att.info {
-        AttributeType::Single => {
+    match attr.multiplicity {
+        AttrMultiplicity::Single => {
             if let Some(tx) = &transform {
                 writeln!(w, "let {} = {};", &name, tx.transform_to_string(&self_name))?;
                 writeln!(
                     w,
                     "let start = start.attr(\"{}\", {}.as_str());",
-                    att.name, &name
+                    attr.name, &name
                 )?;
             } else {
                 writeln!(
                     w,
                     "let start = start.attr(\"{}\", {}.as_str());",
-                    att.name, &self_name
+                    attr.name, &self_name
                 )?;
             }
         }
-        AttributeType::Option => {
+        AttrMultiplicity::Optional => {
             let match_name = if let Some(tx) = &transform {
                 writeln!(
                     w,
@@ -428,7 +312,7 @@ where
             indent(w, |w| {
                 writeln!(w, "Some(attr) => {{")?;
                 indent(w, |w| {
-                    writeln!(w, "start.attr(\"{}\", attr.as_str())", att.name)
+                    writeln!(w, "start.attr(\"{}\", attr.as_str())", attr.name)
                 })?;
                 writeln!(w, "}},")?;
                 writeln!(w, "None => start,")?;
@@ -474,9 +358,9 @@ fn write_add_schema_attr(w: &mut dyn Write, model: &Model) -> std::io::Result<()
     writeln!(w, "}}")
 }
 
-fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     // collect all the attribute fields
-    let (attributes, elements) = split_fields(model, st);
+    let (attributes, elements) = split_fields(st);
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
@@ -485,7 +369,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::
             indent(w, |w| {
                 // write the elements
                 for elem in &elements {
-                    write_element(w, model, elem)?;
+                    write_element(w, elem)?;
                 }
                 writeln!(w, "Ok(())")
             })?;
@@ -501,7 +385,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::
             if !attributes.is_empty() {
                 writeln!(w, "// ---- start attributes ----")?;
                 for att in &attributes {
-                    write_attribute(w, model, att)?;
+                    write_attribute(w, att)?;
                 }
                 writeln!(w, "// ---- end attributes ----")?;
             }
@@ -559,15 +443,15 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
         write_comment(w, &st.comment)?;
         writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
         writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
-        indent(w, |w| write_struct_fields(w, model, st))?;
+        indent(w, |w| write_struct_fields(w, st))?;
         writeln!(w, "}}")?;
     }
 
     // write the serialization impl and trait
     for st in &model.structs {
-        write_serializers(w, st, model)?;
+        write_serializers(w, st)?;
         writeln!(w)?;
-        write_deserializer_impl(w, st, model)?;
+        write_deserializer_impl(w, st)?;
         writeln!(w)?;
         write_deserializer_trait_impl(w, st)?;
     }
@@ -581,29 +465,20 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     Ok(())
 }
 
-fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_struct_cells(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     // do this recursively depth-first
     if let Some(bt) = &st.base_type {
-        match model.structs.iter().find(|st| &st.name == bt) {
-            None => panic!("cannot resolve base type {} in {}", bt, st.name),
-            Some(st) => {
-                write_struct_cells(w, st, model)?;
-            }
-        }
+        write_struct_cells(w, bt)?;
     }
 
     for field in &st.fields {
-        let rust_type = get_rust_type(model, resolve_type(model, &field.field_type));
-        let cell_type = match &field.info {
-            FieldTypeInfo::Attribute(x) => match x {
-                AttributeType::Single => format!("SetOnce<{}>", rust_type),
-                AttributeType::Option => format!("SetOnce<{}>", rust_type),
-            },
-            FieldTypeInfo::Element(x) => match x {
-                ElementType::Single => format!("SetOnce<{}>", rust_type),
-                ElementType::Array => format!("Vec<{}>", rust_type),
-                ElementType::Option => format!("SetOnce<{}>", rust_type),
-                ElementType::Error(x) => panic!("{}", x),
+        let cell_type = match &field.field_type {
+            FieldType::Attribute(_, t) => format!("SetOnce<{}>", t.rust_struct_type()),
+            FieldType::Element(m, t) => match m {
+                ElemMultiplicity::Single | ElemMultiplicity::Optional => {
+                    format!("SetOnce<{}>", t.rust_struct_type())
+                }
+                ElemMultiplicity::Vec => format!("Vec<{}>", t.rust_struct_type()),
             },
         };
 
@@ -618,29 +493,27 @@ fn write_struct_cells(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io:
     Ok(())
 }
 
-fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
+fn write_struct_initializer(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     // do this recursively depth-first
     if let Some(bt) = &st.base_type {
-        match model.structs.iter().find(|st| &st.name == bt) {
-            None => panic!("cannot resolve base type {} in {}", bt, st.name),
-            Some(st) => {
-                write_struct_initializer(w, st, model)?;
-            }
-        }
+        write_struct_initializer(w, bt)?;
     }
 
     for field in &st.fields {
         let rust_var = get_rust_field_name(&field.name);
-        match &field.info {
-            FieldTypeInfo::Attribute(x) => match x {
-                AttributeType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
-                AttributeType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
+        match &field.field_type {
+            FieldType::Attribute(m, _) => match m {
+                AttrMultiplicity::Single => {
+                    writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var)
+                }
+                AttrMultiplicity::Optional => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
             },
-            FieldTypeInfo::Element(x) => match x {
-                ElementType::Single => writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var),
-                ElementType::Array => writeln!(w, "{},", &rust_var),
-                ElementType::Option => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
-                ElementType::Error(x) => panic!("{}", x),
+            FieldType::Element(m, _) => match m {
+                ElemMultiplicity::Single => {
+                    writeln!(w, "{} : {}.require()?,", &rust_var, &rust_var)
+                }
+                ElemMultiplicity::Vec => writeln!(w, "{},", &rust_var),
+                ElemMultiplicity::Optional => writeln!(w, "{} : {}.get(),", &rust_var, &rust_var),
             },
         }?;
     }
@@ -648,18 +521,14 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct, model: &Model) -> st
     Ok(())
 }
 
-fn parse_attribute(model: &Model, attr: &Attribute) -> String {
-    match get_attr_transform(model, &attr.field_type) {
+fn parse_attribute(attr: &Attribute) -> String {
+    match get_attr_transform(&attr.field_type) {
         None => "attr.value.clone()".to_string(),
         Some(x) => x.parse_from_string(),
     }
 }
 
-fn write_attr_parse_loop(
-    w: &mut dyn Write,
-    attrs: &[Attribute],
-    model: &Model,
-) -> std::io::Result<()> {
+fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Result<()> {
     writeln!(w, "for attr in attrs.iter() {{")?;
     indent(w, |w| {
         writeln!(w, "match attr.name.local_name.as_str() {{")?;
@@ -670,7 +539,7 @@ fn write_attr_parse_loop(
                     "\"{}\" => {}.set({})?,",
                     &attr.name,
                     get_rust_field_name(&attr.name),
-                    parse_attribute(model, attr)
+                    parse_attribute(attr)
                 )?;
             }
             writeln!(w, "_ => return Err(ReadError::UnknownAttribute)")
@@ -680,14 +549,14 @@ fn write_attr_parse_loop(
     writeln!(w, "}}")
 }
 
-fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> std::io::Result<()> {
-    let transform = get_elem_transform(model, &elem.field_type);
+fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<()> {
+    let transform = get_elem_transform(&elem.field_type);
 
     let tx: String = match transform {
-        ElementTransform::Struct => {
+        ElementTransform::Struct(s) => {
             format!(
                 "{}::read(reader, &attributes, \"{}\")?",
-                elem.field_type.to_upper_camel_case(),
+                s.name.to_upper_camel_case(),
                 &elem.name
             )
         }
@@ -703,24 +572,17 @@ fn write_element_handler(w: &mut dyn Write, model: &Model, elem: &Element) -> st
         ),
     };
 
-    match &elem.info {
-        ElementType::Single | ElementType::Option => {
+    match &elem.multiplicity {
+        ElemMultiplicity::Single | ElemMultiplicity::Optional => {
             writeln!(w, "{}.set({})?", get_rust_field_name(&elem.name), tx)
         }
-        ElementType::Array => {
+        ElemMultiplicity::Vec => {
             writeln!(w, "{}.push({})", get_rust_field_name(&elem.name), tx)
-        }
-        ElementType::Error(err) => {
-            panic!("{}", err)
         }
     }
 }
 
-fn write_elem_parse_loop(
-    w: &mut dyn Write,
-    elems: &[Element],
-    model: &Model,
-) -> std::io::Result<()> {
+fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Result<()> {
     let start_elem_tag = {
         if elems.is_empty() {
             "xml::reader::XmlEvent::StartElement { .. }"
@@ -728,8 +590,8 @@ fn write_elem_parse_loop(
             // are any of the elements structs?
             let has_struct = elems
                 .iter()
-                .any(|e| match get_elem_transform(model, &e.field_type) {
-                    ElementTransform::Struct => true,
+                .any(|e| match get_elem_transform(&e.field_type) {
+                    ElementTransform::Struct(_) => true,
                     ElementTransform::Number => false,
                     ElementTransform::String => false,
                     ElementTransform::HexBytes => false,
@@ -774,7 +636,7 @@ fn write_elem_parse_loop(
                     indent(w, |w| {
                         for elem in elems {
                             writeln!(w, "\"{}\" => {{", &elem.name)?;
-                            indent(w, |w| write_element_handler(w, model, elem))?;
+                            indent(w, |w| write_element_handler(w, elem))?;
                             writeln!(w, "}}")?;
                         }
                         writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
@@ -835,23 +697,23 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
     writeln!(w, "}}")
 }
 
-fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std::io::Result<()> {
-    let (attr, elem) = split_fields(model, st);
+fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
+    let (attr, elem) = split_fields(st);
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
         writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
-            write_struct_cells(w, st, model)?;
+            write_struct_cells(w, st)?;
             writeln!(w)?;
-            write_attr_parse_loop(w, &attr, model)?;
+            write_attr_parse_loop(w, &attr)?;
             writeln!(w)?;
-            write_elem_parse_loop(w, &elem, model)?;
+            write_elem_parse_loop(w, &elem)?;
             writeln!(w)?;
             writeln!(w, "// construct the type from the cells")?;
             writeln!(w, "Ok({} {{", st.name.to_upper_camel_case())?;
-            indent(w, |w| write_struct_initializer(w, st, model))?;
+            indent(w, |w| write_struct_initializer(w, st))?;
             writeln!(w, "}})")
         })?;
         writeln!(w, "}}")?;
@@ -875,7 +737,8 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct, model: &Model) -> std
 fn main() {
     let opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input).unwrap();
-    let model: Model = serde_json::from_str(&input).unwrap();
+    let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input).unwrap();
+    let model = model.resolve();
 
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);
