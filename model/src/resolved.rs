@@ -52,6 +52,7 @@ pub struct Struct {
     pub name: String,
     pub base_type: Option<Rc<Struct>>,
     pub fields: Vec<Field>,
+    pub metadata: Metadata,
 }
 
 #[derive(Debug)]
@@ -60,44 +61,19 @@ pub struct Model {
     pub structs: Vec<Rc<Struct>>,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub struct Metadata {
+    /// true if the struct is inherited from by another struct
+    pub is_base: bool,
+    /// true if the struct is used as an element in another struct
+    pub use_as_element: bool,
+}
+
 impl Model {
-    /// true if this struct is inherited from by any other struct in the model
-    pub fn is_base(&self, st: &Rc<Struct>) -> bool {
-        for other in self.structs.iter() {
-            if let Some(other) = &other.base_type {
-                if Rc::ptr_eq(other, st) {
-                    return true;
-                }
-            }
-        }
-        false
-    }
-
-    /// true if this struct is used as a field in any other struct
-    pub fn used_as_field(&self, st: &Rc<Struct>) -> bool {
-        for other in self.structs.iter() {
-            for field in other.fields.iter() {
-                if let FieldType::Element(_, ElementType::Struct(other)) = &field.field_type {
-                    if Rc::ptr_eq(st, other) {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    /// find all the base types in the model that are used as fields in other structs
-    pub fn base_fields(&self) -> Vec<Rc<Struct>> {
-        let mut fields = Vec::new();
-        for st in self.structs.iter() {
-            if self.is_base(&st) && self.used_as_field(&st) {
-                // add it to the fields list
-                if !fields.iter().any(|x| Rc::ptr_eq(x, st)) {
-                    fields.push(st.clone())
-                }
-            }
-        }
-        fields
+    pub fn base_fields(&self) -> impl Iterator<Item = Rc<Struct>> + '_ {
+        self.structs
+            .iter()
+            .filter(|x| x.metadata.is_base && x.metadata.use_as_element)
+            .cloned()
     }
 }

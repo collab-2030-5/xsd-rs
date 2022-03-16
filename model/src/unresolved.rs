@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Struct};
+use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
@@ -137,6 +137,7 @@ impl UnresolvedField {
 impl UnresolvedStruct {
     fn resolve(
         &self,
+        metadata: Metadata,
         structs: &HashMap<String, Rc<Struct>>,
         simple_types: &HashMap<String, SimpleType>,
     ) -> Option<std::rc::Rc<Struct>> {
@@ -170,33 +171,74 @@ impl UnresolvedStruct {
             name: self.name.clone(),
             base_type,
             fields,
+            metadata,
         }))
     }
 }
 
 impl UnresolvedModel {
+    fn is_base(&self, name: &str) -> bool {
+        for other in self.structs.iter() {
+            if let Some(other) = &other.base_type {
+                if other.as_str() == name {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    fn used_as_field(&self, name: &str) -> bool {
+        for other in self.structs.iter() {
+            for field in other.fields.iter() {
+                if field.field_type.as_str() == name {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub fn compute_metadata(&self) -> HashMap<String, Metadata> {
+        let mut meta_map: HashMap<String, Metadata> = HashMap::new();
+
+        for st in self.structs.iter() {
+            let metadata = Metadata {
+                is_base: self.is_base(&st.name),
+                use_as_element: self.used_as_field(&st.name),
+            };
+            meta_map.insert(st.name.clone(), metadata);
+        }
+
+        meta_map
+    }
+
     pub fn resolve(&self) -> crate::resolved::Model {
         let mut input: HashMap<String, UnresolvedStruct> = self
             .structs
             .iter()
             .map(|x| (x.name.clone(), x.clone()))
             .collect();
+
+        // compute some metadata about the structs
+        let meta_map = self.compute_metadata();
+
         let mut output: HashMap<String, Rc<Struct>> = HashMap::new();
 
         loop {
             if input.is_empty() {
-                // compute metad
-
                 return crate::resolved::Model {
                     target_ns: self.target_ns.clone(),
                     structs: output.values().cloned().collect(),
                 };
             }
 
-            if let Some(x) = input
-                .iter()
-                .find_map(|(_, v)| v.resolve(&output, &self.simple_types))
-            {
+            if let Some(x) = input.iter().find_map(|(_, v)| {
+                // lookup the metadata
+                let metadata = *meta_map.get(&v.name).unwrap();
+
+                v.resolve(metadata, &output, &self.simple_types)
+            }) {
                 input.remove(&x.name);
                 output.insert(x.name.clone(), x);
             } else {
