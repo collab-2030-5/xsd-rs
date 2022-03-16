@@ -5,7 +5,7 @@ pub mod unresolved;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Namespace {
     pub name: Option<String>,
     pub uri: String,

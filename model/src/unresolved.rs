@@ -156,7 +156,7 @@ impl UnresolvedStruct {
         // resolve the fields
         let mut fields: Vec<Field> = Vec::new();
         for field in self.fields.iter() {
-            match field.resolve(&structs, simple_types) {
+            match field.resolve(structs, simple_types) {
                 None => {
                     // can't resolve field yet
                     return None;
@@ -186,6 +186,7 @@ impl UnresolvedModel {
         loop {
             if input.is_empty() {
                 return crate::resolved::Model {
+                    target_ns: self.target_ns.clone(),
                     structs: output.values().cloned().collect(),
                 };
             }

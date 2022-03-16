@@ -1,4 +1,4 @@
-use crate::SimpleType;
+use crate::{Namespace, SimpleType};
 
 use std::rc::Rc;
 
@@ -57,5 +57,6 @@ pub struct Struct {
 
 #[derive(Debug)]
 pub struct Model {
+    pub target_ns: Option<Namespace>,
     pub structs: Vec<Rc<Struct>>,
 }
