@@ -185,6 +185,8 @@ impl UnresolvedModel {
 
         loop {
             if input.is_empty() {
+                // compute metad
+
                 return crate::resolved::Model {
                     target_ns: self.target_ns.clone(),
                     structs: output.values().cloned().collect(),

@@ -740,6 +740,10 @@ fn main() {
     let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input).unwrap();
     let model = model.resolve();
 
+    for x in model.base_fields() {
+        println!("base field: {}", x.name);
+    }
+
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);
 
