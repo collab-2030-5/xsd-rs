@@ -69,11 +69,41 @@ pub struct Metadata {
     pub use_as_element: bool,
 }
 
+impl Struct {
+    /// test if this struct inherits from a base struct, directly or indirectly
+    pub fn inherits_from(&self, base: &Rc<Struct>) -> bool {
+        if let Some(child) = &self.base_type {
+            if Rc::ptr_eq(child, base) {
+                true
+            } else {
+                child.inherits_from(base)
+            }
+        } else {
+            false
+        }
+    }
+}
+
 impl Model {
-    pub fn base_fields(&self) -> impl Iterator<Item = Rc<Struct>> + '_ {
+    /// return all of the structs that are 1) base structs AND 2) used as fields in other structs
+    pub fn base_fields(&self) -> Vec<Rc<Struct>> {
         self.structs
             .iter()
             .filter(|x| x.metadata.is_base && x.metadata.use_as_element)
             .cloned()
+            .collect()
+    }
+
+    /// All structs that inherit from a base struct, directly or indirectly
+    pub fn sub_structs_of(&self, base: &Rc<Struct>) -> Vec<Rc<Struct>> {
+        let mut structs = Vec::new();
+
+        for other in self.structs.iter() {
+            if other.inherits_from(base) && !structs.iter().any(|x| Rc::ptr_eq(x, other)) {
+                structs.push(other.clone());
+            }
+        }
+
+        structs
     }
 }

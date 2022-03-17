@@ -13,6 +13,7 @@ use xml_model::resolved::{
 use xml_model::SimpleType;
 
 use crate::traits::RustType;
+use std::rc::Rc;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -177,7 +178,7 @@ impl ElementTransform {
             ElementTransform::Struct(_) => {
                 writeln!(
                     w,
-                    "{}.write_with_name(writer, \"{}\", false)?;",
+                    "{}.write_with_name(writer, \"{}\", false, false)?;",
                     rust_name, xsd_name
                 )
             }
@@ -378,7 +379,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
             writeln!(w)?;
         }
 
-        writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+        writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
         indent(w, |w| {
             writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
 
@@ -389,6 +390,14 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
                 }
                 writeln!(w, "// ---- end attributes ----")?;
             }
+
+            writeln!(w, "let start = if write_type {{")?;
+            indent(w, |w| {
+                writeln!(w, "start.attr(\"{}\", \"{}\")", "xsi:type", st.name)
+            })?;
+            writeln!(w, "}} else {{")?;
+            indent(w, |w| writeln!(w, "start"))?;
+            writeln!(w, "}};")?;
 
             writeln!(w, "writer.write(start)?;")?;
 
@@ -415,7 +424,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
             )?;
             writeln!(
                 w,
-                "self.write_with_name(&mut writer, \"{}\", true)?;",
+                "self.write_with_name(&mut writer, \"{}\", true, false)?;",
                 st.name
             )?;
             writeln!(w, "Ok(())")
@@ -455,6 +464,10 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
         writeln!(w)?;
         write_deserializer_trait_impl(w, st)?;
     }
+
+    writeln!(w)?;
+
+    write_base_enums(w, model)?;
 
     writeln!(w)?;
 
@@ -734,15 +747,82 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
     writeln!(w, "}}")
 }
 
+fn write_base_enum_def(
+    w: &mut dyn Write,
+    st: &Struct,
+    parents: &[Rc<Struct>],
+) -> std::io::Result<()> {
+    let base_name = st.name.to_upper_camel_case();
+    writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(w, "pub enum {} {{", base_name)?;
+    indent(w, |w| {
+        for st in parents.iter() {
+            let child_name = st.name.to_upper_camel_case();
+            writeln!(w, "{}(super::{}),", child_name, child_name)?;
+        }
+        Ok(())
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_base_enum_impl(
+    w: &mut dyn Write,
+    st: &Struct,
+    parents: &[Rc<Struct>],
+) -> std::io::Result<()> {
+    let base_name = st.name.to_upper_camel_case();
+    writeln!(w, "impl {} {{", base_name)?;
+    indent(w, |w| {
+        writeln!(w, "pub(crate) fn write_with_name<W>(&self, writer: &mut xml::EventWriter<W>, name: &str) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+        indent(w, |w| {
+            writeln!(w, "match self {{")?;
+            indent(w, |w| {
+                for p in parents {
+                    writeln!(
+                        w,
+                        "{}::{}(x) => x.write_with_name(writer, name, false, true),",
+                        base_name,
+                        p.name.to_upper_camel_case()
+                    )?;
+                }
+                Ok(())
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")
+}
+
+fn write_base_enums(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+    let base_fields = model.base_fields();
+
+    if base_fields.is_empty() {
+        return Ok(());
+    }
+
+    writeln!(w, "pub mod inherited {{")?;
+    indent(w, |w| {
+        for base in base_fields.iter() {
+            writeln!(w)?;
+            let parents = model.sub_structs_of(base);
+            write_base_enum_def(w, base, parents.as_slice())?;
+            writeln!(w)?;
+            write_base_enum_impl(w, base, parents.as_slice())?;
+            writeln!(w)?;
+        }
+        Ok(())
+    })?;
+    writeln!(w, "}}")?;
+
+    Ok(())
+}
+
 fn main() {
     let opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input).unwrap();
     let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input).unwrap();
     let model = model.resolve();
-
-    for x in model.base_fields() {
-        println!("base field: {}", x.name);
-    }
 
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);
