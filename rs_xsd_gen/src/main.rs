@@ -393,7 +393,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 
             writeln!(w, "let start = if write_type {{")?;
             indent(w, |w| {
-                writeln!(w, "start.attr(\"{}\", \"{}\")", "xsi:type", st.name)
+                writeln!(w, "start.attr(\"xsi:type\", \"{}\")", st.name)
             })?;
             writeln!(w, "}} else {{")?;
             indent(w, |w| writeln!(w, "start"))?;
@@ -756,6 +756,7 @@ fn write_base_enum_def(
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(w, "pub enum {} {{", base_name)?;
     indent(w, |w| {
+        writeln!(w, "{}(super::{}),", base_name, base_name)?;
         for st in parents.iter() {
             let child_name = st.name.to_upper_camel_case();
             writeln!(w, "{}(super::{}),", child_name, child_name)?;
@@ -777,6 +778,11 @@ fn write_base_enum_impl(
         indent(w, |w| {
             writeln!(w, "match self {{")?;
             indent(w, |w| {
+                writeln!(
+                    w,
+                    "{}::{}(x) => x.write_with_name(writer, name, false, false),",
+                    base_name, base_name
+                )?;
                 for p in parents {
                     writeln!(
                         w,
@@ -789,7 +795,34 @@ fn write_base_enum_impl(
             })?;
             writeln!(w, "}}")
         })?;
-        writeln!(w, "}}")
+        writeln!(w, "}}")?;
+        writeln!(w)?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, crate::ReadError> where R: std::io::Read {{")?;
+        indent(w, |w| {
+            writeln!(w, "match crate::find_xsi_type(attrs) {{")?;
+            indent(w, |w| {
+                writeln!(
+                    w,
+                    "// if xsi:type isn't present just deserialize the base type"
+                )?;
+                writeln!(w, "None => {}::read(reader, attrs, parent_tag),", st.name)?;
+                for child in parents {
+                    let child_name = child.name.to_upper_camel_case();
+                    writeln!(
+                        w,
+                        "Some(\"{}\") => Ok({}::{}(super::{}::read(reader, attrs, parent_tag)?)),",
+                        child.name,
+                        base_name,
+                        child_name,
+                        child.name.to_upper_camel_case()
+                    )?;
+                }
+                writeln!(w, "Some(_) => return Err(crate::ReadError::UnknownType),")
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")?;
+        writeln!(w)
     })?;
     writeln!(w, "}}")
 }
@@ -801,6 +834,13 @@ fn write_base_enums(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
         return Ok(());
     }
 
+    writeln!(
+        w,
+        "/// Enum representations of types that are used in conjunction w/ xsi:type tags"
+    )?;
+    writeln!(w, "/// 1) base types ")?;
+    writeln!(w, "/// 2) used as elements in other types")?;
+    writeln!(w, "/// 2) used as elements in other types")?;
     writeln!(w, "pub mod inherited {{")?;
     indent(w, |w| {
         for base in base_fields.iter() {

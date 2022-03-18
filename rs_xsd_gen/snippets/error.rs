@@ -24,6 +24,8 @@ pub enum ReadError {
     BadHexString,
     /// Parser encountered an unexpected event
     UnexpectedEvent,
+    /// Unknown xsi:type
+    UnknownType,
     /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
@@ -109,6 +111,7 @@ impl std::fmt::Display for ReadError {
             ReadError::UnknownAttribute => write!(f, "unknown attribute"),
             ReadError::BadInteger => write!(f, "bad integer"),
             ReadError::BadHexString => write!(f, "bad hex string"),
+            ReadError::UnknownType => write!(f, "unknown xsi:type"),
             ReadError::UnexpectedEvent => write!(f, "unexpected event"),
         }
     }

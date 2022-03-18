@@ -159,3 +159,11 @@ fn write_simple_tag<W>(
     writer.write(xml::writer::XmlEvent::end_element())
 }
 
+pub(crate) fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> Option<&str> {
+    attrs.iter().find_map(|x| {
+        match (x.name.namespace.as_deref(), x.name.local_name.as_str()) {
+            (Some("xsi"), "type") => Some(x.value.as_str()),
+            _ => None,
+        }
+    })
+}
