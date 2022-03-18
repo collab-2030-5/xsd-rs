@@ -29,7 +29,13 @@ impl RustType for ElementType {
     fn rust_struct_type(&self) -> String {
         match self {
             ElementType::Simple(x) => x.rust_struct_type(),
-            ElementType::Struct(x) => x.name.to_upper_camel_case(),
+            ElementType::Struct(x) => {
+                if x.metadata.is_base {
+                    format!("inherited::{}", x.name.to_upper_camel_case())
+                } else {
+                    x.name.to_upper_camel_case()
+                }
+            }
         }
     }
 }
