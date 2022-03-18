@@ -19,8 +19,9 @@ pub(crate) struct Config {
 impl Config {
     pub(crate) fn generate_base_type(&self, base_name: &str, child_name: &str) -> bool {
         match self.base_type_whitelist.get(base_name) {
-            // if not configured, assume Auto
-            None => true,
+            None => {
+                panic!("base type {} requires a configuration entry", base_name);
+            }
             Some(x) => match x {
                 BaseTypeConfig::Auto => true,
                 BaseTypeConfig::Whitelist(x) => x.contains(child_name),

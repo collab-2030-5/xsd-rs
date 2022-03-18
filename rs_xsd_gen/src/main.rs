@@ -180,12 +180,20 @@ impl ElementTransform {
         W: Write,
     {
         match self {
-            ElementTransform::Struct(_) => {
-                writeln!(
-                    w,
-                    "{}.write_with_name(writer, \"{}\", false, false)?;",
-                    rust_name, xsd_name
-                )
+            ElementTransform::Struct(x) => {
+                if x.metadata.is_base {
+                    writeln!(
+                        w,
+                        "{}.write_with_name(writer, \"{}\")?;",
+                        rust_name, xsd_name
+                    )
+                } else {
+                    writeln!(
+                        w,
+                        "{}.write_with_name(writer, \"{}\", false, false)?;",
+                        rust_name, xsd_name
+                    )
+                }
             }
             ElementTransform::String => {
                 writeln!(
@@ -572,11 +580,19 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
 
     let tx: String = match transform {
         ElementTransform::Struct(s) => {
-            format!(
-                "{}::read(reader, &attributes, \"{}\")?",
-                s.name.to_upper_camel_case(),
-                &elem.name
-            )
+            if s.metadata.is_base {
+                format!(
+                    "inherited::{}::read(reader, &attributes, \"{}\")?",
+                    s.name.to_upper_camel_case(),
+                    &elem.name
+                )
+            } else {
+                format!(
+                    "{}::read(reader, &attributes, \"{}\")?",
+                    s.name.to_upper_camel_case(),
+                    &elem.name
+                )
+            }
         }
         ElementTransform::Number => {
             format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
@@ -806,7 +822,7 @@ fn write_base_enum_impl(
         writeln!(w)?;
         writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, crate::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
-            writeln!(w, "match crate::find_xsi_type(attrs) {{")?;
+            writeln!(w, "match crate::find_xsi_type(attrs)? {{")?;
             indent(w, |w| {
                 for child in parents
                     .iter()
@@ -815,14 +831,14 @@ fn write_base_enum_impl(
                     let child_name = child.name.to_upper_camel_case();
                     writeln!(
                         w,
-                        "Some(\"{}\") => Ok({}::{}(super::{}::read(reader, attrs, parent_tag)?)),",
+                        "\"{}\" => Ok({}::{}(super::{}::read(reader, attrs, parent_tag)?)),",
                         child.name,
                         base_name,
                         child_name,
                         child.name.to_upper_camel_case()
                     )?;
                 }
-                writeln!(w, "Some(_) => return Err(crate::ReadError::UnknownType),")
+                writeln!(w, "_ => return Err(crate::ReadError::UnknownType),")
             })?;
             writeln!(w, "}}")
         })?;
