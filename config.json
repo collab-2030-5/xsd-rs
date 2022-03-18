@@ -1,0 +1,10 @@
+{
+  "base_type_whitelist" : {
+    "Response": "Auto",
+    "Resource" : {
+      "Whitelist" : [
+
+      ]
+    }
+  }
+}
