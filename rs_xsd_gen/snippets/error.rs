@@ -16,8 +16,6 @@ pub enum ReadError {
     DuplicateField,
     /// Missing mandatory field
     MissingMandatoryField,
-    /// Unknown attribute
-    UnknownAttribute,
     /// String -> integer parsing failed
     BadInteger,
     /// hex string bad format
@@ -25,7 +23,9 @@ pub enum ReadError {
     /// Parser encountered an unexpected event
     UnexpectedEvent,
     /// Unknown xsi:type
-    UnknownType,
+    UnknownXsiType,
+    /// Missing required xsi:type
+    MissingXsiType,
     /// other backend dependent errors
     Other(Box<dyn std::error::Error>),
 }
@@ -108,10 +108,10 @@ impl std::fmt::Display for ReadError {
             ReadError::DuplicateField => write!(f, "duplicate field"),
             ReadError::Other(x) => write!(f, "{}", x),
             ReadError::MissingMandatoryField => write!(f, "missing mandatory field"),
-            ReadError::UnknownAttribute => write!(f, "unknown attribute"),
             ReadError::BadInteger => write!(f, "bad integer"),
             ReadError::BadHexString => write!(f, "bad hex string"),
-            ReadError::UnknownType => write!(f, "unknown xsi:type"),
+            ReadError::MissingXsiType => write!(f, "missing required xsi:type"),
+            ReadError::UnknownXsiType => write!(f, "unknown xsi:type"),
             ReadError::UnexpectedEvent => write!(f, "unexpected event"),
         }
     }

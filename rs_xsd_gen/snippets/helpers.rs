@@ -161,11 +161,14 @@ fn write_simple_tag<W>(
 
 pub(crate) fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> core::result::Result<&str, crate::ReadError> {
     let result = attrs.iter().find_map(|x| {
-        match (x.name.namespace.as_deref(), x.name.local_name.as_str()) {
+        match (x.name.prefix.as_deref(), x.name.local_name.as_str()) {
             (Some("xsi"), "type") => Some(x.value.as_str()),
-            _ => None,
+            (x, y) => {
+                println!("{:?}, {:?}", x, y);
+                None
+            },
         }
     });
 
-    result.ok_or(crate::ReadError::UnknownType)
+    result.ok_or(crate::ReadError::MissingXsiType)
 }

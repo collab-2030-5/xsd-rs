@@ -568,7 +568,7 @@ fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Res
                     parse_attribute(attr)
                 )?;
             }
-            writeln!(w, "_ => return Err(ReadError::UnknownAttribute)")
+            writeln!(w, "_ => {{}}, // ignore unknown attributes")
         })?;
         writeln!(w, "}};")
     })?;
@@ -838,7 +838,7 @@ fn write_base_enum_impl(
                         child.name.to_upper_camel_case()
                     )?;
                 }
-                writeln!(w, "_ => return Err(crate::ReadError::UnknownType),")
+                writeln!(w, "_ => return Err(crate::ReadError::UnknownXsiType),")
             })?;
             writeln!(w, "}}")
         })?;
