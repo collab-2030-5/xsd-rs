@@ -1,3 +1,4 @@
+pub(crate) mod config;
 pub(crate) mod traits;
 
 use structopt::StructOpt;
@@ -12,6 +13,7 @@ use xml_model::resolved::{
 };
 use xml_model::SimpleType;
 
+use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
 
@@ -24,6 +26,9 @@ struct Opt {
     /// json input file
     #[structopt(short = "i", long = "input", parse(from_os_str))]
     input: PathBuf,
+    /// config file
+    #[structopt(short = "c", long = "config", parse(from_os_str))]
+    config: PathBuf,
     // rust output file
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
@@ -435,7 +440,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     writeln!(w, "}}")
 }
 
-fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+fn write_model(w: &mut dyn Write, model: &Model, config: &Config) -> std::io::Result<()> {
     // write all the snippets
     write_lines(w, include_str!("../snippets/use_statements.rs"))?;
     writeln!(w)?;
@@ -467,7 +472,7 @@ fn write_model(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
 
     writeln!(w)?;
 
-    write_base_enums(w, model)?;
+    write_base_enums(w, model, &config)?;
 
     writeln!(w)?;
 
@@ -751,13 +756,16 @@ fn write_base_enum_def(
     w: &mut dyn Write,
     st: &Struct,
     parents: &[Rc<Struct>],
+    config: &Config,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(w, "pub enum {} {{", base_name)?;
     indent(w, |w| {
-        writeln!(w, "{}(super::{}),", base_name, base_name)?;
-        for st in parents.iter() {
+        for st in parents
+            .iter()
+            .filter(|x| config.generate_base_type(&st.name, &x.name))
+        {
             let child_name = st.name.to_upper_camel_case();
             writeln!(w, "{}(super::{}),", child_name, child_name)?;
         }
@@ -770,6 +778,7 @@ fn write_base_enum_impl(
     w: &mut dyn Write,
     st: &Struct,
     parents: &[Rc<Struct>],
+    config: &Config,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
     writeln!(w, "impl {} {{", base_name)?;
@@ -778,12 +787,10 @@ fn write_base_enum_impl(
         indent(w, |w| {
             writeln!(w, "match self {{")?;
             indent(w, |w| {
-                writeln!(
-                    w,
-                    "{}::{}(x) => x.write_with_name(writer, name, false, false),",
-                    base_name, base_name
-                )?;
-                for p in parents {
+                for p in parents
+                    .iter()
+                    .filter(|x| config.generate_base_type(&st.name, &x.name))
+                {
                     writeln!(
                         w,
                         "{}::{}(x) => x.write_with_name(writer, name, false, true),",
@@ -801,12 +808,10 @@ fn write_base_enum_impl(
         indent(w, |w| {
             writeln!(w, "match crate::find_xsi_type(attrs) {{")?;
             indent(w, |w| {
-                writeln!(
-                    w,
-                    "// if xsi:type isn't present just deserialize the base type"
-                )?;
-                writeln!(w, "None => {}::read(reader, attrs, parent_tag),", st.name)?;
-                for child in parents {
+                for child in parents
+                    .iter()
+                    .filter(|x| config.generate_base_type(&st.name, &x.name))
+                {
                     let child_name = child.name.to_upper_camel_case();
                     writeln!(
                         w,
@@ -827,7 +832,7 @@ fn write_base_enum_impl(
     writeln!(w, "}}")
 }
 
-fn write_base_enums(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
+fn write_base_enums(w: &mut dyn Write, model: &Model, config: &Config) -> std::io::Result<()> {
     let base_fields = model.base_fields();
 
     if base_fields.is_empty() {
@@ -846,9 +851,9 @@ fn write_base_enums(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
         for base in base_fields.iter() {
             writeln!(w)?;
             let parents = model.sub_structs_of(base);
-            write_base_enum_def(w, base, parents.as_slice())?;
+            write_base_enum_def(w, base, parents.as_slice(), config)?;
             writeln!(w)?;
-            write_base_enum_impl(w, base, parents.as_slice())?;
+            write_base_enum_impl(w, base, parents.as_slice(), config)?;
             writeln!(w)?;
         }
         Ok(())
@@ -861,11 +866,13 @@ fn write_base_enums(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
 fn main() {
     let opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input).unwrap();
+    let config: config::Config =
+        serde_json::from_reader(std::fs::File::open(opt.config).unwrap()).unwrap();
     let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input).unwrap();
     let model = model.resolve();
 
     let output = std::fs::File::create(opt.output).unwrap();
     let mut writer = LineWriter::new(output);
 
-    write_model(&mut writer, &model).unwrap();
+    write_model(&mut writer, &model, &config).unwrap();
 }
