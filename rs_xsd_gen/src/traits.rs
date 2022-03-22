@@ -31,9 +31,9 @@ impl RustType for ElementType {
             ElementType::Simple(x) => x.rust_struct_type(),
             ElementType::Struct(x) => {
                 if x.metadata.is_base {
-                    format!("inherited::{}", x.name.to_upper_camel_case())
+                    format!("base::{}", x.name.to_upper_camel_case())
                 } else {
-                    x.name.to_upper_camel_case()
+                    format!("structs::{}", x.name.to_upper_camel_case())
                 }
             }
         }

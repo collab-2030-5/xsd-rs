@@ -12,7 +12,7 @@ impl Default for WriteConfig {
 }
 
 impl WriteConfig {
-    fn to_xml_rs(self) -> EmitterConfig {
-        EmitterConfig::new().write_document_declaration(self.write_document_declaration)
+    pub(crate) fn to_xml_rs(self) -> xml::EmitterConfig {
+        xml::EmitterConfig::new().write_document_declaration(self.write_document_declaration)
     }
 }

@@ -7,15 +7,15 @@ use heck::{ToSnakeCase, ToUpperCamelCase};
 use indent_write::io::IndentWriter;
 use std::io::LineWriter;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use xml_model::resolved::{
     AttrMultiplicity, ElemMultiplicity, ElementType, FieldType, Model, Struct,
 };
-use xml_model::SimpleType;
 
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
+use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -29,9 +29,131 @@ struct Opt {
     /// config file
     #[structopt(short = "c", long = "config", parse(from_os_str))]
     config: PathBuf,
-    // rust output file
+    /// rust output directory
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
+    /// rust output directory
+    #[structopt(short = "r", long = "remove")]
+    remove_dir: bool,
+}
+
+type FatalError = Box<dyn std::error::Error>;
+
+fn main() -> Result<(), FatalError> {
+    let opt: Opt = Opt::from_args();
+    let input = std::fs::read_to_string(opt.input)?;
+    let config: config::Config = serde_json::from_reader(std::fs::File::open(opt.config)?)?;
+    let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input)?;
+    let model = model.resolve();
+
+    create_main_output_dir(&opt.output, opt.remove_dir)?;
+
+    write_model(opt.output, &model, &config)?;
+
+    Ok(())
+}
+
+fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), FatalError> {
+    let files = [
+        ("config.rs", include_str!("../snippets/config.rs")),
+        ("error.rs", include_str!("../snippets/error.rs")),
+        ("helpers.rs", include_str!("../snippets/helpers.rs")),
+        ("mod.rs", include_str!("../snippets/mod.rs")),
+        ("traits.rs", include_str!("../snippets/traits.rs")),
+    ];
+
+    for (file_name, data) in files {
+        write_file(&dir.join(file_name), data)?;
+    }
+
+    let struct_dir = dir.join("structs");
+    std::fs::create_dir(&struct_dir)?;
+
+    let mod_file = struct_dir.join("mod.rs");
+    write_struct_mod_file(&mod_file, model)?;
+
+    for st in &model.structs {
+        let path = struct_dir.join(format!("{}.rs", st.name.to_snake_case()));
+        let mut writer = create(&path)?;
+        write_struct_file(&mut writer, st)?;
+    }
+
+    let base_enum_dir = dir.join("base");
+    write_base_enums(&base_enum_dir, model, config)?;
+
+    Ok(())
+}
+
+fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
+    write_comment(w, &st.comment)?;
+    writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
+    indent(w, |w| write_struct_fields(w, st))?;
+    writeln!(w, "}}")
+}
+
+fn write_struct_file(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
+    writeln!(w, "use super::super::*;")?;
+    writeln!(w, "use xml::writer::*;")?;
+    writeln!(w, "use xml::common::Position;")?;
+    writeln!(w)?;
+    write_struct_definition(w, st)?;
+    writeln!(w)?;
+    write_serializers(w, st)?;
+    writeln!(w)?;
+    write_deserializer_impl(w, st)?;
+    writeln!(w)?;
+    write_deserializer_trait_impl(w, st)?;
+    Ok(())
+}
+
+fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
+    let mut w = create(path)?;
+
+    for st in model.structs.iter() {
+        writeln!(w, "mod {};", st.name.to_snake_case())?;
+    }
+
+    writeln!(w)?;
+
+    for st in model.structs.iter() {
+        writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
+    }
+
+    writeln!(w)?;
+
+    write_add_schema_attr(&mut w, model)?;
+
+    Ok(())
+}
+
+fn create_main_output_dir(path: &Path, delete_dir: bool) -> Result<(), FatalError> {
+    if path.exists() {
+        if path.is_file() {
+            return Err(format!(
+                "Output must be a directory, but the supplied path is a file: {:?}",
+                path
+            )
+            .into());
+        }
+
+        if path.is_dir() {
+            if delete_dir {
+                std::fs::remove_dir_all(path)?;
+            } else {
+                return Err(format!("Cannot write into existing directory {:?}. Delete the directory or use the -r flag to remove it", path).into());
+            }
+        }
+    }
+
+    std::fs::create_dir(path)?;
+
+    Ok(())
+}
+
+fn create(path: &std::path::Path) -> Result<impl std::io::Write, FatalError> {
+    let output = std::fs::File::create(path)?;
+    Ok(LineWriter::new(output))
 }
 
 fn write_comment(w: &mut dyn Write, comment: &Option<String>) -> std::io::Result<()> {
@@ -340,19 +462,12 @@ where
     Ok(())
 }
 
-fn write_lines(w: &mut dyn Write, s: &str) -> std::io::Result<()> {
-    for line in s.lines() {
-        writeln!(w, "{}", line)?;
-    }
-    Ok(())
-}
-
 fn write_add_schema_attr(w: &mut dyn Write, model: &Model) -> std::io::Result<()> {
     let target_ns = model.target_ns.as_ref().expect("requires target namespace");
 
     writeln!(
         w,
-        "fn add_schema_attr(start: events::StartElementBuilder) -> events::StartElementBuilder {{"
+        "pub(crate) fn add_schema_attr(start: xml::writer::events::StartElementBuilder) -> xml::writer::events::StartElementBuilder {{"
     )?;
     indent(w, |w| {
         writeln!(w, "start")?;
@@ -392,9 +507,9 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
             writeln!(w)?;
         }
 
-        writeln!(w, "fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+        writeln!(w, "pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
         indent(w, |w| {
-            writeln!(w, "let start = if top_level {{ add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
+            writeln!(w, "let start = if top_level {{ structs::add_schema_attr(events::XmlEvent::start_element(name)) }} else {{ events::XmlEvent::start_element(name) }};")?;
 
             if !attributes.is_empty() {
                 writeln!(w, "// ---- start attributes ----")?;
@@ -448,46 +563,9 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     writeln!(w, "}}")
 }
 
-fn write_model(w: &mut dyn Write, model: &Model, config: &Config) -> std::io::Result<()> {
-    // write all the snippets
-    write_lines(w, include_str!("../snippets/use_statements.rs"))?;
-    writeln!(w)?;
-    write_lines(w, include_str!("../snippets/traits.rs"))?;
-    writeln!(w)?;
-    write_lines(w, include_str!("../snippets/config.rs"))?;
-    writeln!(w)?;
-
-    write_add_schema_attr(w, model)?;
-    writeln!(w)?;
-
-    // write the struct definitions
-    for st in &model.structs {
-        write_comment(w, &st.comment)?;
-        writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
-        writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
-        indent(w, |w| write_struct_fields(w, st))?;
-        writeln!(w, "}}")?;
-    }
-
-    // write the serialization impl and trait
-    for st in &model.structs {
-        write_serializers(w, st)?;
-        writeln!(w)?;
-        write_deserializer_impl(w, st)?;
-        writeln!(w)?;
-        write_deserializer_trait_impl(w, st)?;
-    }
-
-    writeln!(w)?;
-
-    write_base_enums(w, model, &config)?;
-
-    writeln!(w)?;
-
-    write_lines(w, include_str!("../snippets/error.rs"))?;
-    writeln!(w)?;
-    write_lines(w, include_str!("../snippets/helpers.rs"))?;
-
+fn write_file(path: &Path, data: &str) -> Result<(), FatalError> {
+    let mut writer = create(path)?;
+    writer.write_all(data.as_bytes())?;
     Ok(())
 }
 
@@ -582,13 +660,13 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ElementTransform::Struct(s) => {
             if s.metadata.is_base {
                 format!(
-                    "inherited::{}::read(reader, &attributes, \"{}\")?",
+                    "base::{}::read(reader, &attributes, \"{}\")?",
                     s.name.to_upper_camel_case(),
                     &elem.name
                 )
             } else {
                 format!(
-                    "{}::read(reader, &attributes, \"{}\")?",
+                    "structs::{}::read(reader, &attributes, \"{}\")?",
                     s.name.to_upper_camel_case(),
                     &elem.name
                 )
@@ -736,7 +814,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st)?;
@@ -783,7 +861,7 @@ fn write_base_enum_def(
             .filter(|x| config.generate_base_type(&st.name, &x.name))
         {
             let child_name = st.name.to_upper_camel_case();
-            writeln!(w, "{}(super::{}),", child_name, child_name)?;
+            writeln!(w, "{}(structs::{}),", child_name, child_name)?;
         }
         Ok(())
     })?;
@@ -831,7 +909,7 @@ fn write_base_enum_impl(
                     let child_name = child.name.to_upper_camel_case();
                     writeln!(
                         w,
-                        "\"{}\" => Ok({}::{}(super::{}::read(reader, attrs, parent_tag)?)),",
+                        "\"{}\" => Ok({}::{}(structs::{}::read(reader, attrs, parent_tag)?)),",
                         child.name,
                         base_name,
                         child_name,
@@ -848,47 +926,40 @@ fn write_base_enum_impl(
     writeln!(w, "}}")
 }
 
-fn write_base_enums(w: &mut dyn Write, model: &Model, config: &Config) -> std::io::Result<()> {
+fn write_base_enums(dir: &Path, model: &Model, config: &Config) -> Result<(), FatalError> {
+    std::fs::create_dir(dir)?;
+
     let base_fields = model.base_fields();
 
     if base_fields.is_empty() {
         return Ok(());
     }
 
-    writeln!(
-        w,
-        "/// Enum representations of types that are used in conjunction w/ xsi:type tags"
-    )?;
-    writeln!(w, "/// 1) base types ")?;
-    writeln!(w, "/// 2) used as elements in other types")?;
-    writeln!(w, "/// 2) used as elements in other types")?;
-    writeln!(w, "pub mod inherited {{")?;
-    indent(w, |w| {
+    // write the module file
+    {
+        let mut w = create(&dir.join("mod.rs"))?;
         for base in base_fields.iter() {
-            writeln!(w)?;
-            let parents = model.sub_structs_of(base);
-            write_base_enum_def(w, base, parents.as_slice(), config)?;
-            writeln!(w)?;
-            write_base_enum_impl(w, base, parents.as_slice(), config)?;
-            writeln!(w)?;
+            writeln!(w, "mod {};", base.name.to_snake_case())?;
         }
-        Ok(())
-    })?;
-    writeln!(w, "}}")?;
+
+        writeln!(w)?;
+
+        for base in base_fields.iter() {
+            writeln!(w, "pub use {}::*;", base.name.to_snake_case())?;
+        }
+    }
+
+    for base in base_fields.iter() {
+        let file = dir.join(format!("{}.rs", base.name.to_snake_case()));
+        let mut w = create(&file)?;
+        writeln!(w, "use super::super::*;")?;
+        writeln!(w)?;
+        let parents = model.sub_structs_of(base);
+        write_base_enum_def(&mut w, base, parents.as_slice(), config)?;
+        writeln!(w)?;
+        write_base_enum_impl(&mut w, base, parents.as_slice(), config)?;
+        writeln!(w)?;
+    }
 
     Ok(())
-}
-
-fn main() {
-    let opt = Opt::from_args();
-    let input = std::fs::read_to_string(opt.input).unwrap();
-    let config: config::Config =
-        serde_json::from_reader(std::fs::File::open(opt.config).unwrap()).unwrap();
-    let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input).unwrap();
-    let model = model.resolve();
-
-    let output = std::fs::File::create(opt.output).unwrap();
-    let mut writer = LineWriter::new(output);
-
-    write_model(&mut writer, &model, &config).unwrap();
 }

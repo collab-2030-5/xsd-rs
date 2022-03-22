@@ -1,3 +1,5 @@
+use super::*;
+
 /// XML types implement this trait to write them to any std::io::Write
 pub trait WriteXml {
 
