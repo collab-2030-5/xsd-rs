@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::config::Config;
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -213,7 +214,7 @@ impl UnresolvedModel {
         meta_map
     }
 
-    pub fn resolve(&self) -> crate::resolved::Model {
+    pub fn resolve(&self, _config: Config) -> crate::resolved::Model {
         let mut input: HashMap<String, UnresolvedStruct> = self
             .structs
             .iter()

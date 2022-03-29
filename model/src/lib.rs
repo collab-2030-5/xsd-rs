@@ -1,3 +1,5 @@
+/// configuration types that can be read/written from JSON
+pub mod config;
 /// resolved version of the model suitable for code-gen
 pub mod resolved;
 /// raw JSON representation of the model

@@ -29,6 +29,9 @@ struct Opt {
     /// config file
     #[structopt(short = "c", long = "config", parse(from_os_str))]
     config: PathBuf,
+    /// mapping file
+    #[structopt(short = "m", long = "mapping", parse(from_os_str))]
+    mapping: PathBuf,
     /// rust output directory
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
@@ -43,8 +46,10 @@ fn main() -> Result<(), FatalError> {
     let opt: Opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input)?;
     let config: config::Config = serde_json::from_reader(std::fs::File::open(opt.config)?)?;
+    let model_config: xml_model::config::Config =
+        serde_json::from_reader(std::fs::File::open(opt.mapping)?)?;
     let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input)?;
-    let model = model.resolve();
+    let model = model.resolve(model_config);
 
     create_main_output_dir(&opt.output, opt.remove_dir)?;
 
