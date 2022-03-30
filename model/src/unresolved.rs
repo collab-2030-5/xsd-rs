@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::config::{Config, NumericEnum};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -213,7 +214,21 @@ impl UnresolvedModel {
         meta_map
     }
 
-    pub fn resolve(&self) -> crate::resolved::Model {
+    pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
+        let enums: Vec<Rc<NumericEnum<u8>>> = config.mappings.iter().map(|x| x.1.clone()).collect();
+
+        // first do type substitution
+        for (type_name, substitute) in config.mappings {
+            match self.simple_types.get_mut(&type_name) {
+                None => {
+                    panic!("No substitute found for type: {}", type_name);
+                }
+                Some(x) => {
+                    *x = SimpleType::EnumU8(substitute);
+                }
+            }
+        }
+
         let mut input: HashMap<String, UnresolvedStruct> = self
             .structs
             .iter()
@@ -228,6 +243,7 @@ impl UnresolvedModel {
         loop {
             if input.is_empty() {
                 return crate::resolved::Model {
+                    enums,
                     target_ns: self.target_ns.clone(),
                     structs: output.values().cloned().collect(),
                 };

@@ -15,6 +15,7 @@ use xml_model::resolved::{
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
+use xml_model::config::NumericEnum;
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -29,6 +30,9 @@ struct Opt {
     /// config file
     #[structopt(short = "c", long = "config", parse(from_os_str))]
     config: PathBuf,
+    /// mapping file
+    #[structopt(short = "m", long = "mapping", parse(from_os_str))]
+    mapping: PathBuf,
     /// rust output directory
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
@@ -43,8 +47,10 @@ fn main() -> Result<(), FatalError> {
     let opt: Opt = Opt::from_args();
     let input = std::fs::read_to_string(opt.input)?;
     let config: config::Config = serde_json::from_reader(std::fs::File::open(opt.config)?)?;
+    let model_config: xml_model::config::Config =
+        serde_json::from_reader(std::fs::File::open(opt.mapping)?)?;
     let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input)?;
-    let model = model.resolve();
+    let model = model.resolve(model_config);
 
     create_main_output_dir(&opt.output, opt.remove_dir)?;
 
@@ -72,6 +78,14 @@ fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), Fatal
     let mod_file = struct_dir.join("mod.rs");
     write_struct_mod_file(&mod_file, model)?;
 
+    // write the enums
+
+    for e in &model.enums {
+        let path = struct_dir.join(format!("{}.rs", e.name.to_snake_case()));
+        let mut writer = create(&path)?;
+        write_enum_file(&mut writer, e)?;
+    }
+
     for st in &model.structs {
         let path = struct_dir.join(format!("{}.rs", st.name.to_snake_case()));
         let mut writer = create(&path)?;
@@ -90,6 +104,57 @@ fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
     writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| write_struct_fields(w, st))?;
     writeln!(w, "}}")
+}
+
+fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalError> {
+    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq)]")?;
+    writeln!(w, "pub enum {} {{", e.name)?;
+    indent(w, |w| {
+        for value in e.variants.values() {
+            write_comment(w, &value.comment)?;
+            writeln!(w, "{},", value.name)?;
+        }
+        writeln!(w, "/// Received an unknown value")?;
+        writeln!(w, "Other(u8)")
+    })?;
+    writeln!(w, "}}")?;
+
+    writeln!(w)?;
+
+    writeln!(w, "impl {} {{", e.name)?;
+    indent(w, |w| {
+        writeln!(w, "pub fn value(&self) -> u8 {{")?;
+        indent(w, |w| {
+            writeln!(w, "match self {{")?;
+            indent(w, |w| {
+                for (value, var) in e.variants.iter() {
+                    writeln!(w, "Self::{} => {},", var.name, value)?;
+                }
+                writeln!(w, "Self::Other(x) => *x,")?;
+                Ok(())
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")?;
+
+        writeln!(w)?;
+
+        writeln!(w, "pub fn from_value(value: u8) -> Self {{")?;
+        indent(w, |w| {
+            writeln!(w, "match value {{")?;
+            indent(w, |w| {
+                for (value, var) in e.variants.iter() {
+                    writeln!(w, "{} => Self::{},", value, var.name)?;
+                }
+                writeln!(w, "_ => Self::Other(value),")?;
+                Ok(())
+            })?;
+            writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")?;
+    Ok(())
 }
 
 fn write_struct_file(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
@@ -114,10 +179,18 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "mod {};", st.name.to_snake_case())?;
     }
 
+    for e in model.enums.iter() {
+        writeln!(w, "mod {};", e.name.to_snake_case())?;
+    }
+
     writeln!(w)?;
 
     for st in model.structs.iter() {
         writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
+    }
+
+    for e in model.enums.iter() {
+        writeln!(w, "pub use {}::*;", e.name.to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -257,17 +330,24 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
 
 enum AttributeTransform {
     Number,
+    Enum(std::rc::Rc<NumericEnum<u8>>),
 }
 
 impl AttributeTransform {
     fn transform_to_string(&self, name: &str) -> String {
         match self {
-            AttributeTransform::Number => format!("{}.to_string()", name),
+            Self::Number => format!("{}.to_string()", name),
+            Self::Enum(_) => {
+                format!("{}.value().to_string()", name)
+            }
         }
     }
     fn parse_from_string(&self) -> String {
         match self {
-            AttributeTransform::Number => "attr.value.parse()?".to_string(),
+            Self::Number => "attr.value.parse()?".to_string(),
+            Self::Enum(e) => {
+                format!("structs::{}::from_value(attr.value.parse()?)", e.name)
+            }
         }
     }
 }
@@ -286,6 +366,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::U32(_) => Some(AttributeTransform::Number),
         SimpleType::I64(_) => Some(AttributeTransform::Number),
         SimpleType::U64(_) => Some(AttributeTransform::Number),
+        SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
     }
 }
 
@@ -362,6 +443,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::U32(_) => ElementTransform::Number,
         SimpleType::I64(_) => ElementTransform::Number,
         SimpleType::U64(_) => ElementTransform::Number,
+        SimpleType::EnumU8(_) => unimplemented!(),
     }
 }
 

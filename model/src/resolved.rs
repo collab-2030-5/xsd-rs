@@ -1,5 +1,6 @@
 use crate::{Namespace, SimpleType};
 
+use crate::config::NumericEnum;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -58,6 +59,7 @@ pub struct Struct {
 #[derive(Debug)]
 pub struct Model {
     pub target_ns: Option<Namespace>,
+    pub enums: Vec<Rc<NumericEnum<u8>>>,
     pub structs: Vec<Rc<Struct>>,
 }
 

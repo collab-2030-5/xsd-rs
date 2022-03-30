@@ -1,3 +1,5 @@
+/// configuration types that can be read/written from JSON
+pub mod config;
 /// resolved version of the model suitable for code-gen
 pub mod resolved;
 /// raw JSON representation of the model
@@ -40,4 +42,6 @@ pub enum SimpleType {
     U32(NumericConstraint<u32>),
     I64(NumericConstraint<i64>),
     U64(NumericConstraint<u64>),
+    /// numeric enum type
+    EnumU8(std::rc::Rc<config::NumericEnum<u8>>),
 }

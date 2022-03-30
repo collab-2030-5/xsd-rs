@@ -21,6 +21,7 @@ impl RustType for SimpleType {
             Self::U32(_) => "u32".to_string(),
             Self::I64(_) => "i64".to_string(),
             Self::U64(_) => "u64".to_string(),
+            Self::EnumU8(x) => format!("structs::{}", x.name.to_upper_camel_case()),
         }
     }
 }
