@@ -1,0 +1,26 @@
+{
+  "mappings": {
+    "SubscribableType": {
+      "name": "SubscribableType",
+      "variants": {
+        "0" : {
+          "name" : "NoSupport",
+          "comment": "Resource does NOT support subscriptions"
+        },
+        "1" : {
+          "name" : "NonConditional",
+          "comment": "Resource supports non-conditional subscriptions"
+        },
+        "2" : {
+          "name" : "Conditional",
+          "comment": "Resource supports conditional subscriptions"
+        },
+        "3" : {
+          "name" : "Both",
+          "comment": "Resource supports both conditional and non-conditional subscriptions"
+        }
+      }
+
+    }
+  }
+}
