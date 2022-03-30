@@ -114,7 +114,7 @@ fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalEr
             write_comment(w, &value.comment)?;
             writeln!(w, "{},", value.name)?;
         }
-        writeln!(w, "/// Received an unknown value")?;
+        writeln!(w, "/// Value not defined in the XSD")?;
         writeln!(w, "Other(u8)")
     })?;
     writeln!(w, "}}")?;
@@ -375,6 +375,7 @@ enum ElementTransform {
     Number,
     String,
     HexBytes,
+    Enum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
 }
 
 impl ElementTransform {
@@ -425,6 +426,14 @@ impl ElementTransform {
                     xsd_name
                 )
             }
+            ElementTransform::Enum(_) => {
+                writeln!(w, "let value = {}.value().to_string();", rust_name)?;
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", value.as_str())?;",
+                    xsd_name
+                )
+            }
         }
     }
 }
@@ -443,7 +452,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::U32(_) => ElementTransform::Number,
         SimpleType::I64(_) => ElementTransform::Number,
         SimpleType::U64(_) => ElementTransform::Number,
-        SimpleType::EnumU8(_) => unimplemented!(),
+        SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
     }
 }
 
@@ -764,6 +773,12 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             "parse_hex_bytes(&read_string(reader, \"{}\")?)?",
             &elem.name
         ),
+        ElementTransform::Enum(x) => {
+            format!(
+                "structs::{}::from_value(read_string(reader, \"{}\")?.parse()?)",
+                x.name, &elem.name
+            )
+        }
     };
 
     match &elem.multiplicity {
@@ -789,6 +804,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     ElementTransform::Number => false,
                     ElementTransform::String => false,
                     ElementTransform::HexBytes => false,
+                    ElementTransform::Enum(_) => false,
                 });
 
             if has_struct {

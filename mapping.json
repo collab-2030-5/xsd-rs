@@ -21,6 +21,30 @@
         }
       }
 
+    },
+    "PowerSourceType": {
+      "name": "PowerSourceType",
+      "variants": {
+        "0" : {
+          "name" : "None"
+        },
+        "1" : {
+          "name" : "Mains"
+        },
+        "2" : {
+          "name" : "Battery"
+        },
+        "3" : {
+          "name" : "LocalGeneration"
+        },
+        "4" : {
+          "name" : "Emergency"
+        },
+        "5" : {
+          "name" : "Unknown"
+        }
+      }
+
     }
   }
 }
