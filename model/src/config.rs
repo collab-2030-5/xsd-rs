@@ -21,8 +21,14 @@ where
     pub variants: BTreeMap<T, Variant>,
 }
 
+/// Mappings not provided natively
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Mapping {
+    NumericEnum(std::rc::Rc<NumericEnum<u8>>),
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     /// maps an existing Type -> to an implementation dependent mapping
-    pub mappings: HashMap<String, std::rc::Rc<NumericEnum<u8>>>,
+    pub mappings: HashMap<String, Mapping>,
 }

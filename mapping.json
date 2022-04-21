@@ -1,50 +1,52 @@
 {
   "mappings": {
     "SubscribableType": {
-      "name": "SubscribableType",
-      "variants": {
-        "0" : {
-          "name" : "NoSupport",
-          "comment": "Resource does NOT support subscriptions"
-        },
-        "1" : {
-          "name" : "NonConditional",
-          "comment": "Resource supports non-conditional subscriptions"
-        },
-        "2" : {
-          "name" : "Conditional",
-          "comment": "Resource supports conditional subscriptions"
-        },
-        "3" : {
-          "name" : "Both",
-          "comment": "Resource supports both conditional and non-conditional subscriptions"
+      "NumericEnum": {
+        "name": "SubscribableType",
+        "variants": {
+          "0" : {
+            "name" : "NoSupport",
+            "comment": "Resource does NOT support subscriptions"
+          },
+          "1" : {
+            "name" : "NonConditional",
+            "comment": "Resource supports non-conditional subscriptions"
+          },
+          "2" : {
+            "name" : "Conditional",
+            "comment": "Resource supports conditional subscriptions"
+          },
+          "3" : {
+            "name" : "Both",
+            "comment": "Resource supports both conditional and non-conditional subscriptions"
+          }
         }
       }
-
     },
     "PowerSourceType": {
-      "name": "PowerSourceType",
-      "variants": {
-        "0" : {
-          "name" : "None"
-        },
-        "1" : {
-          "name" : "Mains"
-        },
-        "2" : {
-          "name" : "Battery"
-        },
-        "3" : {
-          "name" : "LocalGeneration"
-        },
-        "4" : {
-          "name" : "Emergency"
-        },
-        "5" : {
-          "name" : "Unknown"
+      "NumericEnum": {
+        "name": "PowerSourceType",
+        "variants": {
+          "0" : {
+            "name" : "None"
+          },
+          "1" : {
+            "name" : "Mains"
+          },
+          "2" : {
+            "name" : "Battery"
+          },
+          "3" : {
+            "name" : "LocalGeneration"
+          },
+          "4" : {
+            "name" : "Emergency"
+          },
+          "5" : {
+            "name" : "Unknown"
+          }
         }
       }
-
     }
   }
 }

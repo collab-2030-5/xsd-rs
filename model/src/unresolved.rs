@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, NumericEnum};
+use crate::config::{Config, Mapping, NumericEnum};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -215,7 +215,13 @@ impl UnresolvedModel {
     }
 
     pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
-        let enums: Vec<Rc<NumericEnum<u8>>> = config.mappings.iter().map(|x| x.1.clone()).collect();
+        let enums: Vec<Rc<NumericEnum<u8>>> = config
+            .mappings
+            .iter()
+            .map(|(_, mapping)| match mapping {
+                Mapping::NumericEnum(x) => x.clone(),
+            })
+            .collect();
 
         // first do type substitution
         for (type_name, substitute) in config.mappings {
@@ -224,7 +230,9 @@ impl UnresolvedModel {
                     panic!("No substitute found for type: {}", type_name);
                 }
                 Some(x) => {
-                    *x = SimpleType::EnumU8(substitute);
+                    *x = match substitute {
+                        Mapping::NumericEnum(x) => SimpleType::EnumU8(x),
+                    }
                 }
             }
         }
