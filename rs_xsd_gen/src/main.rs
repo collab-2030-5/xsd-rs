@@ -15,7 +15,7 @@ use xml_model::resolved::{
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
-use xml_model::config::NumericEnum;
+use xml_model::config::{NamedArray, NumericEnum};
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -78,12 +78,16 @@ fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), Fatal
     let mod_file = struct_dir.join("mod.rs");
     write_struct_mod_file(&mod_file, model)?;
 
-    // write the enums
-
     for e in &model.enums {
         let path = struct_dir.join(format!("{}.rs", e.name.to_snake_case()));
         let mut writer = create(&path)?;
         write_enum_file(&mut writer, e)?;
+    }
+
+    for na in &model.named_arrays {
+        let path = struct_dir.join(format!("{}.rs", na.name.to_snake_case()));
+        let mut writer = create(&path)?;
+        write_named_array_file(&mut writer, na)?;
     }
 
     for st in &model.structs {
@@ -104,6 +108,14 @@ fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
     writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| write_struct_fields(w, st))?;
     writeln!(w, "}}")
+}
+
+fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), FatalError> {
+    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq)]")?;
+    writeln!(w, "pub struct {} {{", na.name)?;
+    indent(w, |w| writeln!(w, "pub(crate) inner: [u8; {}],", na.size))?;
+    writeln!(w, "}}")?;
+    Ok(())
 }
 
 fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalError> {
@@ -179,6 +191,10 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "mod {};", st.name.to_snake_case())?;
     }
 
+    for na in model.named_arrays.iter() {
+        writeln!(w, "mod {};", na.name.to_snake_case())?;
+    }
+
     for e in model.enums.iter() {
         writeln!(w, "mod {};", e.name.to_snake_case())?;
     }
@@ -187,6 +203,10 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
 
     for st in model.structs.iter() {
         writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
+    }
+
+    for na in model.named_arrays.iter() {
+        writeln!(w, "pub use {}::*;", na.name.to_snake_case())?;
     }
 
     for e in model.enums.iter() {
@@ -367,6 +387,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::I64(_) => Some(AttributeTransform::Number),
         SimpleType::U64(_) => Some(AttributeTransform::Number),
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
+        SimpleType::NamedArray(_) => None,
     }
 }
 
@@ -376,6 +397,7 @@ enum ElementTransform {
     String,
     HexBytes,
     Enum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
+    NamedHexArray(std::rc::Rc<NamedArray>),
 }
 
 impl ElementTransform {
@@ -417,13 +439,8 @@ impl ElementTransform {
             ElementTransform::HexBytes => {
                 writeln!(
                     w,
-                    "let hex : String = {}.iter().map(|x| format!(\"{{:02x}}\", x)).collect();",
-                    rust_name
-                )?;
-                writeln!(
-                    w,
-                    "write_simple_tag(writer, \"{}\", hex.as_str())?;",
-                    xsd_name
+                    "write_hex_tag(writer, \"{}\", &{})?;",
+                    xsd_name, rust_name
                 )
             }
             ElementTransform::Enum(_) => {
@@ -432,6 +449,13 @@ impl ElementTransform {
                     w,
                     "write_simple_tag(writer, \"{}\", value.as_str())?;",
                     xsd_name
+                )
+            }
+            ElementTransform::NamedHexArray(_) => {
+                writeln!(
+                    w,
+                    "write_hex_tag(writer, \"{}\", {}.inner.as_slice())?;",
+                    xsd_name, rust_name
                 )
             }
         }
@@ -453,6 +477,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::I64(_) => ElementTransform::Number,
         SimpleType::U64(_) => ElementTransform::Number,
         SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
+        SimpleType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
     }
 }
 
@@ -779,6 +804,10 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
                 x.name, &elem.name
             )
         }
+        ElementTransform::NamedHexArray(buff) => format!(
+            "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&read_string(reader, \"{}\")?)? }}",
+            buff.name, buff.size, &elem.name
+        ),
     };
 
     match &elem.multiplicity {
@@ -805,6 +834,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     ElementTransform::String => false,
                     ElementTransform::HexBytes => false,
                     ElementTransform::Enum(_) => false,
+                    ElementTransform::NamedHexArray(_) => false,
                 });
 
             if has_struct {

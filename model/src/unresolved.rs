@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, Mapping, NumericEnum};
+use crate::config::{Config, Mapping, NamedArray, NumericEnum};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -218,8 +218,18 @@ impl UnresolvedModel {
         let enums: Vec<Rc<NumericEnum<u8>>> = config
             .mappings
             .iter()
-            .map(|(_, mapping)| match mapping {
-                Mapping::NumericEnum(x) => x.clone(),
+            .filter_map(|(_, mapping)| match mapping {
+                Mapping::NumericEnum(x) => Some(x.clone()),
+                Mapping::NamedArray(_) => None,
+            })
+            .collect();
+
+        let named_arrays: Vec<Rc<NamedArray>> = config
+            .mappings
+            .iter()
+            .filter_map(|(_, mapping)| match mapping {
+                Mapping::NumericEnum(_) => None,
+                Mapping::NamedArray(x) => Some(x.clone()),
             })
             .collect();
 
@@ -232,6 +242,7 @@ impl UnresolvedModel {
                 Some(x) => {
                     *x = match substitute {
                         Mapping::NumericEnum(x) => SimpleType::EnumU8(x),
+                        Mapping::NamedArray(x) => SimpleType::NamedArray(x),
                     }
                 }
             }
@@ -251,8 +262,9 @@ impl UnresolvedModel {
         loop {
             if input.is_empty() {
                 return crate::resolved::Model {
-                    enums,
                     target_ns: self.target_ns.clone(),
+                    enums,
+                    named_arrays,
                     structs: output.values().cloned().collect(),
                 };
             }

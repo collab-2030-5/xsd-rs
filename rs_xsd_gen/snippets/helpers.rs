@@ -88,24 +88,60 @@ pub(crate) fn expect_end_element<R>(
     }
 }
 
-pub(crate) fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> {
-    let mut ret = Vec::new();
+pub(crate) fn iter_hex_bytes<F>(value: &str, mut output: F) -> Result<usize, ReadError>
+    where
+        F: FnMut(usize, u8) -> Result<(), ReadError>,
+{
     if value.len() % 2 != 0 {
         return Err(ReadError::BadHexString);
     }
+
+    let mut pos = 0;
     let count = value.len() / 2;
+    // consume bytes left to right
+
     for i in 0..count {
-        let start = 2*i;
-        let range = start..start+2;
+        let start = 2 * i;
+        let range = start..start + 2;
         match value.get(range) {
             None => {
                 return Err(ReadError::BadHexString);
             }
             Some(s) => {
-                ret.push(u8::from_str_radix(s, 16)?)
+                let value = u8::from_str_radix(s, 16)?;
+                output(pos, value)?;
+
             }
         }
+        pos += 1;
     }
+
+    Ok(pos)
+}
+
+pub(crate) fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> {
+    let mut ret = Vec::new();
+    iter_hex_bytes(value, |_, x| {
+        ret.push(x);
+        Ok(())
+    })?;
+    Ok(ret)
+}
+
+pub(crate) fn parse_fixed_hex_bytes<const T: usize>(
+    value: &str,
+) -> core::result::Result<[u8; T], ReadError> {
+    let mut ret: [u8; T] = [0; T];
+
+    iter_hex_bytes(value, |pos, byte| {
+        match ret.get_mut(pos) {
+            None => return Err(ReadError::BadHexString),
+            Some(x) => {
+                *x = byte;
+                Ok(())
+            }
+        }
+    })?;
 
     Ok(ret)
 }
@@ -146,6 +182,18 @@ pub(crate) fn read_start_elem<R>(reader: &mut xml::reader::EventReader<R>, type_
             _ => return Err(ReadError::UnexpectedEvent),
         }
     }
+}
+
+pub(crate) fn write_hex_tag<W>(
+    writer: &mut xml::EventWriter<W>,
+    tag_name: &str,
+    data: &[u8],
+) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+{
+    let hex : String = data.iter().map(|x| format!("{:02x}", x)).collect();
+    write_simple_tag(writer, tag_name, hex.as_str())
 }
 
 pub(crate) fn write_simple_tag<W>(

@@ -1,5 +1,11 @@
 {
   "mappings": {
+    "HexBinary160": {
+      "NamedArray": {
+        "name": "Lfdi",
+        "size": 20
+      }
+    },
     "SubscribableType": {
       "NumericEnum": {
         "name": "SubscribableType",

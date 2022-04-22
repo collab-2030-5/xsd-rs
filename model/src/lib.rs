@@ -44,4 +44,6 @@ pub enum SimpleType {
     U64(NumericConstraint<u64>),
     /// numeric enum type
     EnumU8(std::rc::Rc<config::NumericEnum<u8>>),
+    /// Fixed size number of bytes mapped to a fixed array
+    NamedArray(std::rc::Rc<config::NamedArray>),
 }
