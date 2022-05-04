@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, NamedArray, NumericEnum, SubstitutedType};
+use crate::config::{Config, FieldKey, NamedArray, NumericEnum, ResolvedConfig, SubstitutedType};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -103,7 +103,33 @@ impl UnresolvedField {
         &self,
         structs: &HashMap<String, Rc<Struct>>,
         simple_types: &HashMap<String, SimpleType>,
+        struct_name: &str,
+        config: &ResolvedConfig,
     ) -> Option<Field> {
+        // first try to resolve it using the substitution map
+        let id = FieldKey {
+            struct_name: struct_name.to_string(),
+            field_name: self.name.to_string(),
+        };
+
+        if let Some(x) = config.field_mappings.get(&id) {
+            println!("Resolved {}.{} to {:?}", id.struct_name, id.field_name, x);
+
+            let field_type = match x {
+                SubstitutedType::NamedArray(x) => {
+                    get_simple_field_type(self.info, SimpleType::NamedArray(x.clone()))
+                }
+                SubstitutedType::NumericEnum(x) => {
+                    get_simple_field_type(self.info, SimpleType::EnumU8(x.clone()))
+                }
+            };
+            return Some(Field {
+                comment: self.comment.clone(),
+                name: self.name.clone(),
+                field_type,
+            });
+        }
+
         // first try to resolve as a simple type
         if let Some(x) = resolve_basic(&self.field_type) {
             return Some(Field {
@@ -141,6 +167,7 @@ impl UnresolvedStruct {
         metadata: Metadata,
         structs: &HashMap<String, Rc<Struct>>,
         simple_types: &HashMap<String, SimpleType>,
+        config: &ResolvedConfig,
     ) -> Option<std::rc::Rc<Struct>> {
         // resolve the base class
         let base_type = if let Some(base) = &self.base_type {
@@ -158,7 +185,7 @@ impl UnresolvedStruct {
         // resolve the fields
         let mut fields: Vec<Field> = Vec::new();
         for field in self.fields.iter() {
-            match field.resolve(structs, simple_types) {
+            match field.resolve(structs, simple_types, &self.name, config) {
                 None => {
                     // can't resolve field yet
                     return None;
@@ -233,14 +260,16 @@ impl UnresolvedModel {
             })
             .collect();
 
+        let config = config.resolve();
+
         // first do type substitution
-        for (type_name, substitute) in config.type_mappings {
-            match self.simple_types.get_mut(&type_name) {
+        for (type_name, substitute) in &config.type_mappings {
+            match self.simple_types.get_mut(type_name.as_str()) {
                 None => {
                     panic!("No substitute found for type: {}", type_name);
                 }
                 Some(x) => {
-                    *x = match config.types.get(&substitute).expect("unknown type mapping") {
+                    *x = match substitute {
                         SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
                         SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
                     }
@@ -273,7 +302,7 @@ impl UnresolvedModel {
                 // lookup the metadata
                 let metadata = *meta_map.get(&v.name).unwrap();
 
-                v.resolve(metadata, &output, &self.simple_types)
+                v.resolve(metadata, &output, &self.simple_types, &config)
             }) {
                 input.remove(&x.name);
                 output.insert(x.name.clone(), x);
