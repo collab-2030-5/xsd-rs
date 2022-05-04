@@ -111,9 +111,13 @@ fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 }
 
 fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), FatalError> {
-    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq)]")?;
+    writeln!(w, "#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]")?;
     writeln!(w, "pub struct {} {{", na.name)?;
-    indent(w, |w| writeln!(w, "pub(crate) inner: [u8; {}],", na.size))?;
+    indent(w, |w| writeln!(w, "pub(crate) inner: [u8; Self::SIZE],"))?;
+    writeln!(w, "}}")?;
+    writeln!(w)?;
+    writeln!(w, "impl {} {{", na.name)?;
+    indent(w, |w| writeln!(w, "pub const SIZE: usize = {};", na.size))?;
     writeln!(w, "}}")?;
     Ok(())
 }

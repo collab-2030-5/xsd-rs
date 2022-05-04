@@ -39,15 +39,26 @@ pub struct NamedArray {
 
 /// Mappings not provided natively
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Mapping {
+pub enum SubstitutedType {
     /// fixed size array of bytes
     NamedArray(std::rc::Rc<NamedArray>),
     /// enumeration w/ numeric representation
     NumericEnum(std::rc::Rc<NumericEnum<u8>>),
 }
 
+/// identifies a particular attribute or element within a struct
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
+pub struct FieldId {
+    pub parent_name: String,
+    pub field_name: String,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    /// maps an existing Type -> to an implementation dependent mapping
-    pub mappings: HashMap<String, Mapping>,
+    /// map of substituted types which may be mapped from and XSD type or a FieldId
+    pub types: HashMap<String, SubstitutedType>,
+    /// maps an existing XSD Type to substituted type
+    pub type_mappings: HashMap<String, String>,
+    /// map particular fields to a substituted type
+    pub field_mappings: HashMap<FieldId, String>,
 }

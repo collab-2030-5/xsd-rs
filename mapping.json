@@ -1,9 +1,22 @@
 {
-  "mappings": {
-    "HexBinary160": {
+  "type_mappings": {
+    "HexBinary160": "LFDI",
+    "mRIDType": "MRID",
+    "SubscribableType": "SubscribableType",
+    "PowerSourceType": "PowerSourceType"
+  },
+  "field_mappings": {},
+  "types": {
+    "LFDI": {
       "NamedArray": {
         "name": "Lfdi",
         "size": 20
+      }
+    },
+    "MRID": {
+      "NamedArray": {
+        "name": "Mrid",
+        "size": 16
       }
     },
     "SubscribableType": {

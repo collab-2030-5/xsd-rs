@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, Mapping, NamedArray, NumericEnum};
+use crate::config::{Config, NamedArray, NumericEnum, SubstitutedType};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -216,33 +216,33 @@ impl UnresolvedModel {
 
     pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
         let enums: Vec<Rc<NumericEnum<u8>>> = config
-            .mappings
+            .types
             .iter()
             .filter_map(|(_, mapping)| match mapping {
-                Mapping::NumericEnum(x) => Some(x.clone()),
-                Mapping::NamedArray(_) => None,
+                SubstitutedType::NumericEnum(x) => Some(x.clone()),
+                SubstitutedType::NamedArray(_) => None,
             })
             .collect();
 
         let named_arrays: Vec<Rc<NamedArray>> = config
-            .mappings
+            .types
             .iter()
             .filter_map(|(_, mapping)| match mapping {
-                Mapping::NumericEnum(_) => None,
-                Mapping::NamedArray(x) => Some(x.clone()),
+                SubstitutedType::NumericEnum(_) => None,
+                SubstitutedType::NamedArray(x) => Some(x.clone()),
             })
             .collect();
 
         // first do type substitution
-        for (type_name, substitute) in config.mappings {
+        for (type_name, substitute) in config.type_mappings {
             match self.simple_types.get_mut(&type_name) {
                 None => {
                     panic!("No substitute found for type: {}", type_name);
                 }
                 Some(x) => {
-                    *x = match substitute {
-                        Mapping::NumericEnum(x) => SimpleType::EnumU8(x),
-                        Mapping::NamedArray(x) => SimpleType::NamedArray(x),
+                    *x = match config.types.get(&substitute).expect("unknown type mapping") {
+                        SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
+                        SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
                     }
                 }
             }
