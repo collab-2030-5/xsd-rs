@@ -111,9 +111,13 @@ fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 }
 
 fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), FatalError> {
-    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq)]")?;
+    writeln!(w, "#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]")?;
     writeln!(w, "pub struct {} {{", na.name)?;
-    indent(w, |w| writeln!(w, "pub(crate) inner: [u8; {}],", na.size))?;
+    indent(w, |w| writeln!(w, "pub(crate) inner: [u8; Self::SIZE],"))?;
+    writeln!(w, "}}")?;
+    writeln!(w)?;
+    writeln!(w, "impl {} {{", na.name)?;
+    indent(w, |w| writeln!(w, "pub const SIZE: usize = {};", na.size))?;
     writeln!(w, "}}")?;
     Ok(())
 }
@@ -351,6 +355,7 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
 enum AttributeTransform {
     Number,
     Enum(std::rc::Rc<NumericEnum<u8>>),
+    NamedArray(std::rc::Rc<NamedArray>),
 }
 
 impl AttributeTransform {
@@ -360,6 +365,9 @@ impl AttributeTransform {
             Self::Enum(_) => {
                 format!("{}.value().to_string()", name)
             }
+            Self::NamedArray(_) => {
+                format!("to_hex({}.inner.as_slice())", name)
+            }
         }
     }
     fn parse_from_string(&self) -> String {
@@ -367,6 +375,12 @@ impl AttributeTransform {
             Self::Number => "attr.value.parse()?".to_string(),
             Self::Enum(e) => {
                 format!("structs::{}::from_value(attr.value.parse()?)", e.name)
+            }
+            Self::NamedArray(x) => {
+                format!(
+                    "structs::{} {{ inner: parse_fixed_hex_bytes(&attr.value)? }}",
+                    x.name
+                )
             }
         }
     }
@@ -387,7 +401,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::I64(_) => Some(AttributeTransform::Number),
         SimpleType::U64(_) => Some(AttributeTransform::Number),
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
-        SimpleType::NamedArray(_) => None,
+        SimpleType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
     }
 }
 

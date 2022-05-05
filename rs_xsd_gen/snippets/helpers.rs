@@ -184,6 +184,10 @@ pub(crate) fn read_start_elem<R>(reader: &mut xml::reader::EventReader<R>, type_
     }
 }
 
+pub(crate) fn to_hex(data: &[u8]) -> String {
+    data.iter().map(|x| format!("{:02x}", x)).collect()
+}
+
 pub(crate) fn write_hex_tag<W>(
     writer: &mut xml::EventWriter<W>,
     tag_name: &str,
@@ -192,7 +196,7 @@ pub(crate) fn write_hex_tag<W>(
     where
         W: std::io::Write,
 {
-    let hex : String = data.iter().map(|x| format!("{:02x}", x)).collect();
+    let hex : String = to_hex(data);
     write_simple_tag(writer, tag_name, hex.as_str())
 }
 

@@ -1,9 +1,36 @@
 {
-  "mappings": {
-    "HexBinary160": {
+  "type_mappings": {
+    "HexBinary160": "LFDI",
+    "mRIDType": "MRID",
+    "SubscribableType": "SubscribableType",
+    "PowerSourceType": "PowerSourceType"
+  },
+  "field_mappings": [
+    {
+      "field_key": {
+        "struct_name": "RespondableResource",
+        "field_name": "responseRequired"
+      },
+      "substituted": "ResponseRequired"
+    }
+  ],
+  "types": {
+    "ResponseRequired": {
+      "NamedArray": {
+        "name": "ResponseRequired",
+        "size": 1
+      }
+    },
+    "LFDI": {
       "NamedArray": {
         "name": "Lfdi",
         "size": 20
+      }
+    },
+    "MRID": {
+      "NamedArray": {
+        "name": "Mrid",
+        "size": 16
       }
     },
     "SubscribableType": {

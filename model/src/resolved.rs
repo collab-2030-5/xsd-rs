@@ -107,6 +107,9 @@ impl Model {
             }
         }
 
+        // can we sort here?
+        structs.sort_by(|lhs, rhs| lhs.name.cmp(&rhs.name));
+
         structs
     }
 }
