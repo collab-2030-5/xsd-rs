@@ -35,6 +35,13 @@
         "field_name": "rtgNormalCategory"
       },
       "substituted": "RtgNormalCategory"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERStatus",
+        "field_name": "alarmStatus"
+      },
+      "substituted": "DerAlarmStatus"
     }
   ],
   "types": {
@@ -179,6 +186,62 @@
             "bit_2": {
               "name": "op_mode_watt_var",
               "comment": "26 - opModWattVar (Watt-Var Mode)"
+            }
+          }
+        ]
+      }
+    },
+    "DerAlarmStatus": {
+      "HexBitField": {
+        "name": "DerAlarmStatus",
+        "comment": "Bitmap indicating the status of DER alarms (see DER LogEvents for more details",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "fault_over_current",
+              "comment": "0 - DER_FAULT_OVER_CURRENT"
+            },
+            "bit_1": {
+              "name": "fault_over_voltage",
+              "comment": "1 - DER_FAULT_OVER_VOLTAGE"
+            },
+            "bit_2": {
+              "name": "fault_under_current",
+              "comment": "2 - DER_FAULT_UNDER_VOLTAGE"
+            },
+            "bit_3": {
+              "name": "fault_over_frequency",
+              "comment": "3 - DER_FAULT_OVER_FREQUENCY"
+            },
+            "bit_4": {
+              "name": "fault_under_frequency",
+              "comment": "4 - DER_FAULT_UNDER_FREQUENCY"
+            },
+            "bit_5": {
+              "name": "fault_voltage_imbalance",
+              "comment": "5 - DER_FAULT_VOLTAGE_IMBALANCE"
+            },
+            "bit_6": {
+              "name": "fault_current_imbalance",
+              "comment": "6 - DER_FAULT_CURRENT_IMBALANCE"
+            },
+            "bit_7": {
+              "name": "fault_emergency_local",
+              "comment": "7 - DER_FAULT_EMERGENCY_LOCAL"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "fault_emergency_remote",
+              "comment": "8 - DER_FAULT_EMERGENCY_REMOTE"
+            },
+            "bit_1": {
+              "name": "fault_low_power_input",
+              "comment": "9 - DER_FAULT_LOW_POWER_INPUT"
+            },
+            "bit_2": {
+              "name": "fault_phase_rotation",
+              "comment": "10 - DER_FAULT_PHASE_ROTATION"
             }
           }
         ]
@@ -348,3 +411,4 @@
     }
   }
 }
+
