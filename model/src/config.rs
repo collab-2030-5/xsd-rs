@@ -79,6 +79,16 @@ pub enum SubstitutedType {
     HexBitField(std::rc::Rc<BitField>),
 }
 
+impl SubstitutedType {
+    pub fn name(&self) -> &str {
+        match self {
+            SubstitutedType::NamedArray(x) => &x.name,
+            SubstitutedType::NumericEnum(x) => &x.name,
+            SubstitutedType::HexBitField(x) => &x.name,
+        }
+    }
+}
+
 /// identifies a particular attribute or element within a struct
 #[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct FieldKey {

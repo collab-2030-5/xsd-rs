@@ -15,7 +15,7 @@ use xml_model::resolved::{
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
-use xml_model::config::{NamedArray, NumericEnum};
+use xml_model::config::{NamedArray, NumericEnum, SubstitutedType};
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -78,16 +78,20 @@ fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), Fatal
     let mod_file = struct_dir.join("mod.rs");
     write_struct_mod_file(&mod_file, model)?;
 
-    for e in &model.enums {
-        let path = struct_dir.join(format!("{}.rs", e.name.to_snake_case()));
+    for substituted in model.substituted_types.iter() {
+        let path = struct_dir.join(format!("{}.rs", substituted.name().to_snake_case()));
         let mut writer = create(&path)?;
-        write_enum_file(&mut writer, e)?;
-    }
-
-    for na in &model.named_arrays {
-        let path = struct_dir.join(format!("{}.rs", na.name.to_snake_case()));
-        let mut writer = create(&path)?;
-        write_named_array_file(&mut writer, na)?;
+        match substituted {
+            SubstitutedType::NamedArray(x) => {
+                write_named_array_file(&mut writer, x)?;
+            }
+            SubstitutedType::NumericEnum(x) => {
+                write_enum_file(&mut writer, x)?;
+            }
+            SubstitutedType::HexBitField(_x) => {
+                unimplemented!()
+            }
+        }
     }
 
     for st in &model.structs {
@@ -195,12 +199,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "mod {};", st.name.to_snake_case())?;
     }
 
-    for na in model.named_arrays.iter() {
-        writeln!(w, "mod {};", na.name.to_snake_case())?;
-    }
-
-    for e in model.enums.iter() {
-        writeln!(w, "mod {};", e.name.to_snake_case())?;
+    for x in model.substituted_types.iter() {
+        writeln!(w, "mod {};", x.name().to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -209,12 +209,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
     }
 
-    for na in model.named_arrays.iter() {
-        writeln!(w, "pub use {}::*;", na.name.to_snake_case())?;
-    }
-
-    for e in model.enums.iter() {
-        writeln!(w, "pub use {}::*;", e.name.to_snake_case())?;
+    for x in model.substituted_types.iter() {
+        writeln!(w, "pub use {}::*;", x.name().to_snake_case())?;
     }
 
     writeln!(w)?;

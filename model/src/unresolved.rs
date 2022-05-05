@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, FieldKey, NamedArray, NumericEnum, ResolvedConfig, SubstitutedType};
+use crate::config::{Config, FieldKey, ResolvedConfig, SubstitutedType};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -113,7 +113,6 @@ impl UnresolvedField {
         };
 
         if let Some(x) = config.field_mappings.get(&id) {
-
             println!("Resolved {}.{}", id.struct_name, id.field_name);
 
             let field_type = match x {
@@ -246,25 +245,7 @@ impl UnresolvedModel {
     }
 
     pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
-        let enums: Vec<Rc<NumericEnum<u8>>> = config
-            .types
-            .iter()
-            .filter_map(|(_, mapping)| match mapping {
-                SubstitutedType::NumericEnum(x) => Some(x.clone()),
-                SubstitutedType::NamedArray(_) => None,
-                SubstitutedType::HexBitField(_) => None,
-            })
-            .collect();
-
-        let named_arrays: Vec<Rc<NamedArray>> = config
-            .types
-            .iter()
-            .filter_map(|(_, mapping)| match mapping {
-                SubstitutedType::NumericEnum(_) => None,
-                SubstitutedType::NamedArray(x) => Some(x.clone()),
-                SubstitutedType::HexBitField(_) => None,
-            })
-            .collect();
+        let substituted_types: Vec<SubstitutedType> = config.types.values().cloned().collect();
 
         let config = config.resolve();
 
@@ -299,8 +280,7 @@ impl UnresolvedModel {
             if input.is_empty() {
                 return crate::resolved::Model {
                     target_ns: self.target_ns.clone(),
-                    enums,
-                    named_arrays,
+                    substituted_types,
                     structs: output.values().cloned().collect(),
                 };
             }

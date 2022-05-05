@@ -1,6 +1,6 @@
 use crate::{Namespace, SimpleType};
 
-use crate::config::{NamedArray, NumericEnum};
+use crate::config::SubstitutedType;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -59,8 +59,7 @@ pub struct Struct {
 #[derive(Debug)]
 pub struct Model {
     pub target_ns: Option<Namespace>,
-    pub enums: Vec<Rc<NumericEnum<u8>>>,
-    pub named_arrays: Vec<Rc<NamedArray>>,
+    pub substituted_types: Vec<SubstitutedType>,
     pub structs: Vec<Rc<Struct>>,
 }
 
