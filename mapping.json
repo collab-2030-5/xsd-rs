@@ -20,6 +20,13 @@
         "field_name": "currentStatus"
       },
       "substituted": "EventStatusType"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERCapability",
+        "field_name": "rtgAbnormalCategory"
+      },
+      "substituted": "RtgAbnormalCategory"
     }
   ],
   "types": {
@@ -252,6 +259,25 @@
           },
           "5" : {
             "name" : "Unknown"
+          }
+        }
+      }
+    },
+    "RtgAbnormalCategory": {
+      "NumericEnum": {
+        "name": "RtgAbnormalCategory",
+        "variants": {
+          "0" : {
+            "name" : "NotSpecified"
+          },
+          "1" : {
+            "name" : "Category1"
+          },
+          "2" : {
+            "name" : "Category2"
+          },
+          "3" : {
+            "name" : "Category3"
           }
         }
       }
