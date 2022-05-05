@@ -46,4 +46,6 @@ pub enum SimpleType {
     EnumU8(std::rc::Rc<config::NumericEnum<u8>>),
     /// Fixed size number of bytes mapped to a fixed array
     NamedArray(std::rc::Rc<config::NamedArray>),
+    /// Bitfield represented as Hex-bytes
+    HexBitField(std::rc::Rc<config::BitField>),
 }

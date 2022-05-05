@@ -22,6 +22,28 @@
     }
   ],
   "types": {
+    "ResponseRequirements": {
+      "HexBitField": {
+        "name": "ResponseRequirements",
+        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "end_device_indicates_received",
+              "comment": "End device shall indicate that message was received"
+            },
+            "bit_1": {
+              "name": "end_device_indicates_specific_response",
+              "comment": "End device shall indicate specific response"
+            },
+            "bit_2": {
+              "name": "end_user_response_required",
+              "comment": "End user / customer response is required"
+            }
+          }
+        ]
+      }
+    },
     "ResponseRequired": {
       "NamedArray": {
         "name": "ResponseRequired",

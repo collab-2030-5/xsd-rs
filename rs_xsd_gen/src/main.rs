@@ -402,6 +402,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::U64(_) => Some(AttributeTransform::Number),
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
         SimpleType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
+        SimpleType::HexBitField(_) => unimplemented!(),
     }
 }
 
@@ -492,6 +493,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::U64(_) => ElementTransform::Number,
         SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
         SimpleType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
+        SimpleType::HexBitField(_) => unimplemented!(),
     }
 }
 

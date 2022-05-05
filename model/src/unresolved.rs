@@ -122,6 +122,9 @@ impl UnresolvedField {
                 SubstitutedType::NumericEnum(x) => {
                     get_simple_field_type(self.info, SimpleType::EnumU8(x.clone()))
                 }
+                SubstitutedType::HexBitField(x) => {
+                    get_simple_field_type(self.info, SimpleType::HexBitField(x.clone()))
+                }
             };
             return Some(Field {
                 comment: self.comment.clone(),
@@ -248,6 +251,7 @@ impl UnresolvedModel {
             .filter_map(|(_, mapping)| match mapping {
                 SubstitutedType::NumericEnum(x) => Some(x.clone()),
                 SubstitutedType::NamedArray(_) => None,
+                SubstitutedType::HexBitField(_) => None,
             })
             .collect();
 
@@ -257,6 +261,7 @@ impl UnresolvedModel {
             .filter_map(|(_, mapping)| match mapping {
                 SubstitutedType::NumericEnum(_) => None,
                 SubstitutedType::NamedArray(x) => Some(x.clone()),
+                SubstitutedType::HexBitField(_) => None,
             })
             .collect();
 
@@ -272,6 +277,7 @@ impl UnresolvedModel {
                     *x = match substitute {
                         SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
                         SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
+                        SubstitutedType::HexBitField(x) => SimpleType::HexBitField(x.clone()),
                     }
                 }
             }

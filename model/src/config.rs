@@ -37,13 +37,46 @@ pub struct NamedArray {
     pub name: String,
 }
 
-/// Mappings not provided natively
+/// A particular bit within a byte
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Bit {
+    pub name: String,
+    pub comment: String,
+}
+
+/// Bits within a byte
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Byte {
+    pub bit_0: Option<Bit>,
+    pub bit_1: Option<Bit>,
+    pub bit_2: Option<Bit>,
+    pub bit_3: Option<Bit>,
+    pub bit_4: Option<Bit>,
+    pub bit_5: Option<Bit>,
+    pub bit_6: Option<Bit>,
+    pub bit_7: Option<Bit>,
+}
+
+/// A bit-field represented as an array where each bit has a meaning
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BitField {
+    /// Name of the Rust struct
+    pub name: String,
+    /// comment on the Rust struct
+    pub comment: String,
+    /// an array of bytes where each
+    pub bytes: Vec<Byte>,
+}
+
+/// Mappings not provided natively in XSD
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SubstitutedType {
     /// fixed size array of bytes
     NamedArray(std::rc::Rc<NamedArray>),
     /// enumeration w/ numeric representation
     NumericEnum(std::rc::Rc<NumericEnum<u8>>),
+    /// Bitfield represented by xs:hexBinary
+    HexBitField(std::rc::Rc<BitField>),
 }
 
 /// identifies a particular attribute or element within a struct
