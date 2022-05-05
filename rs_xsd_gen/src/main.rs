@@ -489,6 +489,7 @@ enum ElementTransform {
     HexBytes,
     Enum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
     NamedHexArray(std::rc::Rc<NamedArray>),
+    HexBitField(std::rc::Rc<BitField>),
 }
 
 impl ElementTransform {
@@ -549,6 +550,13 @@ impl ElementTransform {
                     xsd_name, rust_name
                 )
             }
+            ElementTransform::HexBitField(_) => {
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", &{}.to_hex())?;",
+                    xsd_name, rust_name
+                )
+            }
         }
     }
 }
@@ -569,7 +577,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::U64(_) => ElementTransform::Number,
         SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
         SimpleType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
-        SimpleType::HexBitField(_) => unimplemented!(),
+        SimpleType::HexBitField(x) => ElementTransform::HexBitField(x.clone()),
     }
 }
 
@@ -900,6 +908,11 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&read_string(reader, \"{}\")?)? }}",
             buff.name, buff.size, &elem.name
         ),
+        ElementTransform::HexBitField(x) => format!(
+            "structs::{}::from_hex(&read_string(reader, \"{}\")?)?",
+            x.name,
+            elem.name,
+        )
     };
 
     match &elem.multiplicity {
@@ -927,6 +940,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     ElementTransform::HexBytes => false,
                     ElementTransform::Enum(_) => false,
                     ElementTransform::NamedHexArray(_) => false,
+                    ElementTransform::HexBitField(_) => false,
                 });
 
             if has_struct {

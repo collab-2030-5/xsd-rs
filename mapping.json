@@ -3,7 +3,8 @@
     "HexBinary160": "LFDI",
     "mRIDType": "MRID",
     "SubscribableType": "SubscribableType",
-    "PowerSourceType": "PowerSourceType"
+    "PowerSourceType": "PowerSourceType",
+    "DERControlType": "DERControlType"
   },
   "field_mappings": [
     {
@@ -39,6 +40,130 @@
             "bit_2": {
               "name": "end_user_response_required",
               "comment": "End user / customer response is required"
+            }
+          }
+        ]
+      }
+    },
+    "DERControlType": {
+      "HexBitField": {
+        "name": "DERControlType",
+        "comment": "Control modes supported by the DER",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "charge_mode",
+              "comment": "0 - Charge mode"
+            },
+            "bit_1": {
+              "name": "discharge_mode",
+              "comment": "1 - Discharge mode"
+            },
+            "bit_2": {
+              "name": "op_mode_connect",
+              "comment": "2 - opModConnect (Connect / Disconnect - implies galvanic isolation)"
+            },
+            "bit_3": {
+              "name": "op_mode_energive",
+              "comment": "3 - opModEnergize (Energize / De-Energize)"
+            },
+            "bit_4": {
+              "name": "op_mode_fixed_pf_absorb_w",
+              "comment": "4 - opModFixedPFAbsorbW (Fixed Power Factor Setpoint when absorbing active power)"
+            },
+            "bit_5": {
+              "name": "op_mode_fixed_pf_inject_w",
+              "comment": "5 - opModFixedPFInjectW (Fixed Power Factor Setpoint when injecting active power)"
+            },
+            "bit_6": {
+              "name": "op_mode_fixed_var",
+              "comment": "6 - opModFixedVar (Reactive Power Setpoint)"
+            },
+            "bit_7": {
+              "name": "op_mode_fixed_w",
+              "comment": "7 - opModFixedW (Charge / Discharge Setpoint)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_freq_droop",
+              "comment": "8 - opModFreqDroop (Frequency-Watt Parameterized Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_freq_watt",
+              "comment": "9 - opModFreqWatt (Frequency-Watt Curve Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_hfrt_may_trip",
+              "comment": "10 - opModHFRTMayTrip (High Frequency Ride Through, May Trip Mode)"
+            },
+            "bit_3": {
+              "name": "op_mode_hfrt_must_trip",
+              "comment": "11 - opModHFRTMustTrip (High Frequency Ride Through, Must Trip Mode)"
+            },
+            "bit_4": {
+              "name": "op_mode_hvrt_may_trip",
+              "comment": "12 - opModHVRTMayTrip (High Voltage Ride Through, May Trip Mode)"
+            },
+            "bit_5": {
+              "name": "op_mode_hvrt_momentary_cessation",
+              "comment": "13 - opModHVRTMomentaryCessation (High Voltage Ride Through, Momentary Cessation Mode)"
+            },
+            "bit_6": {
+              "name": "op_mode_hvrt_must_trip",
+              "comment": "14 - opModHVRTMustTrip (High Voltage Ride Through, Must Trip Mode)"
+            },
+            "bit_7": {
+              "name": "op_mode_lfrt_may_trip",
+              "comment": "15 - opModLFRTMayTrip (Low Frequency Ride Through, May Trip Mode)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_lfrt_must_trip",
+              "comment": "16 - opModLFRTMustTrip (Low Frequency Ride Through, Must Trip Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_lvrt_may_trip",
+              "comment": "17 - opModLVRTMayTrip (Low Voltage Ride Through, May Trip Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_lvrt_momentary_cessation",
+              "comment": "18 - opModLVRTMomentaryCessation (Low Voltage Ride Through, Momentary Cessation Mode)"
+            },
+            "bit_3": {
+              "name": "op_mode_lvrt_must_trip",
+              "comment": "19 - opModLVRTMustTrip (Low Voltage Ride Through, Must Trip Mode)"
+            },
+            "bit_4": {
+              "name": "op_mode_max_lim_w",
+              "comment": "20 - opModMaxLimW (Maximum Active Power)"
+            },
+            "bit_5": {
+              "name": "op_mode_target_var",
+              "comment": "21 - opModTargetVar (Target Reactive Power)"
+            },
+            "bit_6": {
+              "name": "op_mode_target_w",
+              "comment": "22 - opModTargetW (Target Active Power)"
+            },
+            "bit_7": {
+              "name": "op_mode_volt_var",
+              "comment": "23 - opModVoltVar (Volt-Var Mode)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_volt_watt",
+              "comment": "24 - opModVoltWatt (Volt-Watt Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_watt_pf",
+              "comment": "25 - opModWattPF (Watt-PowerFactor Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_watt_var",
+              "comment": "26 - opModWattVar (Watt-Var Mode)"
             }
           }
         ]
