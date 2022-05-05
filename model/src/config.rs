@@ -57,13 +57,82 @@ pub struct Byte {
     pub bit_7: Option<Bit>,
 }
 
+impl Byte {
+    pub fn iter(&self) -> impl Iterator<Item = (u8, &Bit)> {
+        ByteIterator { pos: 0, byte: self }
+    }
+}
+
+pub struct ByteIterator<'a> {
+    pos: usize,
+    byte: &'a Byte,
+}
+
+impl<'a> Iterator for ByteIterator<'a> {
+    type Item = (u8, &'a Bit);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.pos > 7 {
+                return None;
+            }
+            let current = self.pos;
+            self.pos += 1;
+            let mask: u8 = 1 << current;
+            match current {
+                0 => {
+                    if let Some(x) = &self.byte.bit_0 {
+                        return Some((mask, x));
+                    }
+                }
+                1 => {
+                    if let Some(x) = &self.byte.bit_1 {
+                        return Some((mask, x));
+                    }
+                }
+                2 => {
+                    if let Some(x) = &self.byte.bit_2 {
+                        return Some((mask, x));
+                    }
+                }
+                3 => {
+                    if let Some(x) = &self.byte.bit_3 {
+                        return Some((mask, x));
+                    }
+                }
+                4 => {
+                    if let Some(x) = &self.byte.bit_4 {
+                        return Some((mask, x));
+                    }
+                }
+                5 => {
+                    if let Some(x) = &self.byte.bit_5 {
+                        return Some((mask, x));
+                    }
+                }
+                6 => {
+                    if let Some(x) = &self.byte.bit_6 {
+                        return Some((mask, x));
+                    }
+                }
+                7 => {
+                    if let Some(x) = &self.byte.bit_7 {
+                        return Some((mask, x));
+                    }
+                }
+                _ => return None,
+            }
+        }
+    }
+}
+
 /// A bit-field represented as an array where each bit has a meaning
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BitField {
     /// Name of the Rust struct
     pub name: String,
     /// comment on the Rust struct
-    pub comment: String,
+    pub comment: Option<String>,
     /// an array of bytes where each
     pub bytes: Vec<Byte>,
 }

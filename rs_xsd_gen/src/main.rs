@@ -15,7 +15,7 @@ use xml_model::resolved::{
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
-use xml_model::config::{NamedArray, NumericEnum, SubstitutedType};
+use xml_model::config::{BitField, NamedArray, NumericEnum, SubstitutedType};
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -88,8 +88,8 @@ fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), Fatal
             SubstitutedType::NumericEnum(x) => {
                 write_enum_file(&mut writer, x)?;
             }
-            SubstitutedType::HexBitField(_x) => {
-                unimplemented!()
+            SubstitutedType::HexBitField(x) => {
+                write_bit_field_file(&mut writer, x)?;
             }
         }
     }
@@ -170,6 +170,79 @@ fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalEr
                 Ok(())
             })?;
             writeln!(w, "}}")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")?;
+    Ok(())
+}
+
+fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalError> {
+    write_comment(w, &bf.comment)?;
+    writeln!(
+        w,
+        "#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]"
+    )?;
+    writeln!(w, "pub struct {} {{", bf.name)?;
+    indent(w, |w| {
+        for (num, byte) in bf.bytes.iter().enumerate() {
+            writeln!(w, "// --- Byte #{} ---", num)?;
+            writeln!(w)?;
+            for (x, bit) in byte.iter() {
+                writeln!(w, "// --- mask 0b{0:08b} ---", x)?;
+                writeln!(w, "/// {}", bit.comment)?;
+                writeln!(w, "pub {}: bool,", bit.name)?;
+            }
+        }
+        Ok(())
+    })?;
+    writeln!(w, "}}")?;
+    writeln!(w)?;
+    writeln!(w, "impl {} {{", bf.name)?;
+    indent(w, |w| {
+        writeln!(
+            w,
+            "pub(crate) fn from_hex(hex: &str) -> Result<Self, crate::ReadError> {{"
+        )?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                "let bytes = crate::parse_fixed_hex_bytes::<{}>(hex)?;",
+                bf.bytes.len()
+            )?;
+            writeln!(w)?;
+            writeln!(w, "let mut value: Self = Default::default();")?;
+            writeln!(w)?;
+            for (num, byte) in bf.bytes.iter().enumerate() {
+                for (mask, bit) in byte.iter() {
+                    writeln!(w, "if bytes[{}] & 0b{:08b} != 0 {{", num, mask)?;
+                    indent(w, |w| writeln!(w, "value.{} = true;", bit.name))?;
+                    writeln!(w, "}}")?;
+                }
+            }
+            writeln!(w)?;
+            writeln!(w, "Ok(value)")
+        })?;
+        writeln!(w, "}}")?;
+        writeln!(w)?;
+        writeln!(w, "pub(crate) fn to_hex(&self) -> String {{")?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                "let mut bytes : [u8; {}] = [0; {}];",
+                bf.bytes.len(),
+                bf.bytes.len()
+            )?;
+            writeln!(w)?;
+            for (num, byte) in bf.bytes.iter().enumerate() {
+                for (mask, bit) in byte.iter() {
+                    writeln!(w, "if self.{} {{", bit.name)?;
+                    indent(w, |w| writeln!(w, "bytes[{}] |= 0b{:08b};", num, mask))?;
+                    writeln!(w, "}}")?;
+                }
+            }
+            writeln!(w)?;
+            writeln!(w, "crate::to_hex(&bytes)")
         })?;
         writeln!(w, "}}")
     })?;
