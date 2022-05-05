@@ -12,6 +12,13 @@
         "field_name": "responseRequired"
       },
       "substituted": "ResponseRequired"
+    },
+    {
+      "field_key": {
+        "struct_name": "EventStatus",
+        "field_name": "currentStatus"
+      },
+      "substituted": "EventStatusType"
     }
   ],
   "types": {
@@ -52,6 +59,33 @@
           "3" : {
             "name" : "Both",
             "comment": "Resource supports both conditional and non-conditional subscriptions"
+          }
+        }
+      }
+    },
+    "EventStatusType": {
+      "NumericEnum": {
+        "name": "EventStatusType",
+        "variants": {
+          "0" : {
+            "name" : "Scheduled",
+            "comment": "This status indicates that the event has been scheduled and the event has not yet started."
+          },
+          "1" : {
+            "name" : "Active",
+            "comment": "This status indicates that the event is currently active."
+          },
+          "2" : {
+            "name" : "Cancelled",
+            "comment": "When events are cancelled, the Status.dateTime attribute SHALL be set to the time the cancellation occurred, which cannot be in the future"
+          },
+          "3" : {
+            "name" : "CancelledWithRandomization",
+            "comment": "The server is responsible for maintaining the cancelled event in its collection for the duration of the Effective Scheduled Period."
+          },
+          "4" : {
+            "name" : "Superseded",
+            "comment": "Events marked as Superseded by servers are events that may have been replaced by new events from the same program that target the exact same set of deviceCategory's (if applicable) AND DERControl controls (e.g., opModTargetW) (if applicable) and overlap for a given period of time."
           }
         }
       }
