@@ -15,7 +15,7 @@ use xml_model::resolved::{
 use crate::config::Config;
 use crate::traits::RustType;
 use std::rc::Rc;
-use xml_model::config::{NamedArray, NumericEnum};
+use xml_model::config::{BitField, NamedArray, NumericEnum, SubstitutedType};
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -78,16 +78,20 @@ fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), Fatal
     let mod_file = struct_dir.join("mod.rs");
     write_struct_mod_file(&mod_file, model)?;
 
-    for e in &model.enums {
-        let path = struct_dir.join(format!("{}.rs", e.name.to_snake_case()));
+    for substituted in model.substituted_types.iter() {
+        let path = struct_dir.join(format!("{}.rs", substituted.name().to_snake_case()));
         let mut writer = create(&path)?;
-        write_enum_file(&mut writer, e)?;
-    }
-
-    for na in &model.named_arrays {
-        let path = struct_dir.join(format!("{}.rs", na.name.to_snake_case()));
-        let mut writer = create(&path)?;
-        write_named_array_file(&mut writer, na)?;
+        match substituted {
+            SubstitutedType::NamedArray(x) => {
+                write_named_array_file(&mut writer, x)?;
+            }
+            SubstitutedType::NumericEnum(x) => {
+                write_enum_file(&mut writer, x)?;
+            }
+            SubstitutedType::HexBitField(x) => {
+                write_bit_field_file(&mut writer, x)?;
+            }
+        }
     }
 
     for st in &model.structs {
@@ -173,6 +177,79 @@ fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalEr
     Ok(())
 }
 
+fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalError> {
+    write_comment(w, &bf.comment)?;
+    writeln!(
+        w,
+        "#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]"
+    )?;
+    writeln!(w, "pub struct {} {{", bf.name)?;
+    indent(w, |w| {
+        for (num, byte) in bf.bytes.iter().enumerate() {
+            writeln!(w, "// --- Byte #{} ---", num)?;
+            writeln!(w)?;
+            for (x, bit) in byte.iter() {
+                writeln!(w, "// --- mask 0b{0:08b} ---", x)?;
+                writeln!(w, "/// {}", bit.comment)?;
+                writeln!(w, "pub {}: bool,", bit.name)?;
+            }
+        }
+        Ok(())
+    })?;
+    writeln!(w, "}}")?;
+    writeln!(w)?;
+    writeln!(w, "impl {} {{", bf.name)?;
+    indent(w, |w| {
+        writeln!(
+            w,
+            "pub(crate) fn from_hex(hex: &str) -> Result<Self, crate::ReadError> {{"
+        )?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                "let bytes = crate::parse_fixed_hex_bytes::<{}>(hex)?;",
+                bf.bytes.len()
+            )?;
+            writeln!(w)?;
+            writeln!(w, "let mut value: Self = Default::default();")?;
+            writeln!(w)?;
+            for (num, byte) in bf.bytes.iter().enumerate() {
+                for (mask, bit) in byte.iter() {
+                    writeln!(w, "if bytes[{}] & 0b{:08b} != 0 {{", num, mask)?;
+                    indent(w, |w| writeln!(w, "value.{} = true;", bit.name))?;
+                    writeln!(w, "}}")?;
+                }
+            }
+            writeln!(w)?;
+            writeln!(w, "Ok(value)")
+        })?;
+        writeln!(w, "}}")?;
+        writeln!(w)?;
+        writeln!(w, "pub(crate) fn to_hex(&self) -> String {{")?;
+        indent(w, |w| {
+            writeln!(
+                w,
+                "let mut bytes : [u8; {}] = [0; {}];",
+                bf.bytes.len(),
+                bf.bytes.len()
+            )?;
+            writeln!(w)?;
+            for (num, byte) in bf.bytes.iter().enumerate() {
+                for (mask, bit) in byte.iter() {
+                    writeln!(w, "if self.{} {{", bit.name)?;
+                    indent(w, |w| writeln!(w, "bytes[{}] |= 0b{:08b};", num, mask))?;
+                    writeln!(w, "}}")?;
+                }
+            }
+            writeln!(w)?;
+            writeln!(w, "crate::to_hex(&bytes)")
+        })?;
+        writeln!(w, "}}")
+    })?;
+    writeln!(w, "}}")?;
+    Ok(())
+}
+
 fn write_struct_file(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
     writeln!(w, "use super::super::*;")?;
     writeln!(w, "use xml::writer::*;")?;
@@ -195,12 +272,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "mod {};", st.name.to_snake_case())?;
     }
 
-    for na in model.named_arrays.iter() {
-        writeln!(w, "mod {};", na.name.to_snake_case())?;
-    }
-
-    for e in model.enums.iter() {
-        writeln!(w, "mod {};", e.name.to_snake_case())?;
+    for x in model.substituted_types.iter() {
+        writeln!(w, "mod {};", x.name().to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -209,12 +282,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
     }
 
-    for na in model.named_arrays.iter() {
-        writeln!(w, "pub use {}::*;", na.name.to_snake_case())?;
-    }
-
-    for e in model.enums.iter() {
-        writeln!(w, "pub use {}::*;", e.name.to_snake_case())?;
+    for x in model.substituted_types.iter() {
+        writeln!(w, "pub use {}::*;", x.name().to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -356,6 +425,7 @@ enum AttributeTransform {
     Number,
     Enum(std::rc::Rc<NumericEnum<u8>>),
     NamedArray(std::rc::Rc<NamedArray>),
+    HexBitfield(std::rc::Rc<BitField>),
 }
 
 impl AttributeTransform {
@@ -367,6 +437,9 @@ impl AttributeTransform {
             }
             Self::NamedArray(_) => {
                 format!("to_hex({}.inner.as_slice())", name)
+            }
+            Self::HexBitfield(_) => {
+                format!("{}.to_hex()", name)
             }
         }
     }
@@ -381,6 +454,9 @@ impl AttributeTransform {
                     "structs::{} {{ inner: parse_fixed_hex_bytes(&attr.value)? }}",
                     x.name
                 )
+            }
+            Self::HexBitfield(x) => {
+                format!("structs::{}::from_hex(&attr.value)?", x.name)
             }
         }
     }
@@ -402,6 +478,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::U64(_) => Some(AttributeTransform::Number),
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
         SimpleType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
+        SimpleType::HexBitField(x) => Some(AttributeTransform::HexBitfield(x.clone())),
     }
 }
 
@@ -492,6 +569,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::U64(_) => ElementTransform::Number,
         SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
         SimpleType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
+        SimpleType::HexBitField(_) => unimplemented!(),
     }
 }
 

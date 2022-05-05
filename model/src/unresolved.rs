@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::config::{Config, FieldKey, NamedArray, NumericEnum, ResolvedConfig, SubstitutedType};
+use crate::config::{Config, FieldKey, ResolvedConfig, SubstitutedType};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
 use crate::*;
 use serde::{Deserialize, Serialize};
@@ -113,7 +113,7 @@ impl UnresolvedField {
         };
 
         if let Some(x) = config.field_mappings.get(&id) {
-            println!("Resolved {}.{} to {:?}", id.struct_name, id.field_name, x);
+            println!("Resolved {}.{}", id.struct_name, id.field_name);
 
             let field_type = match x {
                 SubstitutedType::NamedArray(x) => {
@@ -121,6 +121,9 @@ impl UnresolvedField {
                 }
                 SubstitutedType::NumericEnum(x) => {
                     get_simple_field_type(self.info, SimpleType::EnumU8(x.clone()))
+                }
+                SubstitutedType::HexBitField(x) => {
+                    get_simple_field_type(self.info, SimpleType::HexBitField(x.clone()))
                 }
             };
             return Some(Field {
@@ -242,23 +245,7 @@ impl UnresolvedModel {
     }
 
     pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
-        let enums: Vec<Rc<NumericEnum<u8>>> = config
-            .types
-            .iter()
-            .filter_map(|(_, mapping)| match mapping {
-                SubstitutedType::NumericEnum(x) => Some(x.clone()),
-                SubstitutedType::NamedArray(_) => None,
-            })
-            .collect();
-
-        let named_arrays: Vec<Rc<NamedArray>> = config
-            .types
-            .iter()
-            .filter_map(|(_, mapping)| match mapping {
-                SubstitutedType::NumericEnum(_) => None,
-                SubstitutedType::NamedArray(x) => Some(x.clone()),
-            })
-            .collect();
+        let substituted_types: Vec<SubstitutedType> = config.types.values().cloned().collect();
 
         let config = config.resolve();
 
@@ -272,6 +259,7 @@ impl UnresolvedModel {
                     *x = match substitute {
                         SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
                         SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
+                        SubstitutedType::HexBitField(x) => SimpleType::HexBitField(x.clone()),
                     }
                 }
             }
@@ -292,8 +280,7 @@ impl UnresolvedModel {
             if input.is_empty() {
                 return crate::resolved::Model {
                     target_ns: self.target_ns.clone(),
-                    enums,
-                    named_arrays,
+                    substituted_types,
                     structs: output.values().cloned().collect(),
                 };
             }

@@ -11,14 +11,37 @@
         "struct_name": "RespondableResource",
         "field_name": "responseRequired"
       },
-      "substituted": "ResponseRequired"
+      "substituted": "ResponseRequirements"
+    },
+    {
+      "field_key": {
+        "struct_name": "EventStatus",
+        "field_name": "currentStatus"
+      },
+      "substituted": "EventStatusType"
     }
   ],
   "types": {
-    "ResponseRequired": {
-      "NamedArray": {
-        "name": "ResponseRequired",
-        "size": 1
+    "ResponseRequirements": {
+      "HexBitField": {
+        "name": "ResponseRequirements",
+        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "end_device_indicates_received",
+              "comment": "End device shall indicate that message was received"
+            },
+            "bit_1": {
+              "name": "end_device_indicates_specific_response",
+              "comment": "End device shall indicate specific response"
+            },
+            "bit_2": {
+              "name": "end_user_response_required",
+              "comment": "End user / customer response is required"
+            }
+          }
+        ]
       }
     },
     "LFDI": {
@@ -52,6 +75,33 @@
           "3" : {
             "name" : "Both",
             "comment": "Resource supports both conditional and non-conditional subscriptions"
+          }
+        }
+      }
+    },
+    "EventStatusType": {
+      "NumericEnum": {
+        "name": "EventStatusType",
+        "variants": {
+          "0" : {
+            "name" : "Scheduled",
+            "comment": "This status indicates that the event has been scheduled and the event has not yet started."
+          },
+          "1" : {
+            "name" : "Active",
+            "comment": "This status indicates that the event is currently active."
+          },
+          "2" : {
+            "name" : "Cancelled",
+            "comment": "When events are cancelled, the Status.dateTime attribute SHALL be set to the time the cancellation occurred, which cannot be in the future"
+          },
+          "3" : {
+            "name" : "CancelledWithRandomization",
+            "comment": "The server is responsible for maintaining the cancelled event in its collection for the duration of the Effective Scheduled Period."
+          },
+          "4" : {
+            "name" : "Superseded",
+            "comment": "Events marked as Superseded by servers are events that may have been replaced by new events from the same program that target the exact same set of deviceCategory's (if applicable) AND DERControl controls (e.g., opModTargetW) (if applicable) and overlap for a given period of time."
           }
         }
       }
