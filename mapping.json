@@ -4,7 +4,8 @@
     "mRIDType": "MRID",
     "SubscribableType": "SubscribableType",
     "PowerSourceType": "PowerSourceType",
-    "DERControlType": "DERControlType"
+    "DERControlType": "DERControlType",
+    "DERType": "DERType"
   },
   "field_mappings": [
     {
@@ -301,6 +302,46 @@
           },
           "2" : {
             "name" : "CategoryB"
+          }
+        }
+      }
+    },
+    "DERType": {
+      "NumericEnum": {
+        "name": "DerType",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable"
+          },
+          "1" : {
+            "name" : "VirtualOrMixedDer"
+          },
+          "2" : {
+            "name" : "ReciprocatingEngine"
+          },
+          "3" : {
+            "name" : "FuelCell"
+          },
+          "4" : {
+            "name" : "PhotovoltaicSystem"
+          },
+          "5" : {
+            "name" : "CombinedHeatAndPower"
+          },
+          "6" : {
+            "name" : "OtherGenerationSystem"
+          },
+          "80" : {
+            "name" : "OtherStorageSystem"
+          },
+          "81" : {
+            "name" : "ElectricVehicle"
+          },
+          "82" : {
+            "name" : "ElectricVehicleSupplyEquipment"
+          },
+          "83" : {
+            "name" : "CombinedPvAndStorage"
           }
         }
       }
