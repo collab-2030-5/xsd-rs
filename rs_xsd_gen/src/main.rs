@@ -910,9 +910,8 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ),
         ElementTransform::HexBitField(x) => format!(
             "structs::{}::from_hex(&read_string(reader, \"{}\")?)?",
-            x.name,
-            elem.name,
-        )
+            x.name, elem.name,
+        ),
     };
 
     match &elem.multiplicity {

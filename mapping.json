@@ -27,6 +27,13 @@
         "field_name": "rtgAbnormalCategory"
       },
       "substituted": "RtgAbnormalCategory"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERCapability",
+        "field_name": "rtgNormalCategory"
+      },
+      "substituted": "RtgNormalCategory"
     }
   ],
   "types": {
@@ -278,6 +285,22 @@
           },
           "3" : {
             "name" : "Category3"
+          }
+        }
+      }
+    },
+    "RtgNormalCategory": {
+      "NumericEnum": {
+        "name": "RtgNormalCategory",
+        "variants": {
+          "0" : {
+            "name" : "NotSpecified"
+          },
+          "1" : {
+            "name" : "CategoryA"
+          },
+          "2" : {
+            "name" : "CategoryB"
           }
         }
       }
