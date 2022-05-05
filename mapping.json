@@ -11,7 +11,7 @@
         "struct_name": "RespondableResource",
         "field_name": "responseRequired"
       },
-      "substituted": "ResponseRequired"
+      "substituted": "ResponseRequirements"
     },
     {
       "field_key": {
@@ -42,12 +42,6 @@
             }
           }
         ]
-      }
-    },
-    "ResponseRequired": {
-      "NamedArray": {
-        "name": "ResponseRequired",
-        "size": 1
       }
     },
     "LFDI": {

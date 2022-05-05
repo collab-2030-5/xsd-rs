@@ -425,6 +425,7 @@ enum AttributeTransform {
     Number,
     Enum(std::rc::Rc<NumericEnum<u8>>),
     NamedArray(std::rc::Rc<NamedArray>),
+    HexBitfield(std::rc::Rc<BitField>),
 }
 
 impl AttributeTransform {
@@ -436,6 +437,9 @@ impl AttributeTransform {
             }
             Self::NamedArray(_) => {
                 format!("to_hex({}.inner.as_slice())", name)
+            }
+            Self::HexBitfield(_) => {
+                format!("{}.to_hex()", name)
             }
         }
     }
@@ -450,6 +454,9 @@ impl AttributeTransform {
                     "structs::{} {{ inner: parse_fixed_hex_bytes(&attr.value)? }}",
                     x.name
                 )
+            }
+            Self::HexBitfield(x) => {
+                format!("structs::{}::from_hex(&attr.value)?", x.name)
             }
         }
     }
@@ -471,7 +478,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::U64(_) => Some(AttributeTransform::Number),
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
         SimpleType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
-        SimpleType::HexBitField(_) => unimplemented!(),
+        SimpleType::HexBitField(x) => Some(AttributeTransform::HexBitfield(x.clone())),
     }
 }
 
