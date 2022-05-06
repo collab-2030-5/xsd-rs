@@ -70,6 +70,13 @@
         "field_name": "value"
       },
       "substituted": "OperationalModeStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "StorageModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "StorageModeStatusValue"
     }
   ],
   "types": {
@@ -529,6 +536,25 @@
           },
           "2" : {
             "name" : "CategoryB"
+          }
+        }
+      }
+    },
+    "StorageModeStatusValue": {
+      "NumericEnum": {
+        "name": "StorageModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "Charging",
+            "comment": "0 – storage charging"
+          },
+          "1" : {
+            "name" : "Discharging",
+            "comment": "1 – storage discharging"
+          },
+          "2" : {
+            "name" : "Holding",
+            "comment": "2 – storage holding"
           }
         }
       }
