@@ -49,6 +49,13 @@
         "field_name": "value"
       },
       "substituted": "ConnectStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "InverterStatusType",
+        "field_name": "value"
+      },
+      "substituted": "InverterStatusValue"
     }
   ],
   "types": {
@@ -282,6 +289,57 @@
             }
           }
         ]
+      }
+    },
+    "InverterStatusValue": {
+      "NumericEnum": {
+        "name": "InverterStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "N/A"
+          },
+          "1" : {
+            "name" : "Off",
+            "comment": "off"
+          },
+          "2" : {
+            "name" : "Sleeping",
+            "comment": "sleeping (auto-shutdown) or DER is at low output power/voltage"
+          },
+          "3" : {
+            "name" : "StartingUp",
+            "comment": "starting up or ON but not producing powers"
+          },
+          "4" : {
+            "name" : "TrackingMppt",
+            "comment": "tracking MPPT power point"
+          },
+          "5" : {
+            "name" : "ForcedPowerReduction",
+            "comment": "forced power reduction/derating"
+          },
+          "6" : {
+            "name" : "ShuttingDown",
+            "comment": "shutting down"
+          },
+          "7" : {
+            "name" : "Faulted",
+            "comment": "one or more faults exist"
+          },
+          "8" : {
+            "name" : "Standby",
+            "comment": "standby (service on unit) - DER may be at high output voltage/power"
+          },
+          "9" : {
+            "name" : "TestMode",
+            "comment": "test mode"
+          },
+          "10" : {
+            "name" : "ManufacturerStatus",
+            "comment": "as defined in manufacturer status"
+          }
+        }
       }
     },
     "LFDI": {
