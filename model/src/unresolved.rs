@@ -113,8 +113,6 @@ impl UnresolvedField {
         };
 
         if let Some(x) = config.field_mappings.get(&id) {
-            println!("Resolved {}.{}", id.struct_name, id.field_name);
-
             let field_type = match x {
                 SubstitutedType::NamedArray(x) => {
                     get_simple_field_type(self.info, SimpleType::NamedArray(x.clone()))

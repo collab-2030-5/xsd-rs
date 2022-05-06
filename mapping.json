@@ -3,7 +3,9 @@
     "HexBinary160": "LFDI",
     "mRIDType": "MRID",
     "SubscribableType": "SubscribableType",
-    "PowerSourceType": "PowerSourceType"
+    "PowerSourceType": "PowerSourceType",
+    "DERControlType": "DERControlType",
+    "DERType": "DERType"
   },
   "field_mappings": [
     {
@@ -19,62 +21,311 @@
         "field_name": "currentStatus"
       },
       "substituted": "EventStatusType"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERCapability",
+        "field_name": "rtgAbnormalCategory"
+      },
+      "substituted": "RtgAbnormalCategory"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERCapability",
+        "field_name": "rtgNormalCategory"
+      },
+      "substituted": "RtgNormalCategory"
+    },
+    {
+      "field_key": {
+        "struct_name": "DERStatus",
+        "field_name": "alarmStatus"
+      },
+      "substituted": "DerAlarmStatus"
+    },
+    {
+      "field_key": {
+        "struct_name": "ConnectStatusType",
+        "field_name": "value"
+      },
+      "substituted": "ConnectStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "InverterStatusType",
+        "field_name": "value"
+      },
+      "substituted": "InverterStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "LocalControlModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "LocalControlModeStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "OperationalModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "OperationalModeStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "StorageModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "StorageModeStatusValue"
     }
   ],
   "types": {
-    "ResponseRequirements": {
+    "ConnectStatusValue": {
       "HexBitField": {
-        "name": "ResponseRequirements",
-        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "name": "ConnectStatusValue",
+        "comment": "Bitmap the connect status of a DER",
         "bytes": [
           {
             "bit_0": {
-              "name": "end_device_indicates_received",
-              "comment": "End device shall indicate that message was received"
+              "name": "connected",
+              "comment": "0 - Connected"
             },
             "bit_1": {
-              "name": "end_device_indicates_specific_response",
-              "comment": "End device shall indicate specific response"
+              "name": "available",
+              "comment": "1 - Available"
             },
             "bit_2": {
-              "name": "end_user_response_required",
-              "comment": "End user / customer response is required"
+              "name": "operating",
+              "comment": "2 - Operating"
+            },
+            "bit_3": {
+              "name": "test",
+              "comment": "3 - Test"
+            },
+            "bit_4": {
+              "name": "fault_or_error",
+              "comment": "4 - Fault / Error"
             }
           }
         ]
       }
     },
-    "LFDI": {
-      "NamedArray": {
-        "name": "Lfdi",
-        "size": 20
+    "DerAlarmStatus": {
+      "HexBitField": {
+        "name": "DerAlarmStatus",
+        "comment": "Bitmap indicating the status of DER alarms (see DER LogEvents for more details",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "fault_over_current",
+              "comment": "0 - DER_FAULT_OVER_CURRENT"
+            },
+            "bit_1": {
+              "name": "fault_over_voltage",
+              "comment": "1 - DER_FAULT_OVER_VOLTAGE"
+            },
+            "bit_2": {
+              "name": "fault_under_current",
+              "comment": "2 - DER_FAULT_UNDER_VOLTAGE"
+            },
+            "bit_3": {
+              "name": "fault_over_frequency",
+              "comment": "3 - DER_FAULT_OVER_FREQUENCY"
+            },
+            "bit_4": {
+              "name": "fault_under_frequency",
+              "comment": "4 - DER_FAULT_UNDER_FREQUENCY"
+            },
+            "bit_5": {
+              "name": "fault_voltage_imbalance",
+              "comment": "5 - DER_FAULT_VOLTAGE_IMBALANCE"
+            },
+            "bit_6": {
+              "name": "fault_current_imbalance",
+              "comment": "6 - DER_FAULT_CURRENT_IMBALANCE"
+            },
+            "bit_7": {
+              "name": "fault_emergency_local",
+              "comment": "7 - DER_FAULT_EMERGENCY_LOCAL"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "fault_emergency_remote",
+              "comment": "8 - DER_FAULT_EMERGENCY_REMOTE"
+            },
+            "bit_1": {
+              "name": "fault_low_power_input",
+              "comment": "9 - DER_FAULT_LOW_POWER_INPUT"
+            },
+            "bit_2": {
+              "name": "fault_phase_rotation",
+              "comment": "10 - DER_FAULT_PHASE_ROTATION"
+            }
+          }
+        ]
       }
     },
-    "MRID": {
-      "NamedArray": {
-        "name": "Mrid",
-        "size": 16
+    "DERControlType": {
+      "HexBitField": {
+        "name": "DERControlType",
+        "comment": "Control modes supported by the DER",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "charge_mode",
+              "comment": "0 - Charge mode"
+            },
+            "bit_1": {
+              "name": "discharge_mode",
+              "comment": "1 - Discharge mode"
+            },
+            "bit_2": {
+              "name": "op_mode_connect",
+              "comment": "2 - opModConnect (Connect / Disconnect - implies galvanic isolation)"
+            },
+            "bit_3": {
+              "name": "op_mode_energive",
+              "comment": "3 - opModEnergize (Energize / De-Energize)"
+            },
+            "bit_4": {
+              "name": "op_mode_fixed_pf_absorb_w",
+              "comment": "4 - opModFixedPFAbsorbW (Fixed Power Factor Setpoint when absorbing active power)"
+            },
+            "bit_5": {
+              "name": "op_mode_fixed_pf_inject_w",
+              "comment": "5 - opModFixedPFInjectW (Fixed Power Factor Setpoint when injecting active power)"
+            },
+            "bit_6": {
+              "name": "op_mode_fixed_var",
+              "comment": "6 - opModFixedVar (Reactive Power Setpoint)"
+            },
+            "bit_7": {
+              "name": "op_mode_fixed_w",
+              "comment": "7 - opModFixedW (Charge / Discharge Setpoint)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_freq_droop",
+              "comment": "8 - opModFreqDroop (Frequency-Watt Parameterized Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_freq_watt",
+              "comment": "9 - opModFreqWatt (Frequency-Watt Curve Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_hfrt_may_trip",
+              "comment": "10 - opModHFRTMayTrip (High Frequency Ride Through, May Trip Mode)"
+            },
+            "bit_3": {
+              "name": "op_mode_hfrt_must_trip",
+              "comment": "11 - opModHFRTMustTrip (High Frequency Ride Through, Must Trip Mode)"
+            },
+            "bit_4": {
+              "name": "op_mode_hvrt_may_trip",
+              "comment": "12 - opModHVRTMayTrip (High Voltage Ride Through, May Trip Mode)"
+            },
+            "bit_5": {
+              "name": "op_mode_hvrt_momentary_cessation",
+              "comment": "13 - opModHVRTMomentaryCessation (High Voltage Ride Through, Momentary Cessation Mode)"
+            },
+            "bit_6": {
+              "name": "op_mode_hvrt_must_trip",
+              "comment": "14 - opModHVRTMustTrip (High Voltage Ride Through, Must Trip Mode)"
+            },
+            "bit_7": {
+              "name": "op_mode_lfrt_may_trip",
+              "comment": "15 - opModLFRTMayTrip (Low Frequency Ride Through, May Trip Mode)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_lfrt_must_trip",
+              "comment": "16 - opModLFRTMustTrip (Low Frequency Ride Through, Must Trip Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_lvrt_may_trip",
+              "comment": "17 - opModLVRTMayTrip (Low Voltage Ride Through, May Trip Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_lvrt_momentary_cessation",
+              "comment": "18 - opModLVRTMomentaryCessation (Low Voltage Ride Through, Momentary Cessation Mode)"
+            },
+            "bit_3": {
+              "name": "op_mode_lvrt_must_trip",
+              "comment": "19 - opModLVRTMustTrip (Low Voltage Ride Through, Must Trip Mode)"
+            },
+            "bit_4": {
+              "name": "op_mode_max_lim_w",
+              "comment": "20 - opModMaxLimW (Maximum Active Power)"
+            },
+            "bit_5": {
+              "name": "op_mode_target_var",
+              "comment": "21 - opModTargetVar (Target Reactive Power)"
+            },
+            "bit_6": {
+              "name": "op_mode_target_w",
+              "comment": "22 - opModTargetW (Target Active Power)"
+            },
+            "bit_7": {
+              "name": "op_mode_volt_var",
+              "comment": "23 - opModVoltVar (Volt-Var Mode)"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "op_mode_volt_watt",
+              "comment": "24 - opModVoltWatt (Volt-Watt Mode)"
+            },
+            "bit_1": {
+              "name": "op_mode_watt_pf",
+              "comment": "25 - opModWattPF (Watt-PowerFactor Mode)"
+            },
+            "bit_2": {
+              "name": "op_mode_watt_var",
+              "comment": "26 - opModWattVar (Watt-Var Mode)"
+            }
+          }
+        ]
       }
     },
-    "SubscribableType": {
+    "DERType": {
       "NumericEnum": {
-        "name": "SubscribableType",
+        "name": "DerType",
         "variants": {
           "0" : {
-            "name" : "NoSupport",
-            "comment": "Resource does NOT support subscriptions"
+            "name" : "NotApplicable"
           },
           "1" : {
-            "name" : "NonConditional",
-            "comment": "Resource supports non-conditional subscriptions"
+            "name" : "VirtualOrMixedDer"
           },
           "2" : {
-            "name" : "Conditional",
-            "comment": "Resource supports conditional subscriptions"
+            "name" : "ReciprocatingEngine"
           },
           "3" : {
-            "name" : "Both",
-            "comment": "Resource supports both conditional and non-conditional subscriptions"
+            "name" : "FuelCell"
+          },
+          "4" : {
+            "name" : "PhotovoltaicSystem"
+          },
+          "5" : {
+            "name" : "CombinedHeatAndPower"
+          },
+          "6" : {
+            "name" : "OtherGenerationSystem"
+          },
+          "80" : {
+            "name" : "OtherStorageSystem"
+          },
+          "81" : {
+            "name" : "ElectricVehicle"
+          },
+          "82" : {
+            "name" : "ElectricVehicleSupplyEquipment"
+          },
+          "83" : {
+            "name" : "CombinedPvAndStorage"
           }
         }
       }
@@ -106,6 +357,107 @@
         }
       }
     },
+    "InverterStatusValue": {
+      "NumericEnum": {
+        "name": "InverterStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "N/A"
+          },
+          "1" : {
+            "name" : "Off",
+            "comment": "off"
+          },
+          "2" : {
+            "name" : "Sleeping",
+            "comment": "sleeping (auto-shutdown) or DER is at low output power/voltage"
+          },
+          "3" : {
+            "name" : "StartingUp",
+            "comment": "starting up or ON but not producing powers"
+          },
+          "4" : {
+            "name" : "TrackingMppt",
+            "comment": "tracking MPPT power point"
+          },
+          "5" : {
+            "name" : "ForcedPowerReduction",
+            "comment": "forced power reduction/derating"
+          },
+          "6" : {
+            "name" : "ShuttingDown",
+            "comment": "shutting down"
+          },
+          "7" : {
+            "name" : "Faulted",
+            "comment": "one or more faults exist"
+          },
+          "8" : {
+            "name" : "Standby",
+            "comment": "standby (service on unit) - DER may be at high output voltage/power"
+          },
+          "9" : {
+            "name" : "TestMode",
+            "comment": "test mode"
+          },
+          "10" : {
+            "name" : "ManufacturerStatus",
+            "comment": "as defined in manufacturer status"
+          }
+        }
+      }
+    },
+    "LocalControlModeStatusValue": {
+      "NumericEnum": {
+        "name": "LocalControlModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "Local",
+            "comment": "local control"
+          },
+          "1" : {
+            "name" : "Remote",
+            "comment": "remote control"
+          }
+        }
+      }
+    },
+    "LFDI": {
+      "NamedArray": {
+        "name": "Lfdi",
+        "size": 20
+      }
+    },
+    "MRID": {
+      "NamedArray": {
+        "name": "Mrid",
+        "size": 16
+      }
+    },
+    "OperationalModeStatusValue": {
+      "NumericEnum": {
+        "name": "OperationalModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "0 - Not applicable / Unknown"
+          },
+          "1" : {
+            "name" : "Off",
+            "comment": "1 - Off"
+          },
+          "2" : {
+            "name" : "OperationalMode",
+            "comment": "2 - Operational mode"
+          },
+          "3" : {
+            "name" : "TestMode",
+            "comment": "3 - Test mode"
+          }
+        }
+      }
+    },
     "PowerSourceType": {
       "NumericEnum": {
         "name": "PowerSourceType",
@@ -130,6 +482,106 @@
           }
         }
       }
+    },
+    "ResponseRequirements": {
+      "HexBitField": {
+        "name": "ResponseRequirements",
+        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "end_device_indicates_received",
+              "comment": "End device shall indicate that message was received"
+            },
+            "bit_1": {
+              "name": "end_device_indicates_specific_response",
+              "comment": "End device shall indicate specific response"
+            },
+            "bit_2": {
+              "name": "end_user_response_required",
+              "comment": "End user / customer response is required"
+            }
+          }
+        ]
+      }
+    },
+    "RtgAbnormalCategory": {
+      "NumericEnum": {
+        "name": "RtgAbnormalCategory",
+        "variants": {
+          "0" : {
+            "name" : "NotSpecified"
+          },
+          "1" : {
+            "name" : "Category1"
+          },
+          "2" : {
+            "name" : "Category2"
+          },
+          "3" : {
+            "name" : "Category3"
+          }
+        }
+      }
+    },
+    "RtgNormalCategory": {
+      "NumericEnum": {
+        "name": "RtgNormalCategory",
+        "variants": {
+          "0" : {
+            "name" : "NotSpecified"
+          },
+          "1" : {
+            "name" : "CategoryA"
+          },
+          "2" : {
+            "name" : "CategoryB"
+          }
+        }
+      }
+    },
+    "StorageModeStatusValue": {
+      "NumericEnum": {
+        "name": "StorageModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "Charging",
+            "comment": "0 – storage charging"
+          },
+          "1" : {
+            "name" : "Discharging",
+            "comment": "1 – storage discharging"
+          },
+          "2" : {
+            "name" : "Holding",
+            "comment": "2 – storage holding"
+          }
+        }
+      }
+    },
+    "SubscribableType": {
+      "NumericEnum": {
+        "name": "SubscribableType",
+        "variants": {
+          "0" : {
+            "name" : "NoSupport",
+            "comment": "Resource does NOT support subscriptions"
+          },
+          "1" : {
+            "name" : "NonConditional",
+            "comment": "Resource supports non-conditional subscriptions"
+          },
+          "2" : {
+            "name" : "Conditional",
+            "comment": "Resource supports conditional subscriptions"
+          },
+          "3" : {
+            "name" : "Both",
+            "comment": "Resource supports both conditional and non-conditional subscriptions"
+          }
+        }
+      }
     }
   }
 }
+
