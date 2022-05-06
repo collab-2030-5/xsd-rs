@@ -42,6 +42,13 @@
         "field_name": "alarmStatus"
       },
       "substituted": "DerAlarmStatus"
+    },
+    {
+      "field_key": {
+        "struct_name": "ConnectStatusType",
+        "field_name": "value"
+      },
+      "substituted": "ConnectStatusValue"
     }
   ],
   "types": {
@@ -242,6 +249,36 @@
             "bit_2": {
               "name": "fault_phase_rotation",
               "comment": "10 - DER_FAULT_PHASE_ROTATION"
+            }
+          }
+        ]
+      }
+    },
+    "ConnectStatusValue": {
+      "HexBitField": {
+        "name": "ConnectStatusValue",
+        "comment": "Bitmap the connect status of a DER",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "connected",
+              "comment": "0 - Connected"
+            },
+            "bit_1": {
+              "name": "available",
+              "comment": "1 - Available"
+            },
+            "bit_2": {
+              "name": "operating",
+              "comment": "2 - Operating"
+            },
+            "bit_3": {
+              "name": "test",
+              "comment": "3 - Test"
+            },
+            "bit_4": {
+              "name": "fault_or_error",
+              "comment": "4 - Fault / Error"
             }
           }
         ]
