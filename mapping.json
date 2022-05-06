@@ -56,6 +56,13 @@
         "field_name": "value"
       },
       "substituted": "InverterStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "LocalControlModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "LocalControlModeStatusValue"
     }
   ],
   "types": {
@@ -346,6 +353,21 @@
       "NamedArray": {
         "name": "Lfdi",
         "size": 20
+      }
+    },
+    "LocalControlModeStatusValue": {
+      "NumericEnum": {
+        "name": "LocalControlModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "Local",
+            "comment": "local control"
+          },
+          "1" : {
+            "name" : "Remote",
+            "comment": "remote control"
+          }
+        }
       }
     },
     "MRID": {
