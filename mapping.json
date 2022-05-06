@@ -66,23 +66,87 @@
     }
   ],
   "types": {
-    "ResponseRequirements": {
+    "ConnectStatusValue": {
       "HexBitField": {
-        "name": "ResponseRequirements",
-        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "name": "ConnectStatusValue",
+        "comment": "Bitmap the connect status of a DER",
         "bytes": [
           {
             "bit_0": {
-              "name": "end_device_indicates_received",
-              "comment": "End device shall indicate that message was received"
+              "name": "connected",
+              "comment": "0 - Connected"
             },
             "bit_1": {
-              "name": "end_device_indicates_specific_response",
-              "comment": "End device shall indicate specific response"
+              "name": "available",
+              "comment": "1 - Available"
             },
             "bit_2": {
-              "name": "end_user_response_required",
-              "comment": "End user / customer response is required"
+              "name": "operating",
+              "comment": "2 - Operating"
+            },
+            "bit_3": {
+              "name": "test",
+              "comment": "3 - Test"
+            },
+            "bit_4": {
+              "name": "fault_or_error",
+              "comment": "4 - Fault / Error"
+            }
+          }
+        ]
+      }
+    },
+    "DerAlarmStatus": {
+      "HexBitField": {
+        "name": "DerAlarmStatus",
+        "comment": "Bitmap indicating the status of DER alarms (see DER LogEvents for more details",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "fault_over_current",
+              "comment": "0 - DER_FAULT_OVER_CURRENT"
+            },
+            "bit_1": {
+              "name": "fault_over_voltage",
+              "comment": "1 - DER_FAULT_OVER_VOLTAGE"
+            },
+            "bit_2": {
+              "name": "fault_under_current",
+              "comment": "2 - DER_FAULT_UNDER_VOLTAGE"
+            },
+            "bit_3": {
+              "name": "fault_over_frequency",
+              "comment": "3 - DER_FAULT_OVER_FREQUENCY"
+            },
+            "bit_4": {
+              "name": "fault_under_frequency",
+              "comment": "4 - DER_FAULT_UNDER_FREQUENCY"
+            },
+            "bit_5": {
+              "name": "fault_voltage_imbalance",
+              "comment": "5 - DER_FAULT_VOLTAGE_IMBALANCE"
+            },
+            "bit_6": {
+              "name": "fault_current_imbalance",
+              "comment": "6 - DER_FAULT_CURRENT_IMBALANCE"
+            },
+            "bit_7": {
+              "name": "fault_emergency_local",
+              "comment": "7 - DER_FAULT_EMERGENCY_LOCAL"
+            }
+          },
+          {
+            "bit_0": {
+              "name": "fault_emergency_remote",
+              "comment": "8 - DER_FAULT_EMERGENCY_REMOTE"
+            },
+            "bit_1": {
+              "name": "fault_low_power_input",
+              "comment": "9 - DER_FAULT_LOW_POWER_INPUT"
+            },
+            "bit_2": {
+              "name": "fault_phase_rotation",
+              "comment": "10 - DER_FAULT_PHASE_ROTATION"
             }
           }
         ]
@@ -212,90 +276,71 @@
         ]
       }
     },
-    "DerAlarmStatus": {
-      "HexBitField": {
-        "name": "DerAlarmStatus",
-        "comment": "Bitmap indicating the status of DER alarms (see DER LogEvents for more details",
-        "bytes": [
-          {
-            "bit_0": {
-              "name": "fault_over_current",
-              "comment": "0 - DER_FAULT_OVER_CURRENT"
-            },
-            "bit_1": {
-              "name": "fault_over_voltage",
-              "comment": "1 - DER_FAULT_OVER_VOLTAGE"
-            },
-            "bit_2": {
-              "name": "fault_under_current",
-              "comment": "2 - DER_FAULT_UNDER_VOLTAGE"
-            },
-            "bit_3": {
-              "name": "fault_over_frequency",
-              "comment": "3 - DER_FAULT_OVER_FREQUENCY"
-            },
-            "bit_4": {
-              "name": "fault_under_frequency",
-              "comment": "4 - DER_FAULT_UNDER_FREQUENCY"
-            },
-            "bit_5": {
-              "name": "fault_voltage_imbalance",
-              "comment": "5 - DER_FAULT_VOLTAGE_IMBALANCE"
-            },
-            "bit_6": {
-              "name": "fault_current_imbalance",
-              "comment": "6 - DER_FAULT_CURRENT_IMBALANCE"
-            },
-            "bit_7": {
-              "name": "fault_emergency_local",
-              "comment": "7 - DER_FAULT_EMERGENCY_LOCAL"
-            }
+    "DERType": {
+      "NumericEnum": {
+        "name": "DerType",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable"
           },
-          {
-            "bit_0": {
-              "name": "fault_emergency_remote",
-              "comment": "8 - DER_FAULT_EMERGENCY_REMOTE"
-            },
-            "bit_1": {
-              "name": "fault_low_power_input",
-              "comment": "9 - DER_FAULT_LOW_POWER_INPUT"
-            },
-            "bit_2": {
-              "name": "fault_phase_rotation",
-              "comment": "10 - DER_FAULT_PHASE_ROTATION"
-            }
+          "1" : {
+            "name" : "VirtualOrMixedDer"
+          },
+          "2" : {
+            "name" : "ReciprocatingEngine"
+          },
+          "3" : {
+            "name" : "FuelCell"
+          },
+          "4" : {
+            "name" : "PhotovoltaicSystem"
+          },
+          "5" : {
+            "name" : "CombinedHeatAndPower"
+          },
+          "6" : {
+            "name" : "OtherGenerationSystem"
+          },
+          "80" : {
+            "name" : "OtherStorageSystem"
+          },
+          "81" : {
+            "name" : "ElectricVehicle"
+          },
+          "82" : {
+            "name" : "ElectricVehicleSupplyEquipment"
+          },
+          "83" : {
+            "name" : "CombinedPvAndStorage"
           }
-        ]
+        }
       }
     },
-    "ConnectStatusValue": {
-      "HexBitField": {
-        "name": "ConnectStatusValue",
-        "comment": "Bitmap the connect status of a DER",
-        "bytes": [
-          {
-            "bit_0": {
-              "name": "connected",
-              "comment": "0 - Connected"
-            },
-            "bit_1": {
-              "name": "available",
-              "comment": "1 - Available"
-            },
-            "bit_2": {
-              "name": "operating",
-              "comment": "2 - Operating"
-            },
-            "bit_3": {
-              "name": "test",
-              "comment": "3 - Test"
-            },
-            "bit_4": {
-              "name": "fault_or_error",
-              "comment": "4 - Fault / Error"
-            }
+    "EventStatusType": {
+      "NumericEnum": {
+        "name": "EventStatusType",
+        "variants": {
+          "0" : {
+            "name" : "Scheduled",
+            "comment": "This status indicates that the event has been scheduled and the event has not yet started."
+          },
+          "1" : {
+            "name" : "Active",
+            "comment": "This status indicates that the event is currently active."
+          },
+          "2" : {
+            "name" : "Cancelled",
+            "comment": "When events are cancelled, the Status.dateTime attribute SHALL be set to the time the cancellation occurred, which cannot be in the future"
+          },
+          "3" : {
+            "name" : "CancelledWithRandomization",
+            "comment": "The server is responsible for maintaining the cancelled event in its collection for the duration of the Effective Scheduled Period."
+          },
+          "4" : {
+            "name" : "Superseded",
+            "comment": "Events marked as Superseded by servers are events that may have been replaced by new events from the same program that target the exact same set of deviceCategory's (if applicable) AND DERControl controls (e.g., opModTargetW) (if applicable) and overlap for a given period of time."
           }
-        ]
+        }
       }
     },
     "InverterStatusValue": {
@@ -349,12 +394,6 @@
         }
       }
     },
-    "LFDI": {
-      "NamedArray": {
-        "name": "Lfdi",
-        "size": 20
-      }
-    },
     "LocalControlModeStatusValue": {
       "NumericEnum": {
         "name": "LocalControlModeStatusValue",
@@ -370,60 +409,16 @@
         }
       }
     },
+    "LFDI": {
+      "NamedArray": {
+        "name": "Lfdi",
+        "size": 20
+      }
+    },
     "MRID": {
       "NamedArray": {
         "name": "Mrid",
         "size": 16
-      }
-    },
-    "SubscribableType": {
-      "NumericEnum": {
-        "name": "SubscribableType",
-        "variants": {
-          "0" : {
-            "name" : "NoSupport",
-            "comment": "Resource does NOT support subscriptions"
-          },
-          "1" : {
-            "name" : "NonConditional",
-            "comment": "Resource supports non-conditional subscriptions"
-          },
-          "2" : {
-            "name" : "Conditional",
-            "comment": "Resource supports conditional subscriptions"
-          },
-          "3" : {
-            "name" : "Both",
-            "comment": "Resource supports both conditional and non-conditional subscriptions"
-          }
-        }
-      }
-    },
-    "EventStatusType": {
-      "NumericEnum": {
-        "name": "EventStatusType",
-        "variants": {
-          "0" : {
-            "name" : "Scheduled",
-            "comment": "This status indicates that the event has been scheduled and the event has not yet started."
-          },
-          "1" : {
-            "name" : "Active",
-            "comment": "This status indicates that the event is currently active."
-          },
-          "2" : {
-            "name" : "Cancelled",
-            "comment": "When events are cancelled, the Status.dateTime attribute SHALL be set to the time the cancellation occurred, which cannot be in the future"
-          },
-          "3" : {
-            "name" : "CancelledWithRandomization",
-            "comment": "The server is responsible for maintaining the cancelled event in its collection for the duration of the Effective Scheduled Period."
-          },
-          "4" : {
-            "name" : "Superseded",
-            "comment": "Events marked as Superseded by servers are events that may have been replaced by new events from the same program that target the exact same set of deviceCategory's (if applicable) AND DERControl controls (e.g., opModTargetW) (if applicable) and overlap for a given period of time."
-          }
-        }
       }
     },
     "PowerSourceType": {
@@ -449,6 +444,28 @@
             "name" : "Unknown"
           }
         }
+      }
+    },
+    "ResponseRequirements": {
+      "HexBitField": {
+        "name": "ResponseRequirements",
+        "comment": "Bit-field type which maps to xs:hexBinary w/ a max size of 1 byte",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "end_device_indicates_received",
+              "comment": "End device shall indicate that message was received"
+            },
+            "bit_1": {
+              "name": "end_device_indicates_specific_response",
+              "comment": "End device shall indicate specific response"
+            },
+            "bit_2": {
+              "name": "end_user_response_required",
+              "comment": "End user / customer response is required"
+            }
+          }
+        ]
       }
     },
     "RtgAbnormalCategory": {
@@ -486,42 +503,25 @@
         }
       }
     },
-    "DERType": {
+    "SubscribableType": {
       "NumericEnum": {
-        "name": "DerType",
+        "name": "SubscribableType",
         "variants": {
           "0" : {
-            "name" : "NotApplicable"
+            "name" : "NoSupport",
+            "comment": "Resource does NOT support subscriptions"
           },
           "1" : {
-            "name" : "VirtualOrMixedDer"
+            "name" : "NonConditional",
+            "comment": "Resource supports non-conditional subscriptions"
           },
           "2" : {
-            "name" : "ReciprocatingEngine"
+            "name" : "Conditional",
+            "comment": "Resource supports conditional subscriptions"
           },
           "3" : {
-            "name" : "FuelCell"
-          },
-          "4" : {
-            "name" : "PhotovoltaicSystem"
-          },
-          "5" : {
-            "name" : "CombinedHeatAndPower"
-          },
-          "6" : {
-            "name" : "OtherGenerationSystem"
-          },
-          "80" : {
-            "name" : "OtherStorageSystem"
-          },
-          "81" : {
-            "name" : "ElectricVehicle"
-          },
-          "82" : {
-            "name" : "ElectricVehicleSupplyEquipment"
-          },
-          "83" : {
-            "name" : "CombinedPvAndStorage"
+            "name" : "Both",
+            "comment": "Resource supports both conditional and non-conditional subscriptions"
           }
         }
       }
