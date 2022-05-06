@@ -63,6 +63,13 @@
         "field_name": "value"
       },
       "substituted": "LocalControlModeStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "OperationalModeStatusType",
+        "field_name": "value"
+      },
+      "substituted": "OperationalModeStatusValue"
     }
   ],
   "types": {
@@ -419,6 +426,29 @@
       "NamedArray": {
         "name": "Mrid",
         "size": 16
+      }
+    },
+    "OperationalModeStatusValue": {
+      "NumericEnum": {
+        "name": "OperationalModeStatusValue",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "0 - Not applicable / Unknown"
+          },
+          "1" : {
+            "name" : "Off",
+            "comment": "1 - Off"
+          },
+          "2" : {
+            "name" : "OperationalMode",
+            "comment": "2 - Operational mode"
+          },
+          "3" : {
+            "name" : "TestMode",
+            "comment": "3 - Test mode"
+          }
+        }
       }
     },
     "PowerSourceType": {
