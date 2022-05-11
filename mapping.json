@@ -77,6 +77,13 @@
         "field_name": "value"
       },
       "substituted": "StorageModeStatusValue"
+    },
+    {
+      "field_key": {
+        "struct_name": "Response",
+        "field_name": "status"
+      },
+      "substituted": "ResponseStatus"
     }
   ],
   "types": {
@@ -503,6 +510,81 @@
             }
           }
         ]
+      }
+    },
+    "ResponseStatus": {
+      "NumericEnum": {
+        "name": "ResponseStatus",
+        "variants": {
+          "1" : {
+            "name" : "EventReceived",
+            "comment": "To notify response server that client has initially received event"
+          },
+          "2" : {
+            "name" : "EventStarted",
+            "comment": "To notify response server that client has begun event"
+          },
+          "3" : {
+            "name" : "EventCompleted",
+            "comment": "To notify response server that the event fully and successfully completed"
+          },
+          "4" : {
+            "name" : "UserOptOut",
+            "comment": "To notify response server that user has chosen to opt out of the event. Can occur before event begins."
+          },
+          "5" : {
+            "name" : "UserOptIn",
+            "comment": "To notify response server that user has chosen to opt in to the event (after a previous opt-out). Can occur before event begins"
+          },
+          "6" : {
+            "name" : "Canceled",
+            "comment": "To notify response server that client has initially received cancellation"
+          },
+          "7" : {
+            "name" : "Superseded",
+            "comment": "To notify response server that client has learned of an event that supersedes this event"
+          },
+          "8" : {
+            "name" : "PartiallyCompletedUserOptOut",
+            "comment": "To notify response server that some participation in the event occurred, but not complete participation, due to one or more user opt-outs"
+          },
+          "9" : {
+            "name" : "PartiallyCompletedUserOptIn",
+            "comment": "To notify response server that some participation in the event occurred, but not complete participation, due to one or more user opt-ins (after a previous opt-out)"
+          },
+          "10" : {
+            "name" : "Completed",
+            "comment": "Event completed, no user participation (previous opt-out)"
+          },
+          "11" : {
+            "name" : "UserAcknowledged",
+            "comment": "To notify response server that no participation in the event occurred"
+          },
+          "12" : {
+            "name" : "CannotBeDisplayed",
+            "comment": "To notify response server that the client is unable to display the message"
+          },
+          "13" : {
+            "name" : "AbortedAlternateServerEvent",
+            "comment": "To notify response server that the client has chosen to stop execution of the event and instead execute an event from a different function set instance on a different server"
+          },
+          "14" : {
+            "name" : "AbortedAlternateProgramEvent",
+            "comment": "To notify response server that the client has chosen to stop execution of the event and instead execute an event from a different function set instance on the same server"
+          },
+          "252" : {
+            "name" : "RejectedControlParameter",
+            "comment": "To notify response server that client is unable to execute the event due to the controls being inapplicable to the device (e.g., a temperature offset was sent to a pool pump)"
+          },
+          "253" : {
+            "name" : "RejectedInvalidEvent",
+            "comment": "To notify response server that client is unable to execute the event due to the controls (e.g., duty cycle, offset, setpoint) being out of range or not possible for the device"
+          },
+          "254" : {
+            "name" : "RejectedReceivedAfterExpiration",
+            "comment": "To notify response server that client has initially received event, but that the event was received after SpecifiedEndTime"
+          }
+        }
       }
     },
     "RtgAbnormalCategory": {
