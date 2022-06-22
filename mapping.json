@@ -11,7 +11,8 @@
     "AccumulationBehaviourType": "AccumulationBehaviourType",
     "DataQualifierType": "DataQualifierType",
     "CommodityType": "CommodityType",
-    "FlowDirectionType": "FlowDirectionType"
+    "FlowDirectionType": "FlowDirectionType",
+    "KindType": "KindType"
   },
   "field_mappings": [
     {
@@ -560,6 +561,33 @@
           "10" : {
             "name" : "ManufacturerStatus",
             "comment": "as defined in manufacturer status"
+          }
+        }
+      }
+    },
+    "KindType": {
+      "NumericEnum": {
+        "name": "KindType",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "0 = Not Applicable (default, if not specified)"
+          },
+          "3" : {
+            "name" : "Currency",
+            "comment": "3 = Currency)"
+          },
+          "8" : {
+            "name" : "Demand",
+            "comment": "8 = Demand)"
+          },
+          "12" : {
+            "name" : "Energy",
+            "comment": "12 = Energy)"
+          },
+          "37" : {
+            "name" : "Power",
+            "comment": "37 = Power"
           }
         }
       }
