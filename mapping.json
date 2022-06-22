@@ -6,7 +6,8 @@
     "PowerSourceType": "PowerSourceType",
     "DERControlType": "DERControlType",
     "DERType": "DERType",
-    "RoleFlagsType": "RoleFlagsType"
+    "RoleFlagsType": "RoleFlagsType",
+    "ServiceKind": "ServiceKind"
   },
   "field_mappings": [
     {
@@ -88,44 +89,6 @@
     }
   ],
   "types": {
-    "RoleFlagsType": {
-      "HexBitField": {
-        "name": "RoleFlagsType",
-        "comment": "Specifies the roles that apply to a usage point",
-        "bytes": [
-          {
-            "bit_0": {
-              "name": "is_mirror",
-              "comment": "SHALL be set if the server is not the measurement device"
-            },
-            "bit_1": {
-              "name": "is_premises_aggregation_point",
-              "comment": "SHALL be set if the UsagePoint is the point of delivery for a premises"
-            },
-            "bit_2": {
-              "name": "is_pev",
-              "comment": "SHALL be set if the usage applies to an electric vehicle"
-            },
-            "bit_3": {
-              "name": "is_der",
-              "comment": "SHALL be set if the usage applies to a distributed energy resource, capable of delivering power to the grid"
-            },
-            "bit_4": {
-              "name": "is_revenue_quality",
-              "comment": "SHALL be set if usage was measured by a device certified as revenue quality"
-            },
-            "bit_5": {
-              "name": "is_dc",
-              "comment": "SHALL be set if the usage point measures direct current"
-            },
-            "bit_6": {
-              "name": "is_submeter ",
-              "comment": "SHALL be set if the usage point is not a premises aggregation point"
-            }
-          }
-        ]
-      }
-    },
     "ConnectStatusValue": {
       "HexBitField": {
         "name": "ConnectStatusValue",
@@ -626,6 +589,44 @@
         }
       }
     },
+    "RoleFlagsType": {
+      "HexBitField": {
+        "name": "RoleFlagsType",
+        "comment": "Specifies the roles that apply to a usage point",
+        "bytes": [
+          {
+            "bit_0": {
+              "name": "is_mirror",
+              "comment": "SHALL be set if the server is not the measurement device"
+            },
+            "bit_1": {
+              "name": "is_premises_aggregation_point",
+              "comment": "SHALL be set if the UsagePoint is the point of delivery for a premises"
+            },
+            "bit_2": {
+              "name": "is_pev",
+              "comment": "SHALL be set if the usage applies to an electric vehicle"
+            },
+            "bit_3": {
+              "name": "is_der",
+              "comment": "SHALL be set if the usage applies to a distributed energy resource, capable of delivering power to the grid"
+            },
+            "bit_4": {
+              "name": "is_revenue_quality",
+              "comment": "SHALL be set if usage was measured by a device certified as revenue quality"
+            },
+            "bit_5": {
+              "name": "is_dc",
+              "comment": "SHALL be set if the usage point measures direct current"
+            },
+            "bit_6": {
+              "name": "is_submeter ",
+              "comment": "SHALL be set if the usage point is not a premises aggregation point"
+            }
+          }
+        ]
+      }
+    },
     "RtgAbnormalCategory": {
       "NumericEnum": {
         "name": "RtgAbnormalCategory",
@@ -657,6 +658,41 @@
           },
           "2" : {
             "name" : "CategoryB"
+          }
+        }
+      }
+    },
+    "ServiceKind": {
+      "NumericEnum": {
+        "name": "ServiceKind",
+        "variants": {
+          "0" : {
+            "name" : "Electricity",
+            "comment": "0 – electricity"
+          },
+          "1" : {
+            "name" : "Gas",
+            "comment": "1 – gas"
+          },
+          "2" : {
+            "name" : "Water",
+            "comment": "2 – water"
+          },
+          "3" : {
+            "name" : "Time",
+            "comment": "3 – time"
+          },
+          "4" : {
+            "name" : "Pressure",
+            "comment": "4 – pressure"
+          },
+          "5" : {
+            "name" : "Heat",
+            "comment": "5 – heat"
+          },
+          "6" : {
+            "name" : "Cooling",
+            "comment": "6 – cooling"
           }
         }
       }
