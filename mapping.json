@@ -10,7 +10,8 @@
     "ServiceKind": "ServiceKind",
     "AccumulationBehaviourType": "AccumulationBehaviourType",
     "DataQualifierType": "DataQualifierType",
-    "CommodityType": "CommodityType"
+    "CommodityType": "CommodityType",
+    "FlowDirectionType": "FlowDirectionType"
   },
   "field_mappings": [
     {
@@ -489,6 +490,25 @@
           "4" : {
             "name" : "Superseded",
             "comment": "Events marked as Superseded by servers are events that may have been replaced by new events from the same program that target the exact same set of deviceCategory's (if applicable) AND DERControl controls (e.g., opModTargetW) (if applicable) and overlap for a given period of time."
+          }
+        }
+      }
+    },
+    "FlowDirectionType": {
+      "NumericEnum": {
+        "name": "FlowDirectionType",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "0 = Not Applicable (default, if not specified)"
+          },
+          "1" : {
+            "name" : "Forward",
+            "comment": "1 = Forward (delivered to customer)"
+          },
+          "19" : {
+            "name" : "Reverse",
+            "comment": "19 = Reverse (received from customer)"
           }
         }
       }
