@@ -8,7 +8,8 @@
     "DERType": "DERType",
     "RoleFlagsType": "RoleFlagsType",
     "ServiceKind": "ServiceKind",
-    "AccumulationBehaviourType": "AccumulationBehaviourType"
+    "AccumulationBehaviourType": "AccumulationBehaviourType",
+    "DataQualifierType": "DataQualifierType"
   },
   "field_mappings": [
     {
@@ -212,6 +213,41 @@
             }
           }
         ]
+      }
+    },
+    "DataQualifierType": {
+      "NumericEnum": {
+        "name": "DataQualifierType",
+        "variants": {
+          "0" : {
+            "name" : "NotApplicable",
+            "comment": "0 = Not Applicable (default, if not specified)"
+          },
+          "2" : {
+            "name" : "Average",
+            "comment": "2 = Average"
+          },
+          "8" : {
+            "name" : "Maximum",
+            "comment": "8 = Maximum"
+          },
+          "9" : {
+            "name" : "Minimum",
+            "comment": "9 = Minimum"
+          },
+          "12" : {
+            "name" : "Normal",
+            "comment": "12 = Normal"
+          },
+          "29" : {
+            "name" : "StdDevOfPop",
+            "comment": "29 = Standard Deviation of a Population (typically indicated by a lower case sigma)"
+          },
+          "30" : {
+            "name" : "StdDevOfSample",
+            "comment": "30 = Standard Deviation of a Sample Drawn from a Population (typically indicated by a lower case 's')"
+          }
+        }
       }
     },
     "DERControlType": {
