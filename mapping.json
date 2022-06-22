@@ -86,6 +86,13 @@
         "field_name": "status"
       },
       "substituted": "ResponseStatus"
+    },
+    {
+      "field_key": {
+        "struct_name": "UsagePointBase",
+        "field_name": "status"
+      },
+      "substituted": "UsagePointStatus"
     }
   ],
   "types": {
@@ -735,6 +742,21 @@
           "3" : {
             "name" : "Both",
             "comment": "Resource supports both conditional and non-conditional subscriptions"
+          }
+        }
+      }
+    },
+    "UsagePointStatus": {
+      "NumericEnum": {
+        "name": "UsagePointStatus",
+        "variants": {
+          "0" : {
+            "name" : "Off",
+            "comment": "Off - 0"
+          },
+          "1" : {
+            "name" : "On",
+            "comment": "On - 1"
           }
         }
       }
