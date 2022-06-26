@@ -2,10 +2,10 @@ use std::str;
 
 use roxmltree::{Namespace, Node};
 
-use crate::parser::constants::attribute;
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{Alias, Enum, RsEntity, StructField, StructFieldSource};
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::constants::attribute;
+use super::node_parser::parse_node;
+use super::types::{Alias, Enum, RsEntity, StructField, StructFieldSource};
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn target_namespace<'a, 'input>(node: &Node<'a, 'input>) -> Option<&'a Namespace<'input>> {
     match node.attribute(attribute::TARGET_NAMESPACE) {

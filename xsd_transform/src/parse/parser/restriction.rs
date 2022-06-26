@@ -1,15 +1,15 @@
 use std::cell::RefCell;
 
-use crate::parser::constants::tag;
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{
+use super::constants::tag;
+use super::node_parser::parse_node;
+use super::types::{
     Enum, EnumCase, EnumSource, Facet, RsEntity, Struct, StructField, StructFieldSource,
     TupleStruct,
 };
-use crate::parser::utils::{
+use super::utils::{
     attribute_groups_to_aliases, attributes_to_fields, get_base, get_documentation, get_parent_name,
 };
-use crate::parser::xsd_elements::{ElementType, FacetType, RestrictionType, XsdNode};
+use super::xsd_elements::{ElementType, FacetType, RestrictionType, XsdNode};
 use roxmltree::Node;
 
 const AVAILABLE_CONTENT_TYPES: [ElementType; 7] = [
@@ -144,8 +144,9 @@ fn is_simple_enumeration(node: &Node) -> bool {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::parser::utils::find_child;
+    use super::super::restriction::simple_type_restriction;
+    use super::super::types::RsEntity;
+    use super::super::utils::find_child;
 
     #[test]
     fn test_simple_type_restriction() {

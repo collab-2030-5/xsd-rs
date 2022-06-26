@@ -1,9 +1,9 @@
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::RsEntity;
-use crate::parser::utils::get_documentation;
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::node_parser::parse_node;
+use super::types::RsEntity;
+use super::utils::get_documentation;
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn parse_simple_type(node: &Node, parent: &Node) -> RsEntity {
     let name = node.attr_name();
@@ -33,9 +33,10 @@ pub fn parse_simple_type(node: &Node, parent: &Node) -> RsEntity {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::parser::types::TypeModifier;
-    use crate::parser::utils::find_child;
+    use super::super::simple_type::parse_simple_type;
+    use super::super::types::RsEntity;
+    use super::super::types::TypeModifier;
+    use super::super::utils::find_child;
 
     #[test]
     fn test_parse_simple_type_with_list() {

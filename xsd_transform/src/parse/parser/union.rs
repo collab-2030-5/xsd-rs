@@ -1,12 +1,10 @@
 use roxmltree::Node;
 
-use crate::parser::constants::attribute;
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{Enum, EnumCase, EnumSource, RsEntity, Struct};
-use crate::parser::utils::{
-    attributes_to_fields, enum_to_field, get_documentation, get_parent_name,
-};
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::constants::attribute;
+use super::node_parser::parse_node;
+use super::types::{Enum, EnumCase, EnumSource, RsEntity, Struct};
+use super::utils::{attributes_to_fields, enum_to_field, get_documentation, get_parent_name};
+use super::xsd_elements::{ElementType, XsdNode};
 use std::cell::RefCell;
 
 pub fn parse_union(union: &Node) -> RsEntity {
@@ -79,9 +77,9 @@ fn enum_subtype_from_node(node: &Node, parent: &Node, index: usize) -> RsEntity 
 
 #[cfg(test)]
 mod test {
-    use crate::parser::types::RsEntity;
-    use crate::parser::union::{create_enum_cases, parse_union};
-    use crate::parser::utils::find_child;
+    use super::super::types::RsEntity;
+    use super::super::union::{create_enum_cases, parse_union};
+    use super::super::utils::find_child;
 
     #[test]
     fn test_create_enum() {

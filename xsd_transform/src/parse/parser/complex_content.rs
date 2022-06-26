@@ -1,8 +1,8 @@
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::RsEntity;
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::node_parser::parse_node;
+use super::types::RsEntity;
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn parse_complex_content(node: &Node) -> RsEntity {
     let content = node

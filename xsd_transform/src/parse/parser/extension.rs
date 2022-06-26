@@ -1,10 +1,10 @@
-use crate::parser::constants::{attribute, tag};
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{RsEntity, Struct, StructField, StructFieldSource};
-use crate::parser::utils::{
+use super::constants::{attribute, tag};
+use super::node_parser::parse_node;
+use super::types::{RsEntity, Struct, StructField, StructFieldSource};
+use super::utils::{
     attribute_groups_to_aliases, attributes_to_fields, get_base, get_documentation,
 };
-use crate::parser::xsd_elements::{ElementType, ExtensionType, XsdNode};
+use super::xsd_elements::{ElementType, ExtensionType, XsdNode};
 use roxmltree::Node;
 use std::cell::RefCell;
 

@@ -1,4 +1,4 @@
-use crate::parser::constants::attribute;
+use super::constants::attribute;
 
 #[derive(Debug, PartialEq)]
 pub enum ElementType {

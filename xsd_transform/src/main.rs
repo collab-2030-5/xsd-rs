@@ -1,8 +1,7 @@
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-pub(crate) mod parser;
-pub(crate) mod transform;
+pub(crate) mod parse;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -21,7 +20,7 @@ struct Opt {
 fn main() {
     let opt = Opt::from_args();
     let xml = std::fs::read_to_string(opt.input).unwrap();
-    let model = transform::transform(&xml);
+    let model = crate::parse::transform(&xml);
 
     let file = std::fs::File::create(opt.output).unwrap();
     let writer = std::io::BufWriter::new(file);

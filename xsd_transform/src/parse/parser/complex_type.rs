@@ -2,12 +2,12 @@ use std::cell::RefCell;
 
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{RsEntity, Struct, StructField, StructFieldSource};
-use crate::parser::utils::{
+use super::node_parser::parse_node;
+use super::types::{RsEntity, Struct, StructField, StructFieldSource};
+use super::utils::{
     attribute_groups_to_aliases, attributes_to_fields, get_documentation, get_parent_name,
 };
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::xsd_elements::{ElementType, XsdNode};
 
 // A complex type can contain one and only one of the following elements,
 // which determines the type of content allowed in the complex type.

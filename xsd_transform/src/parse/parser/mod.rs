@@ -22,8 +22,8 @@ mod union;
 mod utils;
 pub mod xsd_elements;
 
-use crate::parser::schema::parse_schema;
-use crate::parser::types::RsFile;
+use schema::parse_schema;
+use types::RsFile;
 
 // FIXME: Actually pass up errors
 #[allow(clippy::result_unit_err)]

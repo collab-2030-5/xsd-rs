@@ -1,11 +1,12 @@
 #[cfg(test)]
 mod test {
-    use crate::parser::types::TypeModifier;
+    use super::super::types::TypeModifier;
+    use crate::parse::parser::parse;
 
     #[test]
     fn test_extension_base() {
-        use crate::parser::parse;
-        use crate::parser::types::RsEntity;
+        use super::super::parse;
+        use super::super::types::RsEntity;
 
         let text = r#"
 <xs:schema xmlns:tt="http://www.onvif.org/ver10/schema"
@@ -66,8 +67,7 @@ mod test {
 
     #[test]
     fn test_restriction_any_type() {
-        use crate::parser::parse;
-        use crate::parser::types::RsEntity;
+        use super::super::types::RsEntity;
 
         let text = r#"
 <xs:schema targetNamespace="http://schemas.xmlsoap.org/ws/2005/04/discovery"

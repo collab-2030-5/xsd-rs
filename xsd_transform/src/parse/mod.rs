@@ -1,5 +1,7 @@
-use crate::parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, TypeModifier};
-use crate::parser::xsd_elements::FacetType;
+mod parser;
+
+use parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, TypeModifier};
+use parser::xsd_elements::FacetType;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::str::FromStr;
@@ -7,9 +9,10 @@ use std::str::FromStr;
 use xml_model::unresolved::*;
 use xml_model::{Namespace, NumericConstraint, SimpleType, StringConstraint};
 
+/// Parse the XML and transform it into an UnresolvedModel
 pub(crate) fn transform(xml: &str) -> UnresolvedModel {
     //  parse using the underlying library
-    let entity = crate::parser::parse(xml).unwrap();
+    let entity = crate::parse::parser::parse(xml).unwrap();
 
     let mut simple_types = resolve_simple_types(&entity);
     let mut structs = extract_structs(&entity);
@@ -45,7 +48,7 @@ pub(crate) fn transform(xml: &str) -> UnresolvedModel {
     }
 }
 
-fn extract_base_type(x: &crate::parser::types::Struct) -> Option<String> {
+fn extract_base_type(x: &crate::parse::parser::types::Struct) -> Option<String> {
     let base_types: Vec<String> = x
         .fields
         .borrow()
@@ -104,7 +107,7 @@ fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
     }
 }
 
-fn extract_fields(st: &crate::parser::types::Struct) -> Vec<UnresolvedField> {
+fn extract_fields(st: &crate::parse::parser::types::Struct) -> Vec<UnresolvedField> {
     st.fields
         .borrow()
         .iter()

@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use crate::parser::xsd_elements::FacetType;
+use super::xsd_elements::FacetType;
 use roxmltree::Namespace;
 
 #[derive(Debug, Clone, Default)]

@@ -1,5 +1,5 @@
-use crate::parser::constants::attribute;
-use crate::parser::types::{Import, RsEntity};
+use super::constants::attribute;
+use super::types::{Import, RsEntity};
 use roxmltree::Node;
 
 pub fn parse_import(node: &Node) -> RsEntity {

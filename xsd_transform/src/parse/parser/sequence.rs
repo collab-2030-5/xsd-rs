@@ -2,10 +2,10 @@ use std::cell::RefCell;
 
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{RsEntity, Struct, StructField};
-use crate::parser::utils::{enum_to_field, get_documentation, get_parent_name};
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::node_parser::parse_node;
+use super::types::{RsEntity, Struct, StructField};
+use super::utils::{enum_to_field, get_documentation, get_parent_name};
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn parse_sequence(sequence: &Node, parent: &Node) -> RsEntity {
     let name = get_parent_name(sequence);

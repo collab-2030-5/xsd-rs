@@ -1,9 +1,9 @@
 use roxmltree::Node;
 
-use crate::parser::constants::attribute;
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{RsEntity, TupleStruct, TypeModifier};
-use crate::parser::utils::find_child;
+use super::constants::attribute;
+use super::node_parser::parse_node;
+use super::types::{RsEntity, TupleStruct, TypeModifier};
+use super::utils::find_child;
 
 pub fn parse_list(list: &Node) -> RsEntity {
     let mut result = match list.attribute(attribute::ITEM_TYPE) {

@@ -1,23 +1,23 @@
 use roxmltree::Node;
 
-use crate::parser::any::parse_any;
-use crate::parser::any_attribute::parse_any_attribute;
-use crate::parser::attribute::parse_attribute;
-use crate::parser::attribute_group::parse_attribute_group;
-use crate::parser::choice::parse_choice;
-use crate::parser::complex_content::parse_complex_content;
-use crate::parser::complex_type::parse_complex_type;
-use crate::parser::element::parse_element;
-use crate::parser::extension::parse_extension;
-use crate::parser::import::parse_import;
-use crate::parser::list::parse_list;
-use crate::parser::restriction::parse_restriction;
-use crate::parser::sequence::parse_sequence;
-use crate::parser::simple_content::parse_simple_content;
-use crate::parser::simple_type::parse_simple_type;
-use crate::parser::types::RsEntity;
-use crate::parser::union::parse_union;
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::any::parse_any;
+use super::any_attribute::parse_any_attribute;
+use super::attribute::parse_attribute;
+use super::attribute_group::parse_attribute_group;
+use super::choice::parse_choice;
+use super::complex_content::parse_complex_content;
+use super::complex_type::parse_complex_type;
+use super::element::parse_element;
+use super::extension::parse_extension;
+use super::import::parse_import;
+use super::list::parse_list;
+use super::restriction::parse_restriction;
+use super::sequence::parse_sequence;
+use super::simple_content::parse_simple_content;
+use super::simple_type::parse_simple_type;
+use super::types::RsEntity;
+use super::union::parse_union;
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn parse_node(node: &Node, parent: &Node) -> RsEntity {
     use ElementType::*;

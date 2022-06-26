@@ -1,9 +1,9 @@
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{Alias, RsEntity, Struct, StructField, StructFieldSource, TypeModifier};
-use crate::parser::utils::get_documentation;
-use crate::parser::xsd_elements::{ElementType, UseType, XsdNode};
+use super::node_parser::parse_node;
+use super::types::{Alias, RsEntity, Struct, StructField, StructFieldSource, TypeModifier};
+use super::utils::get_documentation;
+use super::xsd_elements::{ElementType, UseType, XsdNode};
 
 pub fn parse_attribute(node: &Node, parent: &Node) -> RsEntity {
     if parent.xsd_type() == ElementType::Schema {
@@ -79,9 +79,9 @@ fn parse_global_attribute(node: &Node) -> RsEntity {
 
 #[cfg(test)]
 mod test {
-    use crate::parser::attribute::parse_global_attribute;
-    use crate::parser::types::RsEntity;
-    use crate::parser::utils::find_child;
+    use super::super::attribute::parse_global_attribute;
+    use super::super::types::RsEntity;
+    use super::super::utils::find_child;
 
     #[test]
     fn test_global_attribute_with_nested_type() {

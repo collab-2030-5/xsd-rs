@@ -1,12 +1,12 @@
 use roxmltree::Node;
 
-use crate::parser::constants::attribute;
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::{
+use super::constants::attribute;
+use super::node_parser::parse_node;
+use super::types::{
     Alias, EnumCase, EnumSource, RsEntity, Struct, StructField, StructFieldSource, TypeModifier,
 };
-use crate::parser::utils::get_documentation;
-use crate::parser::xsd_elements::{max_occurs, min_occurs, ElementType, MaxOccurs, XsdNode};
+use super::utils::get_documentation;
+use super::xsd_elements::{max_occurs, min_occurs, ElementType, MaxOccurs, XsdNode};
 
 const SUPPORTED_CONTENT_TYPES: [ElementType; 2] =
     [ElementType::SimpleType, ElementType::ComplexType];
@@ -175,9 +175,9 @@ pub fn element_modifier(node: &Node) -> TypeModifier {
 
 #[cfg(test)]
 mod test {
-    use crate::parser::element::*;
-    use crate::parser::types::RsEntity;
-    use crate::parser::utils::find_child;
+    use super::super::element::*;
+    use super::super::types::RsEntity;
+    use super::super::utils::find_child;
 
     #[test]
     fn test_global_element_without_type() {

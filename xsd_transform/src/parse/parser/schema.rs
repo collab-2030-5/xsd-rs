@@ -1,9 +1,9 @@
 use roxmltree::Node;
 
-use crate::parser::node_parser::parse_node;
-use crate::parser::types::RsFile;
-use crate::parser::utils::target_namespace;
-use crate::parser::xsd_elements::{ElementType, XsdNode};
+use super::node_parser::parse_node;
+use super::types::RsFile;
+use super::utils::target_namespace;
+use super::xsd_elements::{ElementType, XsdNode};
 
 pub fn parse_schema<'input>(schema: &Node<'_, 'input>) -> RsFile<'input> {
     RsFile {
@@ -35,7 +35,7 @@ pub fn parse_schema<'input>(schema: &Node<'_, 'input>) -> RsFile<'input> {
 
 #[cfg(test)]
 mod test {
-    use crate::parser::schema::parse_schema;
+    use super::super::schema::parse_schema;
 
     #[test]
     fn test_multiple_xsd_ns() {
