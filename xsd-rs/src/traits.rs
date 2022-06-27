@@ -24,6 +24,7 @@ impl RustType for SimpleType {
             Self::EnumU8(x) => format!("structs::{}", x.name.to_upper_camel_case()),
             Self::NamedArray(x) => format!("structs::{}", x.name),
             Self::HexBitField(x) => format!("structs::{}", x.name),
+            Self::NumericDuration(_) => "std::time::Duration".to_string(),
         }
     }
 }

@@ -5,6 +5,7 @@ pub mod resolved;
 /// raw JSON representation of the model
 pub mod unresolved;
 
+use crate::config::NumericDuration;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -48,4 +49,6 @@ pub enum SimpleType {
     NamedArray(std::rc::Rc<config::NamedArray>),
     /// Bitfield represented as Hex-bytes
     HexBitField(std::rc::Rc<config::BitField>),
+    /// Duration encoded as a number
+    NumericDuration(std::rc::Rc<NumericDuration>),
 }

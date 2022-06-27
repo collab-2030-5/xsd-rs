@@ -2,6 +2,16 @@ use std::collections::{BTreeMap, HashMap};
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub enum DurationEncoding {
+    UInt32,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+pub enum NumericDuration {
+    Seconds(DurationEncoding),
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Variant {
     /// name of the variant
@@ -146,14 +156,17 @@ pub enum SubstitutedType {
     NumericEnum(std::rc::Rc<NumericEnum<u8>>),
     /// Bitfield represented by xs:hexBinary
     HexBitField(std::rc::Rc<BitField>),
+    /// Duration encoding as a numeric value
+    NumericDuration(std::rc::Rc<NumericDuration>),
 }
 
 impl SubstitutedType {
-    pub fn name(&self) -> &str {
+    pub fn type_name(&self) -> Option<&str> {
         match self {
-            SubstitutedType::NamedArray(x) => &x.name,
-            SubstitutedType::NumericEnum(x) => &x.name,
-            SubstitutedType::HexBitField(x) => &x.name,
+            SubstitutedType::NamedArray(x) => Some(&x.name),
+            SubstitutedType::NumericEnum(x) => Some(&x.name),
+            SubstitutedType::HexBitField(x) => Some(&x.name),
+            SubstitutedType::NumericDuration(_) => None,
         }
     }
 }
