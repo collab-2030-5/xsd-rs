@@ -2,7 +2,7 @@ mod parser;
 
 use parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, TypeModifier};
 use parser::xsd_elements::FacetType;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fmt::Debug;
 use std::str::FromStr;
 
@@ -160,7 +160,7 @@ fn extract_structs(entity: &RsFile) -> Vec<UnresolvedStruct> {
 }
 
 // simple types can only reference each other
-fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
+fn resolve_simple_types(model: &RsFile) -> BTreeMap<String, SimpleType> {
     let input: Vec<TupleStruct> = model
         .types
         .iter()
@@ -171,7 +171,7 @@ fn resolve_simple_types(model: &RsFile) -> HashMap<String, SimpleType> {
         .cloned()
         .collect();
 
-    let mut output = HashMap::new();
+    let mut output = BTreeMap::new();
 
     for ts in input.iter() {
         match try_resolve_basic(ts) {

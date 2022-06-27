@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use crate::config::{Config, FieldKey, ResolvedConfig, SubstitutedType};
 use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
@@ -10,7 +10,7 @@ use std::rc::Rc;
 pub struct UnresolvedModel {
     pub xsd_ns: Option<Namespace>,
     pub target_ns: Option<Namespace>,
-    pub simple_types: HashMap<String, SimpleType>,
+    pub simple_types: BTreeMap<String, SimpleType>,
     pub structs: Vec<UnresolvedStruct>,
 }
 
@@ -102,7 +102,7 @@ impl UnresolvedField {
     fn resolve(
         &self,
         structs: &HashMap<String, Rc<Struct>>,
-        simple_types: &HashMap<String, SimpleType>,
+        simple_types: &BTreeMap<String, SimpleType>,
         struct_name: &str,
         config: &ResolvedConfig,
     ) -> Option<Field> {
@@ -167,7 +167,7 @@ impl UnresolvedStruct {
         &self,
         metadata: Metadata,
         structs: &HashMap<String, Rc<Struct>>,
-        simple_types: &HashMap<String, SimpleType>,
+        simple_types: &BTreeMap<String, SimpleType>,
         config: &ResolvedConfig,
     ) -> Option<std::rc::Rc<Struct>> {
         // resolve the base class
