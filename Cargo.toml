@@ -2,5 +2,5 @@
 
 members = [
     "model",
-    "rs_xsd_gen",
+    "xsd-rs",
 ]
