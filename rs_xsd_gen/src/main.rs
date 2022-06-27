@@ -13,7 +13,7 @@ use xml_model::resolved::{
     AttrMultiplicity, ElemMultiplicity, ElementType, FieldType, Model, Struct,
 };
 
-use crate::config::Config;
+use crate::config::BaseTypeConfig;
 use crate::traits::RustType;
 use std::rc::Rc;
 use xml_model::config::{BitField, NamedArray, NumericEnum, SubstitutedType};
@@ -31,9 +31,6 @@ struct Opt {
     /// config file
     #[structopt(short = "c", long = "config", parse(from_os_str))]
     config: PathBuf,
-    /// mapping file
-    #[structopt(short = "m", long = "mapping", parse(from_os_str))]
-    mapping: PathBuf,
     /// rust output directory
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: PathBuf,
@@ -48,19 +45,17 @@ fn main() -> Result<(), FatalError> {
     let opt: Opt = Opt::from_args();
     let xsd = std::fs::read_to_string(opt.input)?;
     let config: config::Config = serde_json::from_reader(std::fs::File::open(opt.config)?)?;
-    let model_config: xml_model::config::Config =
-        serde_json::from_reader(std::fs::File::open(opt.mapping)?)?;
     let model: xml_model::unresolved::UnresolvedModel = crate::parse::transform(&xsd);
-    let model = model.resolve(model_config);
+    let model = model.resolve(config.mappings);
 
     create_main_output_dir(&opt.output, opt.remove_dir)?;
 
-    write_model(opt.output, &model, &config)?;
+    write_model(opt.output, &model, &config.base_types)?;
 
     Ok(())
 }
 
-fn write_model(dir: PathBuf, model: &Model, config: &Config) -> Result<(), FatalError> {
+fn write_model(dir: PathBuf, model: &Model, config: &BaseTypeConfig) -> Result<(), FatalError> {
     let files = [
         ("config.rs", include_str!("../snippets/config.rs")),
         ("error.rs", include_str!("../snippets/error.rs")),
@@ -1084,7 +1079,7 @@ fn write_base_enum_def(
     w: &mut dyn Write,
     st: &Struct,
     parents: &[Rc<Struct>],
-    config: &Config,
+    config: &BaseTypeConfig,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
@@ -1106,7 +1101,7 @@ fn write_base_enum_impl(
     w: &mut dyn Write,
     st: &Struct,
     parents: &[Rc<Struct>],
-    config: &Config,
+    config: &BaseTypeConfig,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
     writeln!(w, "impl {} {{", base_name)?;
@@ -1160,7 +1155,7 @@ fn write_base_enum_impl(
     writeln!(w, "}}")
 }
 
-fn write_base_enums(dir: &Path, model: &Model, config: &Config) -> Result<(), FatalError> {
+fn write_base_enums(dir: &Path, model: &Model, config: &BaseTypeConfig) -> Result<(), FatalError> {
     std::fs::create_dir(dir)?;
 
     let base_fields = model.base_fields();
