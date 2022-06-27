@@ -10,7 +10,7 @@ use xml_model::unresolved::*;
 use xml_model::{Namespace, NumericConstraint, SimpleType, StringConstraint};
 
 /// Parse the XML and transform it into an UnresolvedModel
-pub(crate) fn transform(xml: &str) -> UnresolvedModel {
+pub fn transform(xml: &str) -> UnresolvedModel {
     //  parse using the underlying library
     let entity = crate::parse::parser::parse(xml).unwrap();
 
@@ -48,7 +48,7 @@ pub(crate) fn transform(xml: &str) -> UnresolvedModel {
     }
 }
 
-fn extract_base_type(x: &crate::parse::parser::types::Struct) -> Option<String> {
+fn extract_base_type(x: &super::parse::parser::types::Struct) -> Option<String> {
     let base_types: Vec<String> = x
         .fields
         .borrow()
@@ -107,7 +107,7 @@ fn get_element_type(input: &[TypeModifier]) -> Option<ElementType> {
     }
 }
 
-fn extract_fields(st: &crate::parse::parser::types::Struct) -> Vec<UnresolvedField> {
+fn extract_fields(st: &super::parse::parser::types::Struct) -> Vec<UnresolvedField> {
     st.fields
         .borrow()
         .iter()

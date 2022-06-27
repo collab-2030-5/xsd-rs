@@ -27,7 +27,7 @@ use types::RsFile;
 
 // FIXME: Actually pass up errors
 #[allow(clippy::result_unit_err)]
-pub(crate) fn parse(text: &str) -> Result<RsFile, ()> {
+pub fn parse(text: &str) -> Result<RsFile, ()> {
     let doc = roxmltree::Document::parse(text).expect("Parse document error");
 
     let schema = doc

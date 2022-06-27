@@ -1,4 +1,5 @@
 pub(crate) mod config;
+pub(crate) mod parse;
 pub(crate) mod traits;
 
 use structopt::StructOpt;
@@ -24,7 +25,7 @@ use xml_model::SimpleType;
     about = "Reads model of xml from json and emits rust bindings"
 )]
 struct Opt {
-    /// json input file
+    /// input XSD file
     #[structopt(short = "i", long = "input", parse(from_os_str))]
     input: PathBuf,
     /// config file
@@ -45,11 +46,11 @@ type FatalError = Box<dyn std::error::Error>;
 
 fn main() -> Result<(), FatalError> {
     let opt: Opt = Opt::from_args();
-    let input = std::fs::read_to_string(opt.input)?;
+    let xsd = std::fs::read_to_string(opt.input)?;
     let config: config::Config = serde_json::from_reader(std::fs::File::open(opt.config)?)?;
     let model_config: xml_model::config::Config =
         serde_json::from_reader(std::fs::File::open(opt.mapping)?)?;
-    let model: xml_model::unresolved::UnresolvedModel = serde_json::from_str(&input)?;
+    let model: xml_model::unresolved::UnresolvedModel = crate::parse::transform(&xsd);
     let model = model.resolve(model_config);
 
     create_main_output_dir(&opt.output, opt.remove_dir)?;

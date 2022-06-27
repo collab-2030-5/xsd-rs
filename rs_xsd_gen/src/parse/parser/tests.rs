@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
+    use super::super::parse;
     use super::super::types::TypeModifier;
-    use crate::parse::parser::parse;
 
     #[test]
     fn test_extension_base() {
