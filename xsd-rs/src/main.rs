@@ -16,7 +16,9 @@ use xml_model::resolved::{
 use crate::config::BaseTypeConfig;
 use crate::traits::RustType;
 use std::rc::Rc;
-use xml_model::config::{BitField, NamedArray, NumericEnum, SubstitutedType};
+use xml_model::config::{
+    BitField, DurationEncoding, NamedArray, NumericDuration, NumericEnum, SubstitutedType,
+};
 use xml_model::SimpleType;
 
 #[derive(Debug, StructOpt)]
@@ -74,8 +76,12 @@ fn write_model(dir: PathBuf, model: &Model, config: &BaseTypeConfig) -> Result<(
     let mod_file = struct_dir.join("mod.rs");
     write_struct_mod_file(&mod_file, model)?;
 
-    for substituted in model.substituted_types.iter() {
-        let path = struct_dir.join(format!("{}.rs", substituted.name().to_snake_case()));
+    for (substituted, name) in model
+        .substituted_types
+        .iter()
+        .filter_map(|x| x.type_name().map(|name| (x, name)))
+    {
+        let path = struct_dir.join(format!("{}.rs", name.to_snake_case()));
         let mut writer = create(&path)?;
         match substituted {
             SubstitutedType::NamedArray(x) => {
@@ -87,6 +93,7 @@ fn write_model(dir: PathBuf, model: &Model, config: &BaseTypeConfig) -> Result<(
             SubstitutedType::HexBitField(x) => {
                 write_bit_field_file(&mut writer, x)?;
             }
+            SubstitutedType::NumericDuration(_) => {}
         }
     }
 
@@ -268,8 +275,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "mod {};", st.name.to_snake_case())?;
     }
 
-    for x in model.substituted_types.iter() {
-        writeln!(w, "mod {};", x.name().to_snake_case())?;
+    for name in model.substituted_types.iter().filter_map(|x| x.type_name()) {
+        writeln!(w, "mod {};", name.to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -278,8 +285,8 @@ fn write_struct_mod_file(path: &Path, model: &Model) -> Result<(), FatalError> {
         writeln!(w, "pub use {}::*;", st.name.to_snake_case())?;
     }
 
-    for x in model.substituted_types.iter() {
-        writeln!(w, "pub use {}::*;", x.name().to_snake_case())?;
+    for name in model.substituted_types.iter().filter_map(|x| x.type_name()) {
+        writeln!(w, "pub use {}::*;", name.to_snake_case())?;
     }
 
     writeln!(w)?;
@@ -422,6 +429,7 @@ enum AttributeTransform {
     Enum(std::rc::Rc<NumericEnum<u8>>),
     NamedArray(std::rc::Rc<NamedArray>),
     HexBitfield(std::rc::Rc<BitField>),
+    Duration(std::rc::Rc<NumericDuration>),
 }
 
 impl AttributeTransform {
@@ -437,6 +445,11 @@ impl AttributeTransform {
             Self::HexBitfield(_) => {
                 format!("{}.to_hex()", name)
             }
+            Self::Duration(x) => match x.as_ref() {
+                NumericDuration::Seconds(_) => {
+                    format!("{}.as_secs().to_string()", name)
+                }
+            },
         }
     }
     fn parse_from_string(&self) -> String {
@@ -454,6 +467,14 @@ impl AttributeTransform {
             Self::HexBitfield(x) => {
                 format!("structs::{}::from_hex(&attr.value)?", x.name)
             }
+            AttributeTransform::Duration(x) => match x.as_ref() {
+                NumericDuration::Seconds(enc) => match enc {
+                    DurationEncoding::UInt32 => {
+                        "Duration::from_secs(u32::from_str_radix(&attr.value, 10)? as u64)"
+                            .to_string()
+                    }
+                },
+            },
         }
     }
 }
@@ -475,6 +496,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
         SimpleType::EnumU8(x) => Some(AttributeTransform::Enum(x.clone())),
         SimpleType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
         SimpleType::HexBitField(x) => Some(AttributeTransform::HexBitfield(x.clone())),
+        SimpleType::NumericDuration(x) => Some(AttributeTransform::Duration(x.clone())),
     }
 }
 
@@ -486,6 +508,7 @@ enum ElementTransform {
     Enum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
     NamedHexArray(std::rc::Rc<NamedArray>),
     HexBitField(std::rc::Rc<BitField>),
+    NumericDuration(std::rc::Rc<NumericDuration>),
 }
 
 impl ElementTransform {
@@ -553,6 +576,15 @@ impl ElementTransform {
                     xsd_name, rust_name
                 )
             }
+            ElementTransform::NumericDuration(x) => match x.as_ref() {
+                NumericDuration::Seconds(_) => {
+                    writeln!(
+                        w,
+                        "write_simple_tag(writer, \"{}\", &{}.as_secs().to_string())?;",
+                        xsd_name, rust_name
+                    )
+                }
+            },
         }
     }
 }
@@ -574,6 +606,7 @@ fn get_simple_type_transform(st: &SimpleType) -> ElementTransform {
         SimpleType::EnumU8(x) => ElementTransform::Enum(x.clone()),
         SimpleType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
         SimpleType::HexBitField(x) => ElementTransform::HexBitField(x.clone()),
+        SimpleType::NumericDuration(x) => ElementTransform::NumericDuration(x.clone()),
     }
 }
 
@@ -908,6 +941,14 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             "structs::{}::from_hex(&read_string(reader, \"{}\")?)?",
             x.name, elem.name,
         ),
+        ElementTransform::NumericDuration(x) => match x.as_ref() {
+            NumericDuration::Seconds(_) => {
+                format!(
+                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parse()?)",
+                    &elem.name
+                )
+            }
+        },
     };
 
     match &elem.multiplicity {
@@ -936,6 +977,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     ElementTransform::Enum(_) => false,
                     ElementTransform::NamedHexArray(_) => false,
                     ElementTransform::HexBitField(_) => false,
+                    ElementTransform::NumericDuration(_) => false,
                 });
 
             if has_struct {

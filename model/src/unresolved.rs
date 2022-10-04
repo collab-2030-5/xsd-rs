@@ -123,6 +123,9 @@ impl UnresolvedField {
                 SubstitutedType::HexBitField(x) => {
                     get_simple_field_type(self.info, SimpleType::HexBitField(x.clone()))
                 }
+                SubstitutedType::NumericDuration(x) => {
+                    get_simple_field_type(self.info, SimpleType::NumericDuration(x.clone()))
+                }
             };
             return Some(Field {
                 comment: self.comment.clone(),
@@ -258,6 +261,9 @@ impl UnresolvedModel {
                         SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
                         SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
                         SubstitutedType::HexBitField(x) => SimpleType::HexBitField(x.clone()),
+                        SubstitutedType::NumericDuration(x) => {
+                            SimpleType::NumericDuration(x.clone())
+                        }
                     }
                 }
             }
