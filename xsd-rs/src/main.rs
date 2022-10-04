@@ -123,7 +123,7 @@ fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), Fata
 }
 
 fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalError> {
-    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq)]")?;
+    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]")?;
     writeln!(w, "pub enum {} {{", e.name)?;
     indent(w, |w| {
         for value in e.variants.values() {
