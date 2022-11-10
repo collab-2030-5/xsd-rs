@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// controls enum generation for base types used as elements
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub(crate) enum BaseTypeEntry {
     /// automatically discover the base types and use all of them
     Auto,
@@ -11,12 +11,12 @@ pub(crate) enum BaseTypeEntry {
     Whitelist(HashSet<String>),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub(crate) struct BaseTypeConfig {
     pub(crate) whitelist: HashMap<String, BaseTypeEntry>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct Config {
     pub(crate) base_types: BaseTypeConfig,
     pub(crate) mappings: xml_model::config::Config,

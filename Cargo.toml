@@ -3,4 +3,5 @@
 members = [
     "model",
     "xsd-rs",
+    "openadr"
 ]

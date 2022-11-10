@@ -95,7 +95,7 @@ impl From<std::io::Error> for ErrorWithLocation {
         ErrorWithLocation {
             err: ReadError::Io,
             line: 0,
-            col: 0
+            col: 0,
         }
     }
 }

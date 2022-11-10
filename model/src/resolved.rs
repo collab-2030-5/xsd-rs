@@ -1,25 +1,7 @@
-use crate::{Namespace, SimpleType};
+use crate::{SimpleType, TypeId};
+use std::collections::BTreeMap;
 
-use crate::config::SubstitutedType;
 use std::rc::Rc;
-
-#[derive(Clone, Debug)]
-pub enum ElementType {
-    Simple(SimpleType),
-    Struct(std::rc::Rc<Struct>),
-}
-
-impl From<SimpleType> for ElementType {
-    fn from(x: SimpleType) -> Self {
-        ElementType::Simple(x)
-    }
-}
-
-impl From<Rc<Struct>> for ElementType {
-    fn from(x: Rc<Struct>) -> Self {
-        ElementType::Struct(x)
-    }
-}
 
 #[derive(Copy, Clone, Debug)]
 pub enum ElemMultiplicity {
@@ -36,7 +18,7 @@ pub enum AttrMultiplicity {
 
 #[derive(Clone, Debug)]
 pub enum FieldType {
-    Element(ElemMultiplicity, ElementType),
+    Element(ElemMultiplicity, AnyType),
     Attribute(AttrMultiplicity, SimpleType),
 }
 
@@ -50,21 +32,47 @@ pub struct Field {
 #[derive(Debug, Clone)]
 pub struct Struct {
     pub comment: Option<String>,
-    pub name: String,
+    pub id: TypeId,
     pub base_type: Option<Rc<Struct>>,
     pub fields: Vec<Field>,
-    pub metadata: Metadata,
+    pub metadata: StructMetadata,
+}
+
+#[derive(Debug, Clone)]
+pub struct Choice {
+    pub comment: Option<String>,
+    pub id: TypeId,
+    pub variants: Vec<ChoiceVariant>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChoiceVariant {
+    pub comment: Option<String>,
+    pub element_name: String,
+    pub type_info: AnyType,
+}
+
+/// Simple or composite like a struct
+#[derive(Debug, Clone)]
+pub enum AnyType {
+    Simple(SimpleType),
+    Struct(Rc<Struct>),
+    Choice(Rc<Choice>),
+}
+
+impl From<SimpleType> for AnyType {
+    fn from(x: SimpleType) -> Self {
+        Self::Simple(x)
+    }
 }
 
 #[derive(Debug)]
 pub struct Model {
-    pub target_ns: Option<Namespace>,
-    pub substituted_types: Vec<SubstitutedType>,
-    pub structs: Vec<Rc<Struct>>,
+    pub types: BTreeMap<TypeId, AnyType>,
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Metadata {
+pub struct StructMetadata {
     /// true if the struct is inherited from by another struct
     pub is_base: bool,
     /// true if the struct is used as an element in another struct
@@ -87,12 +95,17 @@ impl Struct {
 }
 
 impl Model {
+    pub fn structs(&self) -> impl Iterator<Item = Rc<Struct>> + '_ {
+        self.types.values().filter_map(|t| match t {
+            AnyType::Struct(x) => Some(x.clone()),
+            _ => None,
+        })
+    }
+
     /// return all of the structs that are 1) base structs AND 2) used as fields in other structs
     pub fn base_fields(&self) -> Vec<Rc<Struct>> {
-        self.structs
-            .iter()
+        self.structs()
             .filter(|x| x.metadata.is_base && x.metadata.use_as_element)
-            .cloned()
             .collect()
     }
 
@@ -100,14 +113,14 @@ impl Model {
     pub fn sub_structs_of(&self, base: &Rc<Struct>) -> Vec<Rc<Struct>> {
         let mut structs = Vec::new();
 
-        for other in self.structs.iter() {
-            if other.inherits_from(base) && !structs.iter().any(|x| Rc::ptr_eq(x, other)) {
+        for other in self.structs() {
+            if other.inherits_from(base) && !structs.iter().any(|x| Rc::ptr_eq(x, &other)) {
                 structs.push(other.clone());
             }
         }
 
         // can we sort here?
-        structs.sort_by(|lhs, rhs| lhs.name.cmp(&rhs.name));
+        structs.sort_by(|lhs, rhs| lhs.id.cmp(&rhs.id));
 
         structs
     }

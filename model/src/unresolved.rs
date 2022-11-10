@@ -1,163 +1,176 @@
-use std::collections::{BTreeMap, HashMap};
-
-use crate::config::{Config, FieldKey, ResolvedConfig, SubstitutedType};
-use crate::resolved::{AttrMultiplicity, ElemMultiplicity, Field, FieldType, Metadata, Struct};
-use crate::*;
-use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
+use std::path::Path;
 use std::rc::Rc;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UnresolvedModel {
-    pub xsd_ns: Option<Namespace>,
-    pub target_ns: Option<Namespace>,
-    pub simple_types: BTreeMap<String, SimpleType>,
-    pub structs: Vec<UnresolvedStruct>,
+use crate::config::{Config, FieldId};
+use crate::map::Map;
+use crate::resolved::*;
+use crate::resolver::Resolver;
+use crate::*;
+
+#[derive(Clone, Debug)]
+pub struct UnresolvedChoice {
+    pub type_id: TypeId,
+    pub comment: Option<String>,
+    pub variants: Vec<UnresolvedChoiceVariant>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+pub struct UnresolvedChoiceVariant {
+    pub comment: Option<String>,
+    // name of the element that indicates this variant
+    pub element_name: String,
+    // type for this variant
+    pub type_id: TypeId,
+}
+
+impl UnresolvedChoice {
+    fn resolve(&self, resolver: &Resolver) -> Option<Choice> {
+        let mut variants: Vec<ChoiceVariant> = Vec::new();
+        for var in self.variants.iter() {
+            match var.resolve(resolver) {
+                None => return None, // can't resolve variant yet
+                Some(x) => variants.push(x),
+            }
+        }
+        Some(Choice {
+            comment: self.comment.clone(),
+            id: self.type_id.clone(),
+            variants,
+        })
+    }
+}
+
+impl UnresolvedChoiceVariant {
+    fn resolve(&self, resolver: &Resolver) -> Option<ChoiceVariant> {
+        resolver.resolve(&self.type_id).map(|any| ChoiceVariant {
+            comment: self.comment.clone(),
+            element_name: self.element_name.clone(),
+            type_info: any.clone(),
+        })
+    }
+}
+
+/// represent complex types whose sub-types must be resolved
+#[derive(Debug, Clone)]
+pub enum UnresolvedType {
+    Struct(UnresolvedStruct),
+    Choice(UnresolvedChoice),
+}
+
+impl UnresolvedType {
+    fn get_struct(&self) -> Option<&UnresolvedStruct> {
+        match self {
+            UnresolvedType::Struct(x) => Some(x),
+            UnresolvedType::Choice(_) => None,
+        }
+    }
+
+    fn get_type_id(&self) -> &TypeId {
+        match self {
+            UnresolvedType::Struct(x) => &x.type_id,
+            UnresolvedType::Choice(x) => &x.type_id,
+        }
+    }
+}
+
+/// Extended unresolved types provide additional metadata computed from the entire model
+#[derive(Debug, Clone)]
+pub enum UnresolvedTypeEx {
+    Struct(UnresolvedStruct, StructMetadata),
+    Choice(UnresolvedChoice),
+}
+
+impl UnresolvedTypeEx {
+    fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
+        match self {
+            UnresolvedTypeEx::Struct(x, metadata) => {
+                x.resolve(*metadata, resolver).map(AnyType::Struct)
+            }
+            UnresolvedTypeEx::Choice(x) => x.resolve(resolver).map(|x| AnyType::Choice(Rc::new(x))),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct UnresolvedModel {
+    pub aliases: Map<TypeId, TypeId>,
+    pub simple_types: Map<TypeId, SimpleType>,
+    pub unresolved_types: Vec<UnresolvedType>,
+}
+
+#[derive(Debug, Clone)]
 pub struct UnresolvedField {
     pub comment: Option<String>,
     pub name: String,
-    pub field_type: String,
+    pub field_type: TypeId,
     pub info: FieldTypeInfo,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug)]
 pub enum ElementType {
     Single,
     Array,
     Option,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug)]
 pub enum AttributeType {
     Single,
     Option,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug)]
 pub enum FieldTypeInfo {
     Attribute(AttributeType),
     Element(ElementType),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct UnresolvedStruct {
     pub comment: Option<String>,
-    pub name: String,
+    pub type_id: TypeId,
     /// single optional base struct
-    pub base_type: Option<String>,
+    pub base_type: Option<TypeId>,
     pub fields: Vec<UnresolvedField>,
 }
 
-fn resolve_basic(name: &str) -> Option<SimpleType> {
-    match name {
-        "xs:boolean" => Some(SimpleType::Boolean),
-        "xs:anyURI" => Some(SimpleType::String(StringConstraint::default())),
-        "xs:hexBinary" => Some(SimpleType::HexBytes(None)),
-        "xs:string" => Some(SimpleType::String(StringConstraint::default())),
-        "xs:byte" => Some(SimpleType::I8(NumericConstraint::default())),
-        "xs:unsignedByte" => Some(SimpleType::U8(NumericConstraint::default())),
-        "xs:short" => Some(SimpleType::I16(NumericConstraint::default())),
-        "xs:unsignedShort" => Some(SimpleType::U16(NumericConstraint::default())),
-        "xs:int" => Some(SimpleType::I32(NumericConstraint::default())),
-        "xs:unsignedInt" => Some(SimpleType::U32(NumericConstraint::default())),
-        "xs:long" => Some(SimpleType::I64(NumericConstraint::default())),
-        "xs:unsignedLong" => Some(SimpleType::U64(NumericConstraint::default())),
-        _ => {
-            if name.starts_with("xs:") {
-                panic!("unhandled primitive: {}", name);
-            }
-            None
-        }
-    }
-}
-
-fn get_simple_field_type(info: FieldTypeInfo, st: SimpleType) -> FieldType {
+fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
     match info {
-        FieldTypeInfo::Attribute(x) => match x {
-            AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, st),
-            AttributeType::Option => FieldType::Attribute(AttrMultiplicity::Optional, st),
+        FieldTypeInfo::Attribute(attr_type) => match t {
+            AnyType::Struct(_) => panic!("attributes may not reference struct types"),
+            AnyType::Choice(_) => panic!("attributes may not reference choice types"),
+            AnyType::Simple(x) => match attr_type {
+                AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, x.clone()),
+                AttributeType::Option => {
+                    FieldType::Attribute(AttrMultiplicity::Optional, x.clone())
+                }
+            },
         },
         FieldTypeInfo::Element(x) => match x {
-            ElementType::Single => FieldType::Element(ElemMultiplicity::Single, st.into()),
-            ElementType::Array => FieldType::Element(ElemMultiplicity::Vec, st.into()),
-            ElementType::Option => FieldType::Element(ElemMultiplicity::Optional, st.into()),
-        },
-    }
-}
-
-fn get_struct_field_type(info: FieldTypeInfo, st: Rc<crate::resolved::Struct>) -> FieldType {
-    match info {
-        FieldTypeInfo::Attribute(_) => panic!("attributes cannot use struct type"),
-        FieldTypeInfo::Element(x) => match x {
-            ElementType::Single => FieldType::Element(ElemMultiplicity::Single, st.into()),
-            ElementType::Array => FieldType::Element(ElemMultiplicity::Vec, st.into()),
-            ElementType::Option => FieldType::Element(ElemMultiplicity::Optional, st.into()),
+            ElementType::Single => FieldType::Element(ElemMultiplicity::Single, t),
+            ElementType::Array => FieldType::Element(ElemMultiplicity::Vec, t),
+            ElementType::Option => FieldType::Element(ElemMultiplicity::Optional, t),
         },
     }
 }
 
 impl UnresolvedField {
-    fn resolve(
-        &self,
-        structs: &HashMap<String, Rc<Struct>>,
-        simple_types: &BTreeMap<String, SimpleType>,
-        struct_name: &str,
-        config: &ResolvedConfig,
-    ) -> Option<Field> {
-        // first try to resolve it using the substitution map
-        let id = FieldKey {
-            struct_name: struct_name.to_string(),
-            field_name: self.name.to_string(),
+    fn resolve(&self, parent_id: &TypeId, resolver: &Resolver) -> Option<Field> {
+        // first try to resolve it using the field substitution map
+        let field_id = FieldId {
+            parent_id: parent_id.clone(),
+            field_name: self.name.clone(),
         };
 
-        if let Some(x) = config.field_mappings.get(&id) {
-            let field_type = match x {
-                SubstitutedType::NamedArray(x) => {
-                    get_simple_field_type(self.info, SimpleType::NamedArray(x.clone()))
-                }
-                SubstitutedType::NumericEnum(x) => {
-                    get_simple_field_type(self.info, SimpleType::EnumU8(x.clone()))
-                }
-                SubstitutedType::HexBitField(x) => {
-                    get_simple_field_type(self.info, SimpleType::HexBitField(x.clone()))
-                }
-                SubstitutedType::NumericDuration(x) => {
-                    get_simple_field_type(self.info, SimpleType::NumericDuration(x.clone()))
-                }
-            };
-            return Some(Field {
-                comment: self.comment.clone(),
-                name: self.name.clone(),
-                field_type,
-            });
-        }
+        tracing::debug!("resolving: {}", field_id);
 
-        // first try to resolve as a simple type
-        if let Some(x) = resolve_basic(&self.field_type) {
+        if let Some(x) = resolver.resolve_field(&field_id, &self.field_type) {
+            let any_type: AnyType = x.clone().into();
             return Some(Field {
                 comment: self.comment.clone(),
                 name: self.name.clone(),
-                field_type: get_simple_field_type(self.info, x),
-            });
-        }
-
-        // then try to resolve as an alias for a simple type
-        if let Some(x) = simple_types.get(&self.field_type) {
-            return Some(Field {
-                comment: self.comment.clone(),
-                name: self.name.clone(),
-                field_type: get_simple_field_type(self.info, x.clone()),
-            });
-        }
-
-        // finally try to resolve as a struct!
-        if let Some(x) = structs.get(&self.field_type) {
-            return Some(Field {
-                comment: self.comment.clone(),
-                name: self.name.clone(),
-                field_type: get_struct_field_type(self.info, x.clone()),
+                field_type: get_field_type(self.info, any_type),
             });
         }
 
@@ -168,28 +181,32 @@ impl UnresolvedField {
 impl UnresolvedStruct {
     fn resolve(
         &self,
-        metadata: Metadata,
-        structs: &HashMap<String, Rc<Struct>>,
-        simple_types: &BTreeMap<String, SimpleType>,
-        config: &ResolvedConfig,
+        metadata: StructMetadata,
+        resolver: &Resolver,
     ) -> Option<std::rc::Rc<Struct>> {
+        tracing::debug!("resolving: {}", self.type_id);
+
         // resolve the base class
-        let base_type = if let Some(base) = &self.base_type {
-            match structs.get(base) {
-                None => {
-                    // base class isn't resolved yet, can't resolve this class
-                    return None;
+        let base_type = match &self.base_type {
+            None => None,
+            Some(base_id) => {
+                match resolver.resolve(base_id) {
+                    None => {
+                        // base class isn't resolved yet, can't resolve this struct
+                        return None;
+                    }
+                    Some(AnyType::Struct(x)) => Some(x.clone()),
+                    Some(x) => {
+                        panic!("Base type of {} is not a struct: {:?}", self.type_id, x)
+                    }
                 }
-                Some(x) => Some(x.clone()),
             }
-        } else {
-            None
         };
 
         // resolve the fields
         let mut fields: Vec<Field> = Vec::new();
         for field in self.fields.iter() {
-            match field.resolve(structs, simple_types, &self.name, config) {
+            match field.resolve(&self.type_id, resolver) {
                 None => {
                     // can't resolve field yet
                     return None;
@@ -200,7 +217,7 @@ impl UnresolvedStruct {
 
         Some(Rc::new(Struct {
             comment: self.comment.clone(),
-            name: self.name.clone(),
+            id: self.type_id.clone(),
             base_type,
             fields,
             metadata,
@@ -209,10 +226,16 @@ impl UnresolvedStruct {
 }
 
 impl UnresolvedModel {
-    fn is_base(&self, name: &str) -> bool {
-        for other in self.structs.iter() {
+    pub fn merge_xsd(&mut self, path: &Path) {
+        let data = std::fs::read_to_string(path).unwrap();
+        let rs_file = crate::parse::parser::parse(&data).unwrap();
+        crate::parse::merge(rs_file, self)
+    }
+
+    fn is_base(&self, id: &TypeId) -> bool {
+        for other in self.unresolved_types.iter().filter_map(|x| x.get_struct()) {
             if let Some(other) = &other.base_type {
-                if other.as_str() == name {
+                if other == id {
                     return true;
                 }
             }
@@ -220,10 +243,10 @@ impl UnresolvedModel {
         false
     }
 
-    fn used_as_field(&self, name: &str) -> bool {
-        for other in self.structs.iter() {
+    fn used_as_field(&self, id: &TypeId) -> bool {
+        for other in self.unresolved_types.iter().filter_map(|x| x.get_struct()) {
             for field in other.fields.iter() {
-                if field.field_type.as_str() == name {
+                if &field.field_type == id {
                     return true;
                 }
             }
@@ -231,75 +254,60 @@ impl UnresolvedModel {
         false
     }
 
-    pub fn compute_metadata(&self) -> HashMap<String, Metadata> {
-        let mut meta_map: HashMap<String, Metadata> = HashMap::new();
+    fn extend(&self, unresolved: &UnresolvedType) -> UnresolvedTypeEx {
+        match unresolved {
+            UnresolvedType::Struct(x) => {
+                let metadata = StructMetadata {
+                    is_base: self.is_base(&x.type_id),
+                    use_as_element: self.used_as_field(&x.type_id),
+                };
+                UnresolvedTypeEx::Struct(x.clone(), metadata)
+            }
+            UnresolvedType::Choice(x) => UnresolvedTypeEx::Choice(x.clone()),
+        }
+    }
 
-        for st in self.structs.iter() {
-            let metadata = Metadata {
-                is_base: self.is_base(&st.name),
-                use_as_element: self.used_as_field(&st.name),
-            };
-            meta_map.insert(st.name.clone(), metadata);
+    pub fn compute_metadata(&self) -> Map<TypeId, UnresolvedTypeEx> {
+        let mut meta_map: Map<TypeId, UnresolvedTypeEx> = Default::default();
+
+        for t in self.unresolved_types.iter() {
+            meta_map.insert(t.get_type_id().clone(), self.extend(t));
         }
 
         meta_map
     }
 
-    pub fn resolve(mut self, config: Config) -> crate::resolved::Model {
-        let substituted_types: Vec<SubstitutedType> = config.types.values().cloned().collect();
+    pub fn resolve(self, config: Config) -> crate::resolved::Model {
+        // unresolved types with extended metadata
+        let mut unresolved = self.compute_metadata().to_inner();
 
-        let config = config.resolve();
+        //  type used to resolve them
+        let mut resolver = Resolver::new(config, self.simple_types, self.aliases);
 
-        // first do type substitution
-        for (type_name, substitute) in &config.type_mappings {
-            match self.simple_types.get_mut(type_name.as_str()) {
-                None => {
-                    panic!("No substitute found for type: {}", type_name);
-                }
-                Some(x) => {
-                    *x = match substitute {
-                        SubstitutedType::NumericEnum(x) => SimpleType::EnumU8(x.clone()),
-                        SubstitutedType::NamedArray(x) => SimpleType::NamedArray(x.clone()),
-                        SubstitutedType::HexBitField(x) => SimpleType::HexBitField(x.clone()),
-                        SubstitutedType::NumericDuration(x) => {
-                            SimpleType::NumericDuration(x.clone())
-                        }
-                    }
-                }
-            }
-        }
-
-        let mut input: HashMap<String, UnresolvedStruct> = self
-            .structs
-            .iter()
-            .map(|x| (x.name.clone(), x.clone()))
-            .collect();
-
-        // compute some metadata about the structs
-        let meta_map = self.compute_metadata();
-
-        let mut output: HashMap<String, Rc<Struct>> = HashMap::new();
+        let mut count: usize = 0;
 
         loop {
-            if input.is_empty() {
-                return crate::resolved::Model {
-                    target_ns: self.target_ns.clone(),
-                    substituted_types,
-                    structs: output.values().cloned().collect(),
-                };
+            tracing::debug!("begin iteration {}", count);
+
+            if unresolved.is_empty() {
+                tracing::info!("success in {} iterations", count);
+                return resolver.model();
             }
 
-            if let Some(x) = input.iter().find_map(|(_, v)| {
-                // lookup the metadata
-                let metadata = *meta_map.get(&v.name).unwrap();
-
-                v.resolve(metadata, &output, &self.simple_types, &config)
-            }) {
-                input.remove(&x.name);
-                output.insert(x.name.clone(), x);
+            if let Some((any_type, id)) = unresolved
+                .iter()
+                .find_map(|(id, v)| v.resolve(&resolver).map(|x| (x, id.clone())))
+            {
+                tracing::info!("resolved type: {}", id);
+                unresolved.remove(&id).expect("cannot be empty");
+                resolver.insert(id, any_type);
             } else {
-                panic!("cannot resolve anything else");
+                tracing::error!("Cannot resolve remaining {} types", unresolved.len());
+                tracing::debug!("{:#?}", unresolved);
+                panic!("resolution failed");
             }
+
+            count += 1;
         }
     }
 }

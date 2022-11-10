@@ -1,6 +1,6 @@
 use super::constants::attribute;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ElementType {
     All,
     Annotation,
@@ -37,7 +37,7 @@ pub enum ElementType {
     XsdError(String),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FacetType {
     Enumeration(String),
     FractionDigits(String),
@@ -53,20 +53,20 @@ pub enum FacetType {
     WhiteSpace(WhiteSpace),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WhiteSpace {
     Preserve,
     Replace,
     Collapse,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ExtensionType {
     ComplexContent,
     SimpleContent,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum RestrictionType {
     ComplexContent,
     SimpleContent,

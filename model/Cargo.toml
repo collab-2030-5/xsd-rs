@@ -4,4 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+roxmltree = "0.14.0"
 serde = { version = "1.0.136", features = ["derive", "rc"] }
+tracing = "0.1"
+heck = "0.4.0"

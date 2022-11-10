@@ -1,0 +1,10 @@
+{
+  "base_types": {
+    "whitelist" : {}
+  },
+  "mappings": {
+    "type_mappings": {},
+    "field_mappings": [],
+    "types": {}
+  }
+}

@@ -75,7 +75,7 @@ pub struct Enum {
 }
 
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EnumSource {
     Restriction,
     Choice,
@@ -89,7 +89,7 @@ impl Default for EnumSource {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TypeModifier {
     None,
     Array,
