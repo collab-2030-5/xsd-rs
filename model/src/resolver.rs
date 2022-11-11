@@ -134,6 +134,9 @@ impl Resolver {
             "unsignedLong" => Some(NumericType::U64(NumericConstraint::default()).into()),
             "positiveInteger" => Some(NumericType::U64(NumericConstraint::default()).into()),
             "float" => Some(NumericType::F32(NumericConstraint::default()).into()),
+            // TODO - default formatting for double doesn't use scientific notation so this is OK for decimal type too
+            // we could provide a more optimized representation for double/float that uses scientific notation to remove zeroes
+            "double" | "decimal" => Some(NumericType::F64(NumericConstraint::default()).into()),
             _ => {
                 panic!("unhandled xs type: {}", type_id);
             }

@@ -161,6 +161,9 @@ fn extract_fields(
                 RsEntity::Struct(st) => {
                     structs.append(&mut extract_structs(st, settings, Some(st)));
                 }
+                RsEntity::TupleStruct(t) => {
+                    tracing::warn!("ignoring field sub-type (TupleStruct): {}", t.name);
+                }
                 _ => panic!("Unsupported field subtype: {:#?}", en),
             }
         }
