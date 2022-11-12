@@ -287,7 +287,8 @@ impl UnresolvedModel {
         let mut count: usize = 0;
 
         loop {
-            tracing::debug!("begin iteration {}", count);
+            let span = tracing::info_span!("resolve", i = count);
+            let _entered = span.enter();
 
             if unresolved.is_empty() {
                 tracing::info!("success in {} iterations", count);

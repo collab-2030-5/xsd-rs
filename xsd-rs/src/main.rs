@@ -55,11 +55,7 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
         model
     };
 
-    let model = {
-        let span = tracing::info_span!("resolve");
-        let _entered = span.enter();
-        model.resolve(config.mappings)
-    };
+    let model = model.resolve(config.mappings);
 
     create_main_output_dir(&options.output, options.remove_dir)?;
 
