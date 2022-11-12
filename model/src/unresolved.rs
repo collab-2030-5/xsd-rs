@@ -25,6 +25,19 @@ pub struct UnresolvedChoiceVariant {
 }
 
 impl UnresolvedChoice {
+    fn analyze(&self, resolver: &Resolver) {
+        for var in self.variants.iter() {
+            if var.resolve(resolver).is_none() {
+                tracing::warn!(
+                    "cannot resolve choice variant {}::{} with type: {}",
+                    self.type_id,
+                    var.element_name,
+                    var.type_id
+                );
+            }
+        }
+    }
+
     fn resolve(&self, resolver: &Resolver) -> Option<Choice> {
         let mut variants: Vec<ChoiceVariant> = Vec::new();
         for var in self.variants.iter() {
@@ -88,6 +101,13 @@ impl UnresolvedTypeEx {
                 x.resolve(*metadata, resolver).map(AnyType::Struct)
             }
             UnresolvedTypeEx::Choice(x) => x.resolve(resolver).map(|x| AnyType::Choice(Rc::new(x))),
+        }
+    }
+
+    fn analyze(&self, resolver: &Resolver) {
+        match self {
+            UnresolvedTypeEx::Struct(x, metadata) => x.analyze(*metadata, resolver),
+            UnresolvedTypeEx::Choice(x) => x.analyze(resolver),
         }
     }
 }
@@ -179,6 +199,29 @@ impl UnresolvedField {
 }
 
 impl UnresolvedStruct {
+    fn analyze(&self, _metadata: StructMetadata, resolver: &Resolver) {
+        if let Some(base) = &self.base_type {
+            if resolver.resolve(base).is_none() {
+                tracing::warn!(
+                    "Cannot resolve base type {} in struct {}",
+                    base,
+                    self.type_id
+                );
+            }
+        }
+
+        for field in self.fields.iter() {
+            if field.resolve(&self.type_id, resolver).is_none() {
+                tracing::warn!(
+                    "Cannot resolve field ({}).{} with type {}",
+                    self.type_id,
+                    field.name,
+                    field.field_type
+                );
+            }
+        }
+    }
+
     fn resolve(
         &self,
         metadata: StructMetadata,
@@ -304,7 +347,11 @@ impl UnresolvedModel {
                 resolver.insert(id, any_type);
             } else {
                 tracing::error!("Cannot resolve remaining {} types", unresolved.len());
-                tracing::debug!("{:#?}", unresolved);
+
+                for unresolved in unresolved.values() {
+                    unresolved.analyze(&resolver);
+                }
+
                 panic!("resolution failed");
             }
 
