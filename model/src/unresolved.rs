@@ -38,7 +38,7 @@ impl UnresolvedChoice {
         }
     }
 
-    fn resolve(&self, resolver: &Resolver) -> Option<Choice> {
+    fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
         let mut variants: Vec<ChoiceVariant> = Vec::new();
         for var in self.variants.iter() {
             match var.resolve(resolver) {
@@ -46,11 +46,14 @@ impl UnresolvedChoice {
                 Some(x) => variants.push(x),
             }
         }
-        Some(Choice {
+
+        let choice = Choice {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
             variants,
-        })
+        };
+
+        Some(AnyType::Choice(Rc::new(choice)))
     }
 }
 
@@ -97,10 +100,8 @@ pub enum UnresolvedTypeEx {
 impl UnresolvedTypeEx {
     fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
         match self {
-            UnresolvedTypeEx::Struct(x, metadata) => {
-                x.resolve(*metadata, resolver).map(AnyType::Struct)
-            }
-            UnresolvedTypeEx::Choice(x) => x.resolve(resolver).map(|x| AnyType::Choice(Rc::new(x))),
+            UnresolvedTypeEx::Struct(x, metadata) => x.resolve(*metadata, resolver),
+            UnresolvedTypeEx::Choice(x) => x.resolve(resolver),
         }
     }
 
@@ -222,11 +223,7 @@ impl UnresolvedStruct {
         }
     }
 
-    fn resolve(
-        &self,
-        metadata: StructMetadata,
-        resolver: &Resolver,
-    ) -> Option<std::rc::Rc<Struct>> {
+    fn resolve(&self, metadata: StructMetadata, resolver: &Resolver) -> Option<AnyType> {
         tracing::debug!("resolving: {}", self.type_id);
 
         // resolve the base class
@@ -258,13 +255,13 @@ impl UnresolvedStruct {
             }
         }
 
-        Some(Rc::new(Struct {
+        Some(AnyType::Struct(Rc::new(Struct {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
             base_type,
             fields,
             metadata,
-        }))
+        })))
     }
 }
 

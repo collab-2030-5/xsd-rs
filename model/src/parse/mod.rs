@@ -35,6 +35,7 @@ pub(crate) fn merge(xsd: RsFile, model: &mut UnresolvedModel) {
     let settings = Settings { namespace: ns_name };
 
     let mut simple_types = resolve_simple_types(&xsd, &settings);
+
     let mut structs = extract_structs_from_root(&xsd, &settings);
     let choices = extract_choice_types(&xsd, &settings);
 
