@@ -36,27 +36,8 @@ pub(crate) fn merge(xsd: RsFile, model: &mut UnresolvedModel) {
 
     let mut simple_types = resolve_simple_types(&xsd, &settings);
 
-    let mut structs = extract_structs_from_root(&xsd, &settings);
+    let structs = extract_structs_from_root(&xsd, &settings);
     let choices = extract_choice_types(&xsd, &settings);
-
-    // find struct that are mis-classified - some are just inherited from basic types
-    let base_structs: HashMap<TypeId, SimpleType> = structs
-        .iter()
-        .filter_map(|x| match &x.base_type {
-            Some(bt) => simple_types
-                .get(bt)
-                .map(|st| (x.type_id.clone(), st.clone())),
-            None => None,
-        })
-        .collect();
-
-    // remove these structs from the struct list
-    structs.retain(|f| !base_structs.contains_key(&f.type_id));
-
-    // add these aliases to the simple types list
-    for (k, v) in base_structs.iter() {
-        simple_types.insert(k.clone(), v.clone());
-    }
 
     // add everything to the model
 
