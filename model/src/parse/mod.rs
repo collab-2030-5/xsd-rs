@@ -3,74 +3,23 @@ pub(crate) mod parser;
 use heck::ToUpperCamelCase;
 use parser::types::{RsEntity, RsFile, StructFieldSource, TupleStruct, TypeModifier};
 use parser::xsd_elements::FacetType;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::str::FromStr;
 
 use crate::map::Map;
-use crate::parse::parser::types::{Enum, EnumSource, Struct};
+use crate::parse::parser::types::{Alias, Enum, EnumSource, Struct};
+use crate::unresolved::choice::{UnresolvedChoice, UnresolvedChoiceVariant};
+use crate::unresolved::model::Settings;
+use crate::unresolved::structs::{
+    AttributeType, ElementType, FieldTypeInfo, UnresolvedField, UnresolvedStruct,
+};
 use crate::unresolved::*;
 use crate::*;
 
 pub fn parse_xsd(xsd: &str) -> impl Debug + '_ {
     crate::parse::parser::parse(xsd).unwrap()
-}
-
-struct Settings<'a> {
-    namespace: &'a str,
-}
-
-/// merge the parsed XSD into the existing unresolved model
-pub(crate) fn merge(xsd: RsFile, model: &mut UnresolvedModel) {
-    let namespace = xsd
-        .target_ns
-        .clone()
-        .expect("must contain a namespace entry");
-
-    let ns_name = namespace.name().expect("must contain a namespace name");
-
-    tracing::info!("target namespace: {}", ns_name);
-
-    let settings = Settings { namespace: ns_name };
-
-    let mut simple_types = resolve_simple_types(&xsd, &settings);
-
-    let structs = extract_structs_from_root(&xsd, &settings);
-    let choices = extract_choice_types(&xsd, &settings);
-
-    // add everything to the model
-
-    for (k, v) in extract_aliases(&xsd, &settings).to_inner() {
-        model.aliases.insert(k, v);
-    }
-
-    for (k, v) in simple_types.to_inner() {
-        model.simple_types.insert(k, v);
-    }
-
-    for s in structs {
-        model.unresolved_types.push(UnresolvedType::Struct(s));
-    }
-
-    for c in choices {
-        model.unresolved_types.push(UnresolvedType::Choice(c))
-    }
-}
-
-fn extract_aliases(model: &RsFile, settings: &Settings) -> Map<TypeId, TypeId> {
-    let mut map: Map<TypeId, TypeId> = Default::default();
-
-    for entity in model.types.iter() {
-        if let RsEntity::Alias(x) = entity {
-            let target = TypeId::parse(&x.original, settings.namespace);
-            let alias = TypeId::parse(&x.name, settings.namespace);
-            tracing::debug!("{} is an alias for {}", alias, target);
-            map.insert(alias, target);
-        }
-    }
-
-    map
 }
 
 fn extract_base_type(x: &Struct, settings: &Settings) -> Option<TypeId> {

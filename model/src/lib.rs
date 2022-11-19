@@ -8,7 +8,7 @@ pub mod map;
 pub mod resolved;
 /// types used resolving (TypeId -> AnyType)
 pub mod resolver;
-/// unresolver representation of the model
+/// unresolved representation of the model
 pub mod unresolved;
 
 /// raw XSD parser
