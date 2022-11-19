@@ -1,14 +1,14 @@
 use std::fmt::Debug;
 use std::path::Path;
-use std::rc::Rc;
 
-use crate::config::{Config, FieldId};
+use crate::config::Config;
 use crate::map::Map;
-use crate::parse::parser::types::{Alias, Facet, RsEntity, RsFile, TupleStruct};
+use crate::parse::parser::types::{Alias, RsEntity, RsFile};
 use crate::resolved::*;
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;
 use crate::unresolved::structs::UnresolvedStruct;
+use crate::unresolved::tuple_struct::UnresolvedTupleStruct;
 use crate::*;
 
 /// represent complex types whose sub-types must be resolved
@@ -68,45 +68,6 @@ pub struct UnresolvedModel {
     pub aliases: Map<TypeId, TypeId>,
     pub simple_types: Map<TypeId, SimpleType>,
     pub unresolved_types: Vec<UnresolvedType>,
-}
-
-#[derive(Debug, Clone)]
-pub struct UnresolvedTupleStruct {
-    pub name: String,
-    pub comment: Option<String>,
-    pub type_id: TypeId,
-    pub facets: Vec<Facet>,
-}
-
-impl From<UnresolvedTupleStruct> for UnresolvedType {
-    fn from(x: UnresolvedTupleStruct) -> Self {
-        Self::Tuple(x)
-    }
-}
-
-impl UnresolvedTupleStruct {
-    pub(crate) fn new(ts: TupleStruct, settings: &Settings) -> Self {
-        if !ts.type_modifiers.is_empty() {
-            panic!(
-                "TupleStruct {} contains types modifiers: {:?}",
-                ts.name, ts.type_modifiers
-            );
-        }
-
-        if !ts.subtypes.is_empty() {
-            panic!(
-                "TupleStruct {} contains subtypes: {:?}",
-                ts.name, ts.subtypes
-            );
-        }
-
-        Self {
-            name: ts.name,
-            comment: ts.comment,
-            type_id: TypeId::parse(&ts.type_name, settings.namespace),
-            facets: ts.facets,
-        }
-    }
 }
 
 pub(crate) struct Settings<'a> {

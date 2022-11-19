@@ -9,13 +9,13 @@ use std::rc::Rc;
 use std::str::FromStr;
 
 use crate::map::Map;
-use crate::parse::parser::types::{Alias, Enum, EnumSource, Struct};
+use crate::parse::parser::types::{Enum, EnumSource, Struct};
 use crate::unresolved::choice::{UnresolvedChoice, UnresolvedChoiceVariant};
 use crate::unresolved::model::Settings;
 use crate::unresolved::structs::{
     AttributeType, ElementType, FieldTypeInfo, UnresolvedField, UnresolvedStruct,
 };
-use crate::unresolved::*;
+
 use crate::*;
 
 pub fn parse_xsd(xsd: &str) -> impl Debug + '_ {
