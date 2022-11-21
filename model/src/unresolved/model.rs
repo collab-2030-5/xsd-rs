@@ -11,58 +11,6 @@ use crate::unresolved::structs::UnresolvedStruct;
 use crate::unresolved::tuple_struct::UnresolvedTupleStruct;
 use crate::*;
 
-/// represent complex types whose sub-types must be resolved
-#[derive(Debug, Clone)]
-pub(crate) enum UnresolvedType {
-    Struct(UnresolvedStruct),
-    Choice(UnresolvedChoice),
-    Tuple(UnresolvedTupleStruct),
-}
-
-impl UnresolvedType {
-    fn get_struct(&self) -> Option<&UnresolvedStruct> {
-        match self {
-            UnresolvedType::Struct(x) => Some(x),
-            UnresolvedType::Choice(_) => None,
-            UnresolvedType::Tuple(_) => None,
-        }
-    }
-
-    fn get_type_id(&self) -> &TypeId {
-        match self {
-            UnresolvedType::Struct(x) => &x.type_id,
-            UnresolvedType::Choice(x) => &x.type_id,
-            UnresolvedType::Tuple(x) => &x.type_id,
-        }
-    }
-}
-
-/// Extended unresolved types provide additional metadata computed from the entire model
-#[derive(Debug, Clone)]
-pub(crate) enum UnresolvedTypeEx {
-    Struct(UnresolvedStruct, StructMetadata),
-    Choice(UnresolvedChoice),
-    Tuple(UnresolvedTupleStruct),
-}
-
-impl UnresolvedTypeEx {
-    fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
-        match self {
-            UnresolvedTypeEx::Struct(x, metadata) => x.resolve(*metadata, resolver),
-            UnresolvedTypeEx::Choice(x) => x.resolve(resolver),
-            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
-        }
-    }
-
-    fn analyze(&self, resolver: &Resolver) {
-        match self {
-            UnresolvedTypeEx::Struct(x, metadata) => x.analyze(*metadata, resolver),
-            UnresolvedTypeEx::Choice(x) => x.analyze(resolver),
-            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
-        }
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct UnresolvedModel {
     pub(crate) aliases: Map<TypeId, TypeId>,
@@ -198,5 +146,57 @@ impl UnresolvedModel {
         }
 
         meta_map
+    }
+}
+
+/// represent complex types whose sub-types must be resolved
+#[derive(Debug, Clone)]
+pub(crate) enum UnresolvedType {
+    Struct(UnresolvedStruct),
+    Choice(UnresolvedChoice),
+    Tuple(UnresolvedTupleStruct),
+}
+
+impl UnresolvedType {
+    fn get_struct(&self) -> Option<&UnresolvedStruct> {
+        match self {
+            UnresolvedType::Struct(x) => Some(x),
+            UnresolvedType::Choice(_) => None,
+            UnresolvedType::Tuple(_) => None,
+        }
+    }
+
+    fn get_type_id(&self) -> &TypeId {
+        match self {
+            UnresolvedType::Struct(x) => &x.type_id,
+            UnresolvedType::Choice(x) => &x.type_id,
+            UnresolvedType::Tuple(x) => &x.type_id,
+        }
+    }
+}
+
+/// Extended unresolved types provide additional metadata computed from the entire model
+#[derive(Debug, Clone)]
+enum UnresolvedTypeEx {
+    Struct(UnresolvedStruct, StructMetadata),
+    Choice(UnresolvedChoice),
+    Tuple(UnresolvedTupleStruct),
+}
+
+impl UnresolvedTypeEx {
+    fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
+        match self {
+            UnresolvedTypeEx::Struct(x, metadata) => x.resolve(*metadata, resolver),
+            UnresolvedTypeEx::Choice(x) => x.resolve(resolver),
+            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+        }
+    }
+
+    fn analyze(&self, resolver: &Resolver) {
+        match self {
+            UnresolvedTypeEx::Struct(x, metadata) => x.analyze(*metadata, resolver),
+            UnresolvedTypeEx::Choice(x) => x.analyze(resolver),
+            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+        }
     }
 }
