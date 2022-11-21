@@ -75,14 +75,11 @@ pub(crate) struct Settings<'a> {
 }
 
 impl UnresolvedModel {
+    /// parse and XSD file and merge it into the unresolved model
     pub fn merge_xsd(&mut self, path: &Path) {
         let data = std::fs::read_to_string(path).unwrap();
         let xsd = parse::parser::parse(&data).unwrap();
-        self.merge(xsd)
-    }
 
-    /// merge the parsed XSD into the existing unresolved model
-    fn merge(&mut self, xsd: RsFile) {
         let namespace = xsd
             .target_ns
             .clone()
