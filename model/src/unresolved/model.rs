@@ -13,7 +13,7 @@ use crate::*;
 
 /// represent complex types whose sub-types must be resolved
 #[derive(Debug, Clone)]
-pub enum UnresolvedType {
+pub(crate) enum UnresolvedType {
     Struct(UnresolvedStruct),
     Choice(UnresolvedChoice),
     Tuple(UnresolvedTupleStruct),
@@ -39,7 +39,7 @@ impl UnresolvedType {
 
 /// Extended unresolved types provide additional metadata computed from the entire model
 #[derive(Debug, Clone)]
-pub enum UnresolvedTypeEx {
+pub(crate) enum UnresolvedTypeEx {
     Struct(UnresolvedStruct, StructMetadata),
     Choice(UnresolvedChoice),
     Tuple(UnresolvedTupleStruct),
@@ -65,9 +65,9 @@ impl UnresolvedTypeEx {
 
 #[derive(Debug, Default)]
 pub struct UnresolvedModel {
-    pub aliases: Map<TypeId, TypeId>,
-    pub simple_types: Map<TypeId, SimpleType>,
-    pub unresolved_types: Vec<UnresolvedType>,
+    pub(crate) aliases: Map<TypeId, TypeId>,
+    pub(crate) simple_types: Map<TypeId, SimpleType>,
+    pub(crate) unresolved_types: Vec<UnresolvedType>,
 }
 
 pub(crate) struct Settings<'a> {
@@ -77,7 +77,7 @@ pub(crate) struct Settings<'a> {
 impl UnresolvedModel {
     pub fn merge_xsd(&mut self, path: &Path) {
         let data = std::fs::read_to_string(path).unwrap();
-        let xsd = crate::parse::parser::parse(&data).unwrap();
+        let xsd = parse::parser::parse(&data).unwrap();
         self.merge(xsd)
     }
 
@@ -99,9 +99,19 @@ impl UnresolvedModel {
         }
     }
 
-    fn merge_entity(&mut self, en: &RsEntity, settings: &Settings) {}
+    fn merge_entity(&mut self, entity: &RsEntity, settings: &Settings) {
+        match entity {
+            RsEntity::Struct(_) => {}
+            RsEntity::StructField(_) => {}
+            RsEntity::TupleStruct(_) => {}
+            RsEntity::Enum(_) => {}
+            RsEntity::EnumCase(_) => {}
+            RsEntity::Alias(x) => self.merge_alias(x, settings),
+            RsEntity::Import(_) => {}
+        }
+    }
 
-    fn merge_alias(&mut self, x: Alias, settings: &Settings) {
+    fn merge_alias(&mut self, x: &Alias, settings: &Settings) {
         let target = TypeId::parse(&x.original, settings.namespace);
         let alias = TypeId::parse(&x.name, settings.namespace);
         tracing::debug!("{} is an alias for {}", alias, target);
@@ -144,16 +154,6 @@ impl UnresolvedModel {
         }
     }
 
-    pub fn compute_metadata(&self) -> Map<TypeId, UnresolvedTypeEx> {
-        let mut meta_map: Map<TypeId, UnresolvedTypeEx> = Default::default();
-
-        for t in self.unresolved_types.iter() {
-            meta_map.insert(t.get_type_id().clone(), self.extend(t));
-        }
-
-        meta_map
-    }
-
     pub fn resolve(self, config: Config) -> crate::resolved::Model {
         // unresolved types with extended metadata
         let mut unresolved = self.compute_metadata().to_inner();
@@ -191,5 +191,15 @@ impl UnresolvedModel {
 
             count += 1;
         }
+    }
+
+    fn compute_metadata(&self) -> Map<TypeId, UnresolvedTypeEx> {
+        let mut meta_map: Map<TypeId, UnresolvedTypeEx> = Default::default();
+
+        for t in self.unresolved_types.iter() {
+            meta_map.insert(t.get_type_id().clone(), self.extend(t));
+        }
+
+        meta_map
     }
 }

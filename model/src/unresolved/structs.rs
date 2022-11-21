@@ -26,20 +26,20 @@ pub enum FieldTypeInfo {
 }
 
 #[derive(Debug, Clone)]
-pub struct UnresolvedStruct {
-    pub comment: Option<String>,
-    pub type_id: TypeId,
+pub(crate) struct UnresolvedStruct {
+    pub(crate) comment: Option<String>,
+    pub(crate) type_id: TypeId,
     /// single optional base struct
-    pub base_type: Option<TypeId>,
-    pub fields: Vec<UnresolvedField>,
+    pub(crate) base_type: Option<TypeId>,
+    pub(crate) fields: Vec<UnresolvedField>,
 }
 
 #[derive(Debug, Clone)]
-pub struct UnresolvedField {
-    pub comment: Option<String>,
-    pub name: String,
-    pub field_type: TypeId,
-    pub info: FieldTypeInfo,
+pub(crate) struct UnresolvedField {
+    pub(crate) comment: Option<String>,
+    pub(crate) name: String,
+    pub(crate) field_type: TypeId,
+    pub(crate) info: FieldTypeInfo,
 }
 
 impl UnresolvedField {
