@@ -10,11 +10,7 @@ use std::str::FromStr;
 
 use crate::map::Map;
 use crate::parse::parser::types::{Enum, EnumSource, Struct};
-use crate::unresolved::choice::{UnresolvedChoice, UnresolvedChoiceVariant};
-use crate::unresolved::model::Settings;
-use crate::unresolved::structs::{
-    AttributeType, ElementType, FieldTypeInfo, UnresolvedField, UnresolvedStruct,
-};
+use crate::unresolved::*;
 
 use crate::*;
 

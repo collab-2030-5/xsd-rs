@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::config::Config;
 use crate::map::Map;
-use crate::parse::parser::types::{Alias, RsEntity, RsFile};
+use crate::parse::parser::types::{Alias, RsEntity};
 use crate::resolved::*;
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;

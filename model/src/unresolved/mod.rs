@@ -1,4 +1,10 @@
-pub(crate) mod choice;
-pub mod model;
-pub(crate) mod structs;
-pub(crate) mod tuple_struct;
+mod choice;
+mod model;
+mod structs;
+mod tuple_struct;
+
+pub(crate) use choice::*;
+pub(crate) use structs::*;
+pub(crate) use tuple_struct::*;
+
+pub use model::*;

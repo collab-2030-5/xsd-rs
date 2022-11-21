@@ -3,11 +3,11 @@ use crate::unresolved::model::{Settings, UnresolvedType};
 use crate::TypeId;
 
 #[derive(Debug, Clone)]
-pub struct UnresolvedTupleStruct {
-    pub name: String,
-    pub comment: Option<String>,
-    pub type_id: TypeId,
-    pub facets: Vec<Facet>,
+pub(crate) struct UnresolvedTupleStruct {
+    pub(crate) name: String,
+    pub(crate) comment: Option<String>,
+    pub(crate) type_id: TypeId,
+    pub(crate) facets: Vec<Facet>,
 }
 
 impl From<UnresolvedTupleStruct> for UnresolvedType {

@@ -7,7 +7,7 @@ use std::path::Path;
 use crate::options::{Commands, GenerateOptions, InspectOptions};
 use config::BaseTypeConfig;
 use gen::traits::RustType;
-use xml_model::unresolved::model::UnresolvedModel;
+use xml_model::unresolved::UnresolvedModel;
 
 type FatalError = Box<dyn std::error::Error>;
 
