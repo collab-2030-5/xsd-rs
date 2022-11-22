@@ -5,7 +5,6 @@ use xml::writer::*;
 /// A pricing node is directly associated with a connectivity node.  It is a pricing location for which market participants submit their bids, offers, buy/sell CRRs, and settle.
 #[derive(Debug, Clone, PartialEq)]
 pub struct PnodeType {
-    // --- these fields come from power:PnodeType ---
     pub power_node: String,
 }
 

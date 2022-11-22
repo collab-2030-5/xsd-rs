@@ -1,5 +1,6 @@
 use crate::{SimpleType, TypeId};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
+use std::process::Output;
 
 use std::rc::Rc;
 
@@ -90,6 +91,29 @@ impl Struct {
             }
         } else {
             false
+        }
+    }
+
+    pub fn dedup_fields(&self) -> Vec<&Field> {
+        let mut output: Vec<&Field> = Default::default();
+        self.dedup_fields_impl(&mut output);
+        output
+    }
+
+    fn dedup_fields_impl<'a>(&'a self, fields: &mut Vec<&'a Field>) {
+        if let Some(base) = &self.base_type {
+            base.dedup_fields_impl(fields);
+        }
+
+        for field in self.fields.iter() {
+            match fields.iter().position(|f| f.name == field.name) {
+                Some(x) => {
+                    fields[x] = field;
+                }
+                None => {
+                    fields.push(field);
+                }
+            }
         }
     }
 }

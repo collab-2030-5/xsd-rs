@@ -4,14 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EnergyRealType {
-    // --- these fields come from emix:ItemBaseType ---
-
-    // --- these fields come from power:EnergyItemType ---
-    pub item_description: String,
-    pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
-
-    // --- these fields come from power:EnergyRealType ---
     pub item_description: String,
     pub item_units: String,
     pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
@@ -30,14 +22,7 @@ impl EnergyRealType {
         write_simple_tag(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code.as_str(),
-        )?;
-        write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
-        write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
-        write_simple_tag(
-            writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.as_str(),
+            self.scale_si_scale_code.to_str(),
         )?;
         Ok(())
     }
@@ -94,10 +79,6 @@ impl EnergyRealType {
         let mut item_units: SetOnce<String> = Default::default();
         let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
             Default::default();
-        let mut item_description: SetOnce<String> = Default::default();
-        let mut item_units: SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
-            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -123,20 +104,10 @@ impl EnergyRealType {
                         }
                         "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
                         "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(read_string(
+                            crate::types::scale::SiScaleCodeType::from_str(&read_string(
                                 reader,
                                 "scale:siScaleCode",
-                            ))?,
-                        )?,
-                        "itemDescription" => {
-                            item_description.set(read_string(reader, "itemDescription")?)?
-                        }
-                        "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(read_string(
-                                reader,
-                                "scale:siScaleCode",
-                            ))?,
+                            )?)?,
                         )?,
                         _ => return Err(ReadError::UnexpectedEvent),
                     }
@@ -159,9 +130,6 @@ impl EnergyRealType {
 
         // construct the type from the cells
         Ok(EnergyRealType {
-            item_description: item_description.require()?,
-            item_units: item_units.require()?,
-            scale_si_scale_code: scale_si_scale_code.require()?,
             item_description: item_description.require()?,
             item_units: item_units.require()?,
             scale_si_scale_code: scale_si_scale_code.require()?,

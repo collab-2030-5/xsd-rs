@@ -5,7 +5,6 @@ use xml::writer::*;
 /// A customer ServiceLocation has one or more ServiceDeliveryPoint(s), which in turn relate to Meters. The location may be a point or a polygon, depending on the specific circumstances. For distribution, the ServiceLocation is typically the location of the utility customer's premise.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceLocationType {
-    // --- these fields come from power:ServiceLocationType ---
     pub gml_feature_collection: crate::types::gml::FeatureCollection,
 }
 

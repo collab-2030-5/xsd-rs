@@ -5,7 +5,6 @@ use xml::writer::*;
 /// The Service Area is the geographic region that is affected by the EMIX market condition
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceAreaType {
-    // --- these fields come from emix:ServiceAreaType ---
     pub gml_feature_collection: crate::types::gml::FeatureCollection,
 }
 

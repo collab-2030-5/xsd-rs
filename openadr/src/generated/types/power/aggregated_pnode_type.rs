@@ -5,7 +5,6 @@ use xml::writer::*;
 /// An aggregated pricing node is a specialized type of pricing node used to model items such as System Zone, Default Price Zone, Custom Price Zone, Control Area, Aggregated Generation, Aggregated Participating Load, Aggregated Non-Participating Load, Trading Hub, DCA Zone
 #[derive(Debug, Clone, PartialEq)]
 pub struct AggregatedPnodeType {
-    // --- these fields come from power:AggregatedPnodeType ---
     pub power_node: String,
 }
 

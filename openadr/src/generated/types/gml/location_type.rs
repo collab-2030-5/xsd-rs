@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LocationType {
-    // --- these fields come from gml:locationType ---
     pub polygon: crate::types::gml::PolygonType,
 }
 

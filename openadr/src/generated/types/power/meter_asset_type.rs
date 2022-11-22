@@ -5,7 +5,6 @@ use xml::writer::*;
 /// The MeterAsset is the physical device or devices that performs the role of the meter
 #[derive(Debug, Clone, PartialEq)]
 pub struct MeterAssetType {
-    // --- these fields come from power:MeterAssetType ---
     pub power_mrid: String,
 }
 

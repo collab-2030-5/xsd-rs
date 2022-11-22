@@ -4,9 +4,7 @@ use xml::writer::*;
 
 /// Abstract base type for units for EMIX Product delivery, measurement, and warrants.
 #[derive(Debug, Clone, PartialEq)]
-pub struct ItemBaseType {
-    // --- these fields come from emix:ItemBaseType ---
-}
+pub struct ItemBaseType {}
 
 impl ItemBaseType {
     pub(crate) fn write_with_name<W>(

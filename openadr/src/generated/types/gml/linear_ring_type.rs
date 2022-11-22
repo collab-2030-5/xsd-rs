@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LinearRingType {
-    // --- these fields come from gml:LinearRingType ---
     pub gml_pos_list: f64,
 }
 
@@ -91,7 +90,7 @@ impl LinearRingType {
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
+                            gml_pos_list.set(read_string(reader, "gml:posList")?.parse()?)?
                         }
                         _ => return Err(ReadError::UnexpectedEvent),
                     }

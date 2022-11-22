@@ -4,9 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PowerItemType {
-    // --- these fields come from emix:ItemBaseType ---
-
-    // --- these fields come from power:PowerItemType ---
     pub item_description: String,
     pub item_units: String,
     pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
@@ -26,7 +23,7 @@ impl PowerItemType {
         write_simple_tag(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code.as_str(),
+            self.scale_si_scale_code.to_str(),
         )?;
         self.power_power_attributes.write_with_name(
             writer,
@@ -118,7 +115,7 @@ impl PowerItemType {
                     "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
                     "scale:siScaleCode" => {
                         scale_si_scale_code.set(crate::types::scale::SiScaleCodeType::from_str(
-                            read_string(reader, "scale:siScaleCode"),
+                            &read_string(reader, "scale:siScaleCode")?,
                         )?)?
                     }
                     "power:powerAttributes" => power_power_attributes.set(

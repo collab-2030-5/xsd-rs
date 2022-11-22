@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FeatureCollection {
-    // --- these fields come from gml:FeatureCollection ---
     pub location: crate::types::gml::LocationType,
     pub gml_id: Option<String>,
 }

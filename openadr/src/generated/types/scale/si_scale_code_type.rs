@@ -26,20 +26,20 @@ pub enum SiScaleCodeType {
 }
 
 impl SiScaleCodeType {
-    pub(crate) fn from_str(s: &str) -> Option<Self> {
+    pub(crate) fn from_str(s: &str) -> Result<Self, crate::ReadError> {
         match s {
-            "p" => Some(Self::P),
-            "n" => Some(Self::N),
-            "micro" => Some(Self::Micro),
-            "m" => Some(Self::M),
-            "c" => Some(Self::C),
-            "d" => Some(Self::D),
-            "k" => Some(Self::K),
-            "M" => Some(Self::M2),
-            "G" => Some(Self::G),
-            "T" => Some(Self::T),
-            "none" => Some(Self::None),
-            _ => None,
+            "p" => Ok(Self::P),
+            "n" => Ok(Self::N),
+            "micro" => Ok(Self::Micro),
+            "m" => Ok(Self::M),
+            "c" => Ok(Self::C),
+            "d" => Ok(Self::D),
+            "k" => Ok(Self::K),
+            "M" => Ok(Self::M2),
+            "G" => Ok(Self::G),
+            "T" => Ok(Self::T),
+            "none" => Ok(Self::None),
+            _ => Err(crate::ReadError::UnknownEnumVariant),
         }
     }
 

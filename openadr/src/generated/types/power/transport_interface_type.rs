@@ -5,7 +5,6 @@ use xml::writer::*;
 /// The Transport Interface delineates the edges at either end of a transport segment.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransportInterfaceType {
-    // --- these fields come from power:TransportInterfaceType ---
     pub point_of_receipt: String,
     pub point_of_delivery: String,
 }

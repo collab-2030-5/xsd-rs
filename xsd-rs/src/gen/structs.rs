@@ -211,12 +211,7 @@ fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Res
 }
 
 fn write_struct_cells(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
-    // do this recursively depth-first
-    if let Some(bt) = &st.base_type {
-        write_struct_cells(w, bt)?;
-    }
-
-    for field in &st.fields {
+    for field in st.dedup_fields() {
         let cell_type = match &field.field_type {
             FieldType::Attribute(_, t) => format!("SetOnce<{}>", t.rust_struct_type()),
             FieldType::Element(m, t) => match m {
@@ -348,7 +343,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             }
         }
         ElementTransform::Number => {
-            format!("read_string(reader, \"{}\")?.parser()?", &elem.name)
+            format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
         }
         ElementTransform::String => {
             format!("read_string(reader, \"{}\")?", &elem.name)
@@ -359,7 +354,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ),
         ElementTransform::NumericEnum(x) => {
             format!(
-                "structs::{}::from_value(read_string(reader, \"{}\")?.parser()?)",
+                "structs::{}::from_value(read_string(reader, \"{}\")?.parse()?)",
                 x.name, &elem.name
             )
         }
@@ -374,14 +369,14 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ElementTransform::NumericDuration(x) => match x {
             NumericDuration::Seconds(_) => {
                 format!(
-                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parser()?)",
+                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parse()?)",
                     &elem.name
                 )
             }
         },
         ElementTransform::Enumeration(x) => {
             format!(
-                "{}::from_str(read_string(reader, \"{}\"))?",
+                "{}::from_str(&read_string(reader, \"{}\")?)?",
                 fully_qualified_name(&x.type_id),
                 &elem.name
             )
@@ -399,14 +394,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
 }
 
 fn write_struct_fields(writer: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
-    if let Some(bt) = &st.base_type {
-        write_struct_fields(writer, bt)?;
-    }
-
-    writeln!(writer)?;
-    writeln!(writer, "// --- these fields come from {} ---", st.id)?;
-    writeln!(writer)?;
-    for field in &st.fields {
+    for field in st.dedup_fields() {
         let rust_type = field.field_type.rust_struct_type();
 
         write_comment(writer, &field.comment)?;
@@ -422,12 +410,7 @@ fn write_struct_fields(writer: &mut dyn Write, st: &Struct) -> std::io::Result<(
 }
 
 fn write_struct_initializer(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
-    // do this recursively depth-first
-    if let Some(bt) = &st.base_type {
-        write_struct_initializer(w, bt)?;
-    }
-
-    for field in &st.fields {
+    for field in st.dedup_fields() {
         let rust_var = field.name.rust_field_name();
         match &field.field_type {
             FieldType::Attribute(m, _) => match m {
@@ -453,17 +436,7 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
     let mut attrs = Vec::new();
     let mut elems = Vec::new();
 
-    if let Some(base) = &st.base_type {
-        let (attr, elem) = split_fields(base);
-        for field in attr {
-            attrs.push(field);
-        }
-        for field in elem {
-            elems.push(field);
-        }
-    }
-
-    for field in &st.fields {
+    for field in st.dedup_fields() {
         match &field.field_type {
             FieldType::Attribute(m, t) => {
                 let x = Attribute {
@@ -713,7 +686,7 @@ impl ElementTransform {
             ElementTransform::Enumeration(x) => {
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    "write_simple_tag(writer, \"{}\", {}.to_str())?;",
                     xsd_name, rust_name
                 )
             }

@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PowerAttributesType {
-    // --- these fields come from power:PowerAttributesType ---
     pub hertz: f64,
     pub voltage: f64,
     pub ac: bool,
@@ -98,9 +97,9 @@ impl PowerAttributesType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "hertz" => hertz.set(read_string(reader, "hertz")?.parser()?)?,
-                        "voltage" => voltage.set(read_string(reader, "voltage")?.parser()?)?,
-                        "ac" => ac.set(read_string(reader, "ac")?.parser()?)?,
+                        "hertz" => hertz.set(read_string(reader, "hertz")?.parse()?)?,
+                        "voltage" => voltage.set(read_string(reader, "voltage")?.parse()?)?,
+                        "ac" => ac.set(read_string(reader, "ac")?.parse()?)?,
                         _ => return Err(ReadError::UnexpectedEvent),
                     }
                 }

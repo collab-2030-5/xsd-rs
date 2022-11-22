@@ -22,6 +22,8 @@ pub enum ReadError {
     BadFloat,
     /// hex string bad format
     BadHexString,
+    /// Encountered an unknown enum variant
+    UnknownEnumVariant,
     /// Parser encountered an unexpected event
     UnexpectedEvent,
     /// Unknown xsi:type
@@ -119,6 +121,7 @@ impl std::fmt::Display for ReadError {
             ReadError::BadInteger => write!(f, "bad integer"),
             ReadError::BadFloat => write!(f, "bad float"),
             ReadError::BadHexString => write!(f, "bad hex string"),
+            ReadError::UnknownEnumVariant => write!(f, "unknown enum variant"),
             ReadError::MissingXsiType => write!(f, "missing required xsi:type"),
             ReadError::UnknownXsiType => write!(f, "unknown xsi:type"),
             ReadError::UnexpectedEvent => write!(f, "unexpected event"),

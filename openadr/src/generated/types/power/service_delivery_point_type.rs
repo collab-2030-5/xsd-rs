@@ -5,7 +5,6 @@ use xml::writer::*;
 /// Logical point on the network where the ownership of the service changes hands. It is one of potentially many service points within a ServiceLocation, delivering service in accordance with a CustomerAgreement. Used at the place where a meter may be installed.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceDeliveryPointType {
-    // --- these fields come from power:ServiceDeliveryPointType ---
     pub power_node: String,
 }
 

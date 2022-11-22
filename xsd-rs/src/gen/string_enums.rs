@@ -29,14 +29,17 @@ fn write_definition(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> 
 }
 
 fn write_from_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
-    writeln!(w, "pub(crate) fn from_str(s: &str) -> Option<Self> {{")?;
+    writeln!(
+        w,
+        "pub(crate) fn from_str(s: &str) -> Result<Self, crate::ReadError> {{"
+    )?;
     indent(w, |w| {
         writeln!(w, "match s {{")?;
         indent(w, |w| {
             for var in en.variants.iter() {
-                writeln!(w, "\"{}\" => Some(Self::{}),", var.value, var.name)?;
+                writeln!(w, "\"{}\" => Ok(Self::{}),", var.value, var.name)?;
             }
-            writeln!(w, "_ => None")
+            writeln!(w, "_ => Err(crate::ReadError::UnknownEnumVariant)")
         })?;
         writeln!(w, "}}")
     })?;

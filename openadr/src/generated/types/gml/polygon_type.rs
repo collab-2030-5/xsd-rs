@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PolygonType {
-    // --- these fields come from gml:PolygonType ---
     pub exterior: crate::types::gml::ExteriorType,
     pub gml_id: Option<String>,
 }

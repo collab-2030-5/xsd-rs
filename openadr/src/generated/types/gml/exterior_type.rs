@@ -4,7 +4,6 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExteriorType {
-    // --- these fields come from gml:exteriorType ---
     pub linear_ring: crate::types::gml::LinearRingType,
 }
 
