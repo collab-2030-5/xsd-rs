@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use crate::config::Config;
 use crate::map::Map;
-use crate::parse::parser::types::{
+use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
 };
 use crate::resolved::{AnyType, StructMetadata};
@@ -32,10 +32,10 @@ pub(crate) struct Settings<'a> {
 }
 
 impl UnresolvedModel {
-    /// parse and XSD file and merge it into the unresolved model
+    /// parser and XSD file and merge it into the unresolved model
     pub fn merge_xsd(&mut self, path: &Path) {
         let data = std::fs::read_to_string(path).unwrap();
-        let xsd = parse::parser::parse(&data).unwrap();
+        let xsd = parser::parse(&data).unwrap();
 
         let namespace = xsd
             .target_ns
@@ -90,7 +90,7 @@ impl UnresolvedModel {
 
     fn extract_fields(
         &mut self,
-        fields: &[crate::parse::parser::types::StructField],
+        fields: &[crate::parser::types::StructField],
         settings: &Settings,
     ) -> Vec<UnresolvedField> {
         let mut output: Vec<UnresolvedField> = Default::default();

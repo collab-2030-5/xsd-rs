@@ -1,4 +1,4 @@
-use crate::parse::parser::types::{Facet, TupleStruct};
+use crate::parser::types::{Facet, TupleStruct};
 use crate::unresolved::model::UnresolvedType;
 use crate::TypeId;
 

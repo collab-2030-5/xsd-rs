@@ -13,7 +13,7 @@ pub(crate) fn write(dir: &Path, model: &Model, config: &BaseTypeConfig) -> Resul
 
     // write the module file
     {
-        let mut w = create(&dir.join("mod.rs"))?;
+        let mut w = create(&dir.join("parser"))?;
         for base in base_fields.iter() {
             writeln!(w, "mod {};", base.id.name.to_snake_case())?;
         }

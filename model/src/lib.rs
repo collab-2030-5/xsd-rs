@@ -12,15 +12,16 @@ pub mod resolver;
 pub mod unresolved;
 
 /// raw XSD parser
-pub mod parse;
+pub(crate) mod parser;
 
+/// parse the XSD into its raw format but only return the impl Debug so it can be logged or printed
 pub fn parse_xsd(xsd: &str) -> impl std::fmt::Debug + '_ {
-    crate::parse::parser::parse(xsd).unwrap()
+    crate::parser::parse(xsd).unwrap()
 }
 
 use crate::config::NumericDuration;
-use crate::parse::parser::types::Facet;
-use crate::parse::parser::xsd_elements::FacetType;
+use crate::parser::types::Facet;
+use crate::parser::xsd_elements::FacetType;
 use serde::Deserialize;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;

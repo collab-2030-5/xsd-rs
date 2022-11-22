@@ -347,7 +347,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             }
         }
         ElementTransform::Number => {
-            format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
+            format!("read_string(reader, \"{}\")?.parser()?", &elem.name)
         }
         ElementTransform::String => {
             format!("read_string(reader, \"{}\")?", &elem.name)
@@ -358,7 +358,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ),
         ElementTransform::Enum(x) => {
             format!(
-                "structs::{}::from_value(read_string(reader, \"{}\")?.parse()?)",
+                "structs::{}::from_value(read_string(reader, \"{}\")?.parser()?)",
                 x.name, &elem.name
             )
         }
@@ -373,7 +373,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         ElementTransform::NumericDuration(x) => match x {
             NumericDuration::Seconds(_) => {
                 format!(
-                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parse()?)",
+                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parser()?)",
                     &elem.name
                 )
             }
@@ -509,9 +509,9 @@ impl AttributeTransform {
     }
     fn parse_from_string(&self) -> String {
         match self {
-            Self::Number => "attr.value.parse()?".to_string(),
+            Self::Number => "attr.value.parser()?".to_string(),
             Self::NumericEnum(e) => {
-                format!("structs::{}::from_value(attr.value.parse()?)", e.name)
+                format!("structs::{}::from_value(attr.value.parser()?)", e.name)
             }
             Self::NamedArray(x) => {
                 format!(

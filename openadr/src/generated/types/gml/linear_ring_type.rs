@@ -65,7 +65,7 @@ impl LinearRingType {
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parse()?)?
+                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
                         }
                         _ => return Err(ReadError::UnexpectedEvent)
                     }

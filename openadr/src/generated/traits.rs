@@ -24,18 +24,18 @@ pub trait WriteXml {
 
 /// XML types implement this trait to be read from any std::io::Read
 pub trait ReadXml: Sized {
-    /// parse XML from any std::io::Read
+    /// parser XML from any std::io::Read
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read;
 
-    /// parse XML from &str
+    /// parser XML from &str
     fn read_str<S: AsRef<str>>(data: S) -> core::result::Result<Self, ErrorWithLocation> {
         let mut cursor = std::io::Cursor::new(data.as_ref());
         Self::read(&mut cursor)
     }
 
-    /// parse XML from &str
+    /// parser XML from &str
     fn read_file<S: AsRef<std::path::Path>>(
         path: S,
     ) -> core::result::Result<Self, ErrorWithLocation> {

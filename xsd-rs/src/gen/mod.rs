@@ -91,7 +91,7 @@ pub(crate) fn write_model(
         }
     }
 
-    // use the extracted namespace info to generate all the mod.rs files
+    // use the extracted namespace info to generate all the parser files
     {
         let mut w = create(&types_dir.join("mod.rs"))?;
         for ns in namespaces.keys() {
