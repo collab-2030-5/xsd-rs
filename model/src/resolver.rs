@@ -1,7 +1,10 @@
 use crate::config::{Config, FieldId, ResolvedConfig};
 use crate::map::Map;
 use crate::resolved::{AnyType, Model};
-use crate::{NumericConstraint, NumericType, PrimitiveType, SimpleType, StringConstraints, TypeId};
+use crate::{
+    HexByteConstraints, NumericConstraint, NumericType, PrimitiveType, SimpleType,
+    StringConstraints, TypeId,
+};
 
 #[derive(Debug)]
 struct AliasMap {
@@ -120,7 +123,7 @@ impl Resolver {
         match type_id.name.as_str() {
             "boolean" => Some(PrimitiveType::Boolean.into()),
             "anyURI" => Some(PrimitiveType::String(StringConstraints::default()).into()),
-            "hexBinary" => Some(PrimitiveType::HexBytes(None).into()),
+            "hexBinary" => Some(PrimitiveType::HexBytes(HexByteConstraints::default()).into()),
             "string" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "ID" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "NMTOKEN" => Some(PrimitiveType::String(StringConstraints::default()).into()),

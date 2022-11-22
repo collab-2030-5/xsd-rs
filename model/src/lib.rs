@@ -15,8 +15,11 @@ pub mod unresolved;
 pub mod parse;
 
 use crate::config::NumericDuration;
+use crate::parse::parser::types::Facet;
+use crate::parse::parser::xsd_elements::FacetType;
 use serde::Deserialize;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub struct TypeId {
@@ -53,15 +56,123 @@ pub struct Namespace {
     pub uri: String,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum HexByteConstraints {
+    /// Constrained to a single byte
+    Single,
+    /// Possibly constrained to 2 or more bytes
+    Bytes { max: Option<usize> },
+}
+
+impl Default for HexByteConstraints {
+    fn default() -> Self {
+        Self::Bytes { max: None }
+    }
+}
+
+impl HexByteConstraints {
+    fn apply_facet(self, facet_type: &FacetType) -> HexByteConstraints {
+        match facet_type {
+            FacetType::MaxLength(x) => {
+                let max: usize = x.parse().unwrap();
+                match self {
+                    HexByteConstraints::Single => panic!(
+                        "Already constrained to a single byte, cannot constrain to {}",
+                        max
+                    ),
+                    HexByteConstraints::Bytes { max: Some(x) } => {
+                        panic!(
+                            "Already constrained to a maximum of {} bytes, cannot constrain to {}",
+                            x, max
+                        );
+                    }
+                    HexByteConstraints::Bytes { max: None } => match max {
+                        0 => panic!("maximum length cannot be zero"),
+                        1 => Self::Single,
+                        _ => Self::Bytes { max: Some(max) },
+                    },
+                }
+            }
+            _ => panic!("Unexpected Facet type for xs:hexBinary: {:?}", facet_type),
+        }
+    }
+}
+
 #[derive(Default, Copy, Clone, Debug)]
 pub struct StringConstraints {
     pub max_length: Option<usize>,
 }
 
+impl StringConstraints {
+    fn apply_facet(mut self, facet_type: &FacetType) -> Self {
+        match facet_type {
+            FacetType::MaxLength(x) => {
+                let max: usize = x.parse().unwrap();
+                self.set_max_length(max);
+                self
+            }
+            FacetType::Enumeration(_) => {
+                tracing::warn!("ignoring {:?} for string type", facet_type);
+                self
+            }
+            _ => panic!("unsupported facet for string type: {:?}", facet_type),
+        }
+    }
+
+    fn set_max_length(&mut self, max: usize) {
+        match self.max_length {
+            None => self.max_length = Some(max),
+            Some(x) => {
+                panic!("Max length already set to {}, cannot set to {}", x, max);
+            }
+        }
+    }
+}
+
 #[derive(Default, Debug, Copy, Clone)]
-pub struct NumericConstraint<T> {
+pub struct NumericConstraint<T>
+where
+    T: Display + std::str::FromStr,
+    <T as FromStr>::Err: Debug,
+{
     pub min: Option<T>,
     pub max: Option<T>,
+}
+
+impl<T> NumericConstraint<T>
+where
+    T: Display + std::str::FromStr,
+    <T as FromStr>::Err: Debug,
+{
+    pub(crate) fn apply_facet(mut self, facet: &FacetType) -> Self {
+        match facet {
+            FacetType::MaxInclusive(s) => {
+                let max: T = s.parse().unwrap();
+                self.set_max(max);
+                self
+            }
+            FacetType::MinInclusive(s) => {
+                let min: T = s.parse().unwrap();
+                self.set_min(min);
+                self
+            }
+            x => panic!("Unsupported {} facet: {:?}", std::any::type_name::<T>(), x),
+        }
+    }
+
+    fn set_min(&mut self, min: T) {
+        match &self.min {
+            None => self.min = Some(min),
+            Some(x) => panic!("Min already set to {}, cannot set to {}", x, min),
+        }
+    }
+
+    fn set_max(&mut self, max: T) {
+        match &self.max {
+            None => self.min = Some(max),
+            Some(x) => panic!("Max already set to {}, cannot set to {}", x, max),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -95,9 +206,32 @@ pub enum NumericType {
     F64(NumericConstraint<f64>),
 }
 
+impl NumericType {
+    fn apply_facet(self, facet: &FacetType) -> Self {
+        match self {
+            NumericType::I8(x) => NumericType::I8(x.apply_facet(facet)),
+            NumericType::U8(x) => NumericType::U8(x.apply_facet(facet)),
+            NumericType::I16(x) => NumericType::I16(x.apply_facet(facet)),
+            NumericType::U16(x) => NumericType::U16(x.apply_facet(facet)),
+            NumericType::I32(x) => NumericType::I32(x.apply_facet(facet)),
+            NumericType::U32(x) => NumericType::U32(x.apply_facet(facet)),
+            NumericType::I64(x) => NumericType::I64(x.apply_facet(facet)),
+            NumericType::U64(x) => NumericType::U64(x.apply_facet(facet)),
+            NumericType::F32(x) => NumericType::F32(x.apply_facet(facet)),
+            NumericType::F64(x) => NumericType::F64(x.apply_facet(facet)),
+        }
+    }
+}
+
+impl From<NumericType> for PrimitiveType {
+    fn from(x: NumericType) -> Self {
+        Self::Number(x)
+    }
+}
+
 impl From<NumericType> for SimpleType {
     fn from(x: NumericType) -> Self {
-        Self::Primitive(PrimitiveType::Number(x))
+        Self::Primitive(x.into())
     }
 }
 
@@ -106,16 +240,69 @@ impl From<NumericType> for SimpleType {
 pub enum PrimitiveType {
     /// true or false
     Boolean,
-    /// single byte encoded as a hex (2 characters e.g. "FF"), underlying type is xs:string
-    HexByte,
-    /// multiple bytes with a maximum length, underlying type is xs:string with constraints
-    HexBytes(Option<usize>),
+    /// multiple bytes with a possible maximum length
+    HexBytes(HexByteConstraints),
     /// string with constraints
     String(StringConstraints),
     /// numeric types
     Number(NumericType),
     /// Duration encoded as a number
     NumericDuration(NumericDuration),
+}
+
+impl PrimitiveType {
+    pub(crate) fn try_resolve_xs_type(id: &TypeId) -> Option<PrimitiveType> {
+        if id.ns != "xs" {
+            return None;
+        }
+
+        Some(Self::resolve_xs_type_suffix(&id.name))
+    }
+
+    pub(crate) fn apply_facets(self, facets: &[Facet]) -> PrimitiveType {
+        facets
+            .iter()
+            .fold(self, |sum, facet| sum.apply_facet(&facet.facet_type))
+    }
+
+    /// apply facets to the primitive, constraining it's allowed values and possibly changing its type
+    pub(crate) fn apply_facet(self, facet: &FacetType) -> PrimitiveType {
+        match self {
+            PrimitiveType::HexBytes(x) => PrimitiveType::HexBytes(x.apply_facet(facet)),
+            PrimitiveType::String(x) => PrimitiveType::String(x.apply_facet(facet)),
+            PrimitiveType::Number(x) => PrimitiveType::Number(x.apply_facet(facet)),
+            PrimitiveType::Boolean => {
+                panic!("Facets not supported for boolean type: {:?}", facet);
+            }
+            PrimitiveType::NumericDuration(_) => {
+                panic!(
+                    "Facets not supported for numeric duration type: {:?}",
+                    facet
+                );
+            }
+        }
+    }
+
+    fn resolve_xs_type_suffix(suffix: &str) -> PrimitiveType {
+        match suffix {
+            "token" | "string" | "normalizedString" | "anyURI" => {
+                PrimitiveType::String(StringConstraints::default())
+            }
+            "dateTime" => PrimitiveType::String(StringConstraints::default()),
+            "hexBinary" => PrimitiveType::HexBytes(HexByteConstraints::default()),
+            "byte" => NumericType::I8(NumericConstraint::default()).into(),
+            "unsignedByte" => NumericType::U8(NumericConstraint::default()).into(),
+            "short" => NumericType::I16(NumericConstraint::default()).into(),
+            "unsignedShort" => NumericType::U16(NumericConstraint::default()).into(),
+            "int" => NumericType::I32(NumericConstraint::default()).into(),
+            "unsignedInt" => NumericType::U32(NumericConstraint::default()).into(),
+            "long" => NumericType::I64(NumericConstraint::default()).into(),
+            "unsignedLong" => NumericType::U64(NumericConstraint::default()).into(),
+            "float" => NumericType::F32(NumericConstraint::default()).into(),
+            "double" => NumericType::F64(NumericConstraint::default()).into(),
+            _ => panic!("Unknown 'xs' type: {}", suffix),
+        }
+    }
 }
 
 impl From<PrimitiveType> for SimpleType {

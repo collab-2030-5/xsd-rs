@@ -1,7 +1,7 @@
 use heck::ToUpperCamelCase;
 use std::borrow::Cow;
 use xml_model::resolved::{AnyType, AttrMultiplicity, ElemMultiplicity, FieldType};
-use xml_model::{NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
+use xml_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
 
 use heck::ToSnakeCase;
 
@@ -48,11 +48,19 @@ impl RustType for PrimitiveType {
     fn rust_struct_type(&self) -> Cow<'static, str> {
         match self {
             Self::Boolean => "bool".into(),
-            Self::HexByte => "u8".into(),
-            Self::HexBytes(_) => "Vec<u8>".into(),
+            Self::HexBytes(x) => x.rust_struct_type(),
             Self::String(_) => "String".into(),
             Self::Number(x) => x.rust_struct_type(),
             Self::NumericDuration(_) => "std::time::Duration".into(),
+        }
+    }
+}
+
+impl RustType for HexByteConstraints {
+    fn rust_struct_type(&self) -> Cow<'static, str> {
+        match self {
+            HexByteConstraints::Single => "u8".into(),
+            HexByteConstraints::Bytes { .. } => "Vec<u8>".into(),
         }
     }
 }

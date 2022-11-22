@@ -8,7 +8,7 @@ use crate::{FatalError, RustType};
 use crate::gen::traits::RustFieldName;
 use crate::gen::*;
 use heck::ToUpperCamelCase;
-use xml_model::{PrimitiveType, WrapperType};
+use xml_model::{HexByteConstraints, PrimitiveType, WrapperType};
 
 pub(crate) fn write_struct(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
     writeln!(w, "use crate::*;")?;
@@ -538,8 +538,8 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
     match attr_type {
         SimpleType::Primitive(primitive) => match primitive {
             PrimitiveType::Boolean => Some(AttributeTransform::Number),
-            PrimitiveType::HexByte => Some(AttributeTransform::Number),
-            PrimitiveType::HexBytes(_) => None,
+            PrimitiveType::HexBytes(HexByteConstraints::Single) => Some(AttributeTransform::Number),
+            PrimitiveType::HexBytes(HexByteConstraints::Bytes { .. }) => None,
             PrimitiveType::String(_) => None,
             PrimitiveType::Number(_) => Some(AttributeTransform::Number),
             PrimitiveType::NumericDuration(x) => Some(AttributeTransform::Duration(*x)),
@@ -709,8 +709,8 @@ fn get_element_transform(st: &SimpleType) -> ElementTransform {
     match st {
         SimpleType::Primitive(x) => match x {
             PrimitiveType::Boolean => ElementTransform::Number,
-            PrimitiveType::HexByte => ElementTransform::Number,
-            PrimitiveType::HexBytes(_) => ElementTransform::HexBytes,
+            PrimitiveType::HexBytes(HexByteConstraints::Single) => ElementTransform::Number,
+            PrimitiveType::HexBytes(HexByteConstraints::Bytes { .. }) => ElementTransform::HexBytes,
             PrimitiveType::String(_) => ElementTransform::String,
             PrimitiveType::Number(_) => ElementTransform::Number,
             PrimitiveType::NumericDuration(x) => ElementTransform::NumericDuration(*x),

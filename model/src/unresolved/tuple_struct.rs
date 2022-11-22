@@ -1,5 +1,5 @@
 use crate::parse::parser::types::{Facet, TupleStruct};
-use crate::unresolved::model::{Settings, UnresolvedType};
+use crate::unresolved::model::UnresolvedType;
 use crate::TypeId;
 
 #[derive(Debug, Clone)]
@@ -17,7 +17,7 @@ impl From<UnresolvedTupleStruct> for UnresolvedType {
 }
 
 impl UnresolvedTupleStruct {
-    pub(crate) fn new(ts: TupleStruct, settings: &Settings) -> Self {
+    pub(crate) fn new(type_id: TypeId, ts: TupleStruct) -> Self {
         if !ts.type_modifiers.is_empty() {
             panic!(
                 "TupleStruct {} contains types modifiers: {:?}",
@@ -35,7 +35,7 @@ impl UnresolvedTupleStruct {
         Self {
             name: ts.name,
             comment: ts.comment,
-            type_id: TypeId::parse(&ts.type_name, settings.namespace),
+            type_id,
             facets: ts.facets,
         }
     }
