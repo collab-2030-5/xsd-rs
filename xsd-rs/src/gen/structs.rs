@@ -251,10 +251,11 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     ElementTransform::Number => false,
                     ElementTransform::String => false,
                     ElementTransform::HexBytes => false,
-                    ElementTransform::Enum(_) => false,
+                    ElementTransform::NumericEnum(_) => false,
                     ElementTransform::NamedHexArray(_) => false,
                     ElementTransform::HexBitField(_) => false,
                     ElementTransform::NumericDuration(_) => false,
+                    ElementTransform::Enumeration(_) => false,
                 });
 
             if has_struct {
@@ -356,7 +357,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             "parse_hex_bytes(&read_string(reader, \"{}\")?)?",
             &elem.name
         ),
-        ElementTransform::Enum(x) => {
+        ElementTransform::NumericEnum(x) => {
             format!(
                 "structs::{}::from_value(read_string(reader, \"{}\")?.parser()?)",
                 x.name, &elem.name
@@ -378,6 +379,9 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
                 )
             }
         },
+        ElementTransform::Enumeration(_) => {
+            unimplemented!()
+        }
     };
 
     match &elem.multiplicity {
@@ -621,10 +625,11 @@ enum ElementTransform {
     Number,
     String,
     HexBytes,
-    Enum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
+    NumericEnum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
     NamedHexArray(std::rc::Rc<NamedArray>),
     HexBitField(std::rc::Rc<BitField>),
     NumericDuration(NumericDuration),
+    Enumeration(std::rc::Rc<xml_model::Enumeration>),
 }
 
 impl ElementTransform {
@@ -670,7 +675,7 @@ impl ElementTransform {
                     xsd_name, rust_name
                 )
             }
-            ElementTransform::Enum(_) => {
+            ElementTransform::NumericEnum(_) => {
                 writeln!(w, "let value = {}.value().to_string();", rust_name)?;
                 writeln!(
                     w,
@@ -701,6 +706,13 @@ impl ElementTransform {
                     )
                 }
             },
+            ElementTransform::Enumeration(x) => {
+                writeln!(
+                    w,
+                    "write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    xsd_name, rust_name
+                )
+            }
         }
     }
 }
@@ -716,10 +728,10 @@ fn get_element_transform(st: &SimpleType) -> ElementTransform {
             PrimitiveType::NumericDuration(x) => ElementTransform::NumericDuration(*x),
         },
         SimpleType::Wrapper(wrapper) => match wrapper {
-            WrapperType::EnumU8(x) => ElementTransform::Enum(x.clone()),
+            WrapperType::EnumU8(x) => ElementTransform::NumericEnum(x.clone()),
             WrapperType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
             WrapperType::HexBitField(x) => ElementTransform::HexBitField(x.clone()),
-            WrapperType::Enum(_) => unimplemented!(),
+            WrapperType::Enum(x) => ElementTransform::Enumeration(x.clone()),
         },
     }
 }
