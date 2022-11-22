@@ -14,6 +14,10 @@ pub mod unresolved;
 /// raw XSD parser
 pub mod parse;
 
+pub fn parse_xsd(xsd: &str) -> impl std::fmt::Debug + '_ {
+    crate::parse::parser::parse(xsd).unwrap()
+}
+
 use crate::config::NumericDuration;
 use crate::parse::parser::types::Facet;
 use crate::parse::parser::xsd_elements::FacetType;
