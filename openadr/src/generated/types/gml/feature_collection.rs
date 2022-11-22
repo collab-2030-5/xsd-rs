@@ -1,30 +1,45 @@
 use crate::*;
-use xml::writer::*;
 use xml::common::Position;
+use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FeatureCollection {
-
     // --- these fields come from gml:FeatureCollection ---
-
     pub location: crate::types::gml::LocationType,
     pub gml_id: Option<String>,
-
 }
 
 impl FeatureCollection {
-    fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        self.location.write_with_name(writer, "location", false, false)?;
+    fn write_elem<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        self.location
+            .write_with_name(writer, "location", false, false)?;
         Ok(())
     }
 
-    pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        let start = if top_level { super::add_schema_attr(events::XmlEvent::start_element(name)) } else { events::XmlEvent::start_element(name) };
+    pub(crate) fn write_with_name<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+        name: &str,
+        top_level: bool,
+        write_type: bool,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        let start = if top_level {
+            super::add_schema_attr(events::XmlEvent::start_element(name))
+        } else {
+            events::XmlEvent::start_element(name)
+        };
         // ---- start attributes ----
         let start = match &self.gml_id {
-            Some(attr) => {
-                start.attr("gml:id", attr.as_str())
-            },
+            Some(attr) => start.attr("gml:id", attr.as_str()),
             None => start,
         };
         // ---- end attributes ----
@@ -41,7 +56,10 @@ impl FeatureCollection {
 }
 
 impl WriteXml for FeatureCollection {
-    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {
+    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
+    where
+        W: std::io::Write,
+    {
         let mut writer = config.to_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "gml:FeatureCollection", true, false)?;
         Ok(())
@@ -49,15 +67,22 @@ impl WriteXml for FeatureCollection {
 }
 
 impl FeatureCollection {
-    pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {
+    pub(crate) fn read<R>(
+        reader: &mut xml::reader::EventReader<R>,
+        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        parent_tag: &str,
+    ) -> core::result::Result<Self, ReadError>
+    where
+        R: std::io::Read,
+    {
         // one variable for each attribute and element
-        let mut location : SetOnce<crate::types::gml::LocationType> = Default::default();
-        let mut gml_id : SetOnce<String> = Default::default();
+        let mut location: SetOnce<crate::types::gml::LocationType> = Default::default();
+        let mut gml_id: SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
                 "gml:id" => gml_id.set(attr.value.clone())?,
-                _ => {}, // ignore unknown attributes
+                _ => {} // ignore unknown attributes
             };
         }
 
@@ -72,19 +97,25 @@ impl FeatureCollection {
                         return Err(ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, attributes, .. } => {
-                    match name.local_name.as_str() {
-                        "location" => {
-                            location.set(crate::types::gml::LocationType::read(reader, &attributes, "location")?)?
-                        }
-                        _ => return Err(ReadError::UnexpectedEvent)
-                    }
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "location" => location.set(crate::types::gml::LocationType::read(
+                        reader,
+                        &attributes,
+                        "location",
+                    )?)?,
+                    _ => return Err(ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
-                xml::reader::XmlEvent::StartDocument { .. } => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartDocument { .. } => {
+                    return Err(ReadError::UnexpectedEvent)
+                }
                 xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),
                 xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::ProcessingInstruction { .. } => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::ProcessingInstruction { .. } => {
+                    return Err(ReadError::UnexpectedEvent)
+                }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
                 xml::reader::XmlEvent::Comment(_) => {}
@@ -94,26 +125,38 @@ impl FeatureCollection {
 
         // construct the type from the cells
         Ok(FeatureCollection {
-            location : location.require()?,
-            gml_id : gml_id.get(),
+            location: location.require()?,
+            gml_id: gml_id.get(),
         })
     }
 
-    fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {
+    fn read_top_level<R>(
+        reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, ReadError>
+    where
+        R: std::io::Read,
+    {
         let attr = read_start_tag(reader, "FeatureCollection")?;
         FeatureCollection::read(reader, &attr, "gml:FeatureCollection")
     }
 }
 
 impl ReadXml for FeatureCollection {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
+    where
+        R: std::io::Read,
+    {
         let mut reader = xml::reader::EventReader::new(r);
 
         match FeatureCollection::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(ErrorWithLocation { err, line: pos.row, col: pos.column })
+                Err(ErrorWithLocation {
+                    err,
+                    line: pos.row,
+                    col: pos.column,
+                })
             }
         }
     }

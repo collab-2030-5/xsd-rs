@@ -51,9 +51,9 @@ impl GeneratedType {
             Self::Choice(_) => unimplemented!(),
             Self::Wrapper(x) => match x {
                 WrapperType::Enum(x) => crate::gen::string_enums::write(w, x),
-                WrapperType::EnumU8(x) => crate::gen::numeric_enum::write(w, x),
-                WrapperType::NamedArray(x) => crate::gen::named_array::write(w, x),
-                WrapperType::HexBitField(x) => crate::gen::bit_field::write(w, x),
+                WrapperType::EnumU8(_, x) => crate::gen::numeric_enum::write(w, x),
+                WrapperType::NamedArray(_, x) => crate::gen::named_array::write(w, x),
+                WrapperType::HexBitField(_, x) => crate::gen::bit_field::write(w, x),
             },
         }
     }

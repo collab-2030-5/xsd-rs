@@ -151,7 +151,7 @@ pub struct BitField {
 
 /// Mappings not provided natively in XSD
 #[derive(Debug, Clone, Deserialize)]
-pub enum SubstitutedType {
+pub enum SubstitutedTypeVariant {
     /// fixed size array of bytes
     NamedArray(std::rc::Rc<NamedArray>),
     /// enumeration w/ numeric representation
@@ -162,30 +162,41 @@ pub enum SubstitutedType {
     NumericDuration(NumericDuration),
 }
 
-impl From<SubstitutedType> for SimpleType {
-    fn from(x: SubstitutedType) -> Self {
-        match x {
-            SubstitutedType::NamedArray(x) => WrapperType::NamedArray(x).into(),
-            SubstitutedType::NumericEnum(x) => WrapperType::EnumU8(x).into(),
-            SubstitutedType::HexBitField(x) => WrapperType::HexBitField(x).into(),
-            SubstitutedType::NumericDuration(x) => PrimitiveType::NumericDuration(x).into(),
+/// Mappings not provided natively in XSD
+#[derive(Debug, Clone, Deserialize)]
+pub struct Substitution {
+    target: TypeId,
+    variant: SubstitutedTypeVariant,
+}
+
+impl From<Substitution> for SimpleType {
+    fn from(t: Substitution) -> Self {
+        match t.variant {
+            SubstitutedTypeVariant::NamedArray(x) => WrapperType::NamedArray(t.target, x).into(),
+            SubstitutedTypeVariant::NumericEnum(x) => WrapperType::EnumU8(t.target, x).into(),
+            SubstitutedTypeVariant::HexBitField(x) => WrapperType::HexBitField(t.target, x).into(),
+            SubstitutedTypeVariant::NumericDuration(x) => PrimitiveType::NumericDuration(x).into(),
         }
     }
 }
 
-impl SubstitutedType {
+impl Substitution {
+    pub(crate) fn new(target: TypeId, variant: SubstitutedTypeVariant) -> Self {
+        Self { target, variant }
+    }
+
     pub fn type_name(&self) -> Option<&str> {
-        match self {
-            SubstitutedType::NamedArray(x) => Some(&x.name),
-            SubstitutedType::NumericEnum(x) => Some(&x.name),
-            SubstitutedType::HexBitField(x) => Some(&x.name),
-            SubstitutedType::NumericDuration(_) => None,
+        match &self.variant {
+            SubstitutedTypeVariant::NamedArray(x) => Some(&x.name),
+            SubstitutedTypeVariant::NumericEnum(x) => Some(&x.name),
+            SubstitutedTypeVariant::HexBitField(x) => Some(&x.name),
+            SubstitutedTypeVariant::NumericDuration(_) => None,
         }
     }
 }
 
-impl From<SubstitutedType> for AnyType {
-    fn from(x: SubstitutedType) -> Self {
+impl From<Substitution> for AnyType {
+    fn from(x: Substitution) -> Self {
         Self::Simple(x.into())
     }
 }
@@ -217,7 +228,7 @@ pub struct FieldMapping {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     /// map of substituted types which may be mapped from and XSD type or a FieldId
-    pub types: HashMap<TypeId, SubstitutedType>,
+    pub types: HashMap<TypeId, Substitution>,
     /// maps an existing XSD Type to substituted type
     pub type_mappings: HashMap<TypeId, TypeId>,
     /// map particular fields to a substituted type
@@ -226,8 +237,8 @@ pub struct Config {
 
 impl Config {
     pub fn resolve(self) -> ResolvedConfig {
-        let mut type_mappings: HashMap<TypeId, SubstitutedType> = Default::default();
-        let mut field_mappings: HashMap<FieldId, SubstitutedType> = Default::default();
+        let mut type_mappings: HashMap<TypeId, Substitution> = Default::default();
+        let mut field_mappings: HashMap<FieldId, Substitution> = Default::default();
 
         for (key, t) in self.type_mappings {
             let resolved = self.types.get(&t).expect("Unknown type");
@@ -249,6 +260,6 @@ impl Config {
 /// resolved version of the configuration
 #[derive(Debug)]
 pub struct ResolvedConfig {
-    pub type_mappings: HashMap<TypeId, SubstitutedType>,
-    pub field_mappings: HashMap<FieldId, SubstitutedType>,
+    pub type_mappings: HashMap<TypeId, Substitution>,
+    pub field_mappings: HashMap<FieldId, Substitution>,
 }

@@ -1,25 +1,41 @@
 use crate::*;
-use xml::writer::*;
 use xml::common::Position;
+use xml::writer::*;
 
 /// The EndDeviceAssets are the physical device or devices which could be meters or other types of devices that may be of interest
 #[derive(Debug, Clone, PartialEq)]
 pub struct EndDeviceAssetType {
-
     // --- these fields come from power:EndDeviceAssetType ---
-
     pub power_mrid: String,
-
 }
 
 impl EndDeviceAssetType {
-    fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
+    fn write_elem<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
         write_simple_tag(writer, "power:mrid", self.power_mrid.as_str())?;
         Ok(())
     }
 
-    pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        let start = if top_level { super::add_schema_attr(events::XmlEvent::start_element(name)) } else { events::XmlEvent::start_element(name) };
+    pub(crate) fn write_with_name<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+        name: &str,
+        top_level: bool,
+        write_type: bool,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        let start = if top_level {
+            super::add_schema_attr(events::XmlEvent::start_element(name))
+        } else {
+            events::XmlEvent::start_element(name)
+        };
         let start = if write_type {
             start.attr("xsi:type", "power:EndDeviceAssetType")
         } else {
@@ -33,7 +49,10 @@ impl EndDeviceAssetType {
 }
 
 impl WriteXml for EndDeviceAssetType {
-    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {
+    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
+    where
+        W: std::io::Write,
+    {
         let mut writer = config.to_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "power:EndDeviceAssetType", true, false)?;
         Ok(())
@@ -41,13 +60,20 @@ impl WriteXml for EndDeviceAssetType {
 }
 
 impl EndDeviceAssetType {
-    pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {
+    pub(crate) fn read<R>(
+        reader: &mut xml::reader::EventReader<R>,
+        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        parent_tag: &str,
+    ) -> core::result::Result<Self, ReadError>
+    where
+        R: std::io::Read,
+    {
         // one variable for each attribute and element
-        let mut power_mrid : SetOnce<String> = Default::default();
+        let mut power_mrid: SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                _ => {}, // ignore unknown attributes
+                _ => {} // ignore unknown attributes
             };
         }
 
@@ -64,17 +90,19 @@ impl EndDeviceAssetType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:mrid" => {
-                            power_mrid.set(read_string(reader, "power:mrid")?)?
-                        }
-                        _ => return Err(ReadError::UnexpectedEvent)
+                        "power:mrid" => power_mrid.set(read_string(reader, "power:mrid")?)?,
+                        _ => return Err(ReadError::UnexpectedEvent),
                     }
                 }
                 // treat these events as errors
-                xml::reader::XmlEvent::StartDocument { .. } => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartDocument { .. } => {
+                    return Err(ReadError::UnexpectedEvent)
+                }
                 xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),
                 xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::ProcessingInstruction { .. } => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::ProcessingInstruction { .. } => {
+                    return Err(ReadError::UnexpectedEvent)
+                }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
                 xml::reader::XmlEvent::Comment(_) => {}
@@ -84,25 +112,37 @@ impl EndDeviceAssetType {
 
         // construct the type from the cells
         Ok(EndDeviceAssetType {
-            power_mrid : power_mrid.require()?,
+            power_mrid: power_mrid.require()?,
         })
     }
 
-    fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {
+    fn read_top_level<R>(
+        reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, ReadError>
+    where
+        R: std::io::Read,
+    {
         let attr = read_start_tag(reader, "EndDeviceAssetType")?;
         EndDeviceAssetType::read(reader, &attr, "power:EndDeviceAssetType")
     }
 }
 
 impl ReadXml for EndDeviceAssetType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
+    where
+        R: std::io::Read,
+    {
         let mut reader = xml::reader::EventReader::new(r);
 
         match EndDeviceAssetType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(ErrorWithLocation { err, line: pos.row, col: pos.column })
+                Err(ErrorWithLocation {
+                    err,
+                    line: pos.row,
+                    col: pos.column,
+                })
             }
         }
     }

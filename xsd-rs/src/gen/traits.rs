@@ -67,12 +67,10 @@ impl RustType for HexByteConstraints {
 
 impl RustType for WrapperType {
     fn rust_struct_type(&self) -> Cow<'static, str> {
-        match self {
-            Self::EnumU8(x) => format!("structs::{}", x.name.to_upper_camel_case()).into(),
-            Self::Enum(x) => format!("enums::{}", x.type_id.name.to_upper_camel_case()).into(),
-            Self::NamedArray(x) => format!("structs::{}", x.name).into(),
-            Self::HexBitField(x) => format!("structs::{}", x.name).into(),
-        }
+        let namespace = self.type_id().ns.as_str();
+        let name = self.name();
+
+        format!("crate::types::{}::{}", namespace, name).into()
     }
 }
 
@@ -85,7 +83,7 @@ impl RustType for SimpleType {
     }
 }
 
-fn fully_qualified_name(id: &TypeId) -> String {
+pub(crate) fn fully_qualified_name(id: &TypeId) -> String {
     format!(
         "crate::types::{}::{}",
         id.ns.to_snake_case(),

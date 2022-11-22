@@ -2,13 +2,15 @@ use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
+/// The Transport Interface delineates the edges at either end of a transport segment.
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearRingType {
-    // --- these fields come from gml:LinearRingType ---
-    pub gml_pos_list: f64,
+pub struct TransportInterfaceType {
+    // --- these fields come from power:TransportInterfaceType ---
+    pub point_of_receipt: String,
+    pub point_of_delivery: String,
 }
 
-impl LinearRingType {
+impl TransportInterfaceType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,8 +18,8 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        let value = self.gml_pos_list.to_string();
-        write_simple_tag(writer, "gml:posList", value.as_str())?;
+        write_simple_tag(writer, "pointOfReceipt", self.point_of_receipt.as_str())?;
+        write_simple_tag(writer, "pointOfDelivery", self.point_of_delivery.as_str())?;
         Ok(())
     }
 
@@ -37,7 +39,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:LinearRingType")
+            start.attr("xsi:type", "power:TransportInterfaceType")
         } else {
             start
         };
@@ -48,18 +50,18 @@ impl LinearRingType {
     }
 }
 
-impl WriteXml for LinearRingType {
+impl WriteXml for TransportInterfaceType {
     fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
     where
         W: std::io::Write,
     {
         let mut writer = config.to_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:LinearRingType", true, false)?;
+        self.write_with_name(&mut writer, "power:TransportInterfaceType", true, false)?;
         Ok(())
     }
 }
 
-impl LinearRingType {
+impl TransportInterfaceType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -69,7 +71,8 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: SetOnce<f64> = Default::default();
+        let mut point_of_receipt: SetOnce<String> = Default::default();
+        let mut point_of_delivery: SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -90,8 +93,11 @@ impl LinearRingType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
+                        "pointOfReceipt" => {
+                            point_of_receipt.set(read_string(reader, "pointOfReceipt")?)?
+                        }
+                        "pointOfDelivery" => {
+                            point_of_delivery.set(read_string(reader, "pointOfDelivery")?)?
                         }
                         _ => return Err(ReadError::UnexpectedEvent),
                     }
@@ -113,8 +119,9 @@ impl LinearRingType {
         }
 
         // construct the type from the cells
-        Ok(LinearRingType {
-            gml_pos_list: gml_pos_list.require()?,
+        Ok(TransportInterfaceType {
+            point_of_receipt: point_of_receipt.require()?,
+            point_of_delivery: point_of_delivery.require()?,
         })
     }
 
@@ -124,19 +131,19 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "gml:LinearRingType")
+        let attr = read_start_tag(reader, "TransportInterfaceType")?;
+        TransportInterfaceType::read(reader, &attr, "power:TransportInterfaceType")
     }
 }
 
-impl ReadXml for LinearRingType {
+impl ReadXml for TransportInterfaceType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LinearRingType::read_top_level(&mut reader) {
+        match TransportInterfaceType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

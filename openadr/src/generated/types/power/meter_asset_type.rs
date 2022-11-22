@@ -2,13 +2,14 @@ use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
+/// The MeterAsset is the physical device or devices that performs the role of the meter
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearRingType {
-    // --- these fields come from gml:LinearRingType ---
-    pub gml_pos_list: f64,
+pub struct MeterAssetType {
+    // --- these fields come from power:MeterAssetType ---
+    pub power_mrid: String,
 }
 
-impl LinearRingType {
+impl MeterAssetType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,8 +17,7 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        let value = self.gml_pos_list.to_string();
-        write_simple_tag(writer, "gml:posList", value.as_str())?;
+        write_simple_tag(writer, "power:mrid", self.power_mrid.as_str())?;
         Ok(())
     }
 
@@ -37,7 +37,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:LinearRingType")
+            start.attr("xsi:type", "power:MeterAssetType")
         } else {
             start
         };
@@ -48,18 +48,18 @@ impl LinearRingType {
     }
 }
 
-impl WriteXml for LinearRingType {
+impl WriteXml for MeterAssetType {
     fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
     where
         W: std::io::Write,
     {
         let mut writer = config.to_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:LinearRingType", true, false)?;
+        self.write_with_name(&mut writer, "power:MeterAssetType", true, false)?;
         Ok(())
     }
 }
 
-impl LinearRingType {
+impl MeterAssetType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -69,7 +69,7 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: SetOnce<f64> = Default::default();
+        let mut power_mrid: SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -90,9 +90,7 @@ impl LinearRingType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
-                        }
+                        "power:mrid" => power_mrid.set(read_string(reader, "power:mrid")?)?,
                         _ => return Err(ReadError::UnexpectedEvent),
                     }
                 }
@@ -113,8 +111,8 @@ impl LinearRingType {
         }
 
         // construct the type from the cells
-        Ok(LinearRingType {
-            gml_pos_list: gml_pos_list.require()?,
+        Ok(MeterAssetType {
+            power_mrid: power_mrid.require()?,
         })
     }
 
@@ -124,19 +122,19 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "gml:LinearRingType")
+        let attr = read_start_tag(reader, "MeterAssetType")?;
+        MeterAssetType::read(reader, &attr, "power:MeterAssetType")
     }
 }
 
-impl ReadXml for LinearRingType {
+impl ReadXml for MeterAssetType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LinearRingType::read_top_level(&mut reader) {
+        match MeterAssetType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

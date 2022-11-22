@@ -5,7 +5,7 @@ use xml_model::resolved::*;
 
 use crate::{FatalError, RustType};
 
-use crate::gen::traits::RustFieldName;
+use crate::gen::traits::{fully_qualified_name, RustFieldName};
 use crate::gen::*;
 use heck::ToUpperCamelCase;
 use xml_model::{HexByteConstraints, PrimitiveType, WrapperType};
@@ -379,8 +379,12 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
                 )
             }
         },
-        ElementTransform::Enumeration(_) => {
-            unimplemented!()
+        ElementTransform::Enumeration(x) => {
+            format!(
+                "{}::from_str(read_string(reader, \"{}\"))?",
+                fully_qualified_name(&x.type_id),
+                &elem.name
+            )
         }
     };
 
@@ -549,9 +553,9 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
             PrimitiveType::NumericDuration(x) => Some(AttributeTransform::Duration(*x)),
         },
         SimpleType::Wrapper(wrapper) => match wrapper {
-            WrapperType::EnumU8(x) => Some(AttributeTransform::NumericEnum(x.clone())),
-            WrapperType::NamedArray(x) => Some(AttributeTransform::NamedArray(x.clone())),
-            WrapperType::HexBitField(x) => Some(AttributeTransform::HexBitfield(x.clone())),
+            WrapperType::EnumU8(_, x) => Some(AttributeTransform::NumericEnum(x.clone())),
+            WrapperType::NamedArray(_, x) => Some(AttributeTransform::NamedArray(x.clone())),
+            WrapperType::HexBitField(_, x) => Some(AttributeTransform::HexBitfield(x.clone())),
             WrapperType::Enum(_) => unimplemented!(),
         },
     }
@@ -728,9 +732,9 @@ fn get_element_transform(st: &SimpleType) -> ElementTransform {
             PrimitiveType::NumericDuration(x) => ElementTransform::NumericDuration(*x),
         },
         SimpleType::Wrapper(wrapper) => match wrapper {
-            WrapperType::EnumU8(x) => ElementTransform::NumericEnum(x.clone()),
-            WrapperType::NamedArray(x) => ElementTransform::NamedHexArray(x.clone()),
-            WrapperType::HexBitField(x) => ElementTransform::HexBitField(x.clone()),
+            WrapperType::EnumU8(_, x) => ElementTransform::NumericEnum(x.clone()),
+            WrapperType::NamedArray(_, x) => ElementTransform::NamedHexArray(x.clone()),
+            WrapperType::HexBitField(_, x) => ElementTransform::HexBitField(x.clone()),
             WrapperType::Enum(x) => ElementTransform::Enumeration(x.clone()),
         },
     }

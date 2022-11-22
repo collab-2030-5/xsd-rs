@@ -3,21 +3,23 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EnergyApparentType {
+pub struct PowerRealType {
     // --- these fields come from emix:ItemBaseType ---
 
-    // --- these fields come from power:EnergyItemType ---
+    // --- these fields come from power:PowerItemType ---
     pub item_description: String,
     pub item_units: String,
     pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
+    pub power_power_attributes: crate::types::power::PowerAttributesType,
 
-    // --- these fields come from power:EnergyApparentType ---
+    // --- these fields come from power:PowerRealType ---
     pub item_description: String,
     pub item_units: String,
     pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
+    pub power_power_attributes: crate::types::power::PowerAttributesType,
 }
 
-impl EnergyApparentType {
+impl PowerRealType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -32,12 +34,24 @@ impl EnergyApparentType {
             "scale:siScaleCode",
             self.scale_si_scale_code.as_str(),
         )?;
+        self.power_power_attributes.write_with_name(
+            writer,
+            "power:powerAttributes",
+            false,
+            false,
+        )?;
         write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
         write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
         write_simple_tag(
             writer,
             "scale:siScaleCode",
             self.scale_si_scale_code.as_str(),
+        )?;
+        self.power_power_attributes.write_with_name(
+            writer,
+            "power:powerAttributes",
+            false,
+            false,
         )?;
         Ok(())
     }
@@ -58,7 +72,7 @@ impl EnergyApparentType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:EnergyApparentType")
+            start.attr("xsi:type", "power:PowerRealType")
         } else {
             start
         };
@@ -69,18 +83,18 @@ impl EnergyApparentType {
     }
 }
 
-impl WriteXml for EnergyApparentType {
+impl WriteXml for PowerRealType {
     fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
     where
         W: std::io::Write,
     {
         let mut writer = config.to_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyApparentType", true, false)?;
+        self.write_with_name(&mut writer, "power:PowerRealType", true, false)?;
         Ok(())
     }
 }
 
-impl EnergyApparentType {
+impl PowerRealType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -94,9 +108,13 @@ impl EnergyApparentType {
         let mut item_units: SetOnce<String> = Default::default();
         let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
             Default::default();
+        let mut power_power_attributes: SetOnce<crate::types::power::PowerAttributesType> =
+            Default::default();
         let mut item_description: SetOnce<String> = Default::default();
         let mut item_units: SetOnce<String> = Default::default();
         let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
+            Default::default();
+        let mut power_power_attributes: SetOnce<crate::types::power::PowerAttributesType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -116,31 +134,43 @@ impl EnergyApparentType {
                         return Err(ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "itemDescription" => {
-                            item_description.set(read_string(reader, "itemDescription")?)?
-                        }
-                        "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(read_string(
-                                reader,
-                                "scale:siScaleCode",
-                            ))?,
-                        )?,
-                        "itemDescription" => {
-                            item_description.set(read_string(reader, "itemDescription")?)?
-                        }
-                        "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(read_string(
-                                reader,
-                                "scale:siScaleCode",
-                            ))?,
-                        )?,
-                        _ => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "itemDescription" => {
+                        item_description.set(read_string(reader, "itemDescription")?)?
                     }
-                }
+                    "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
+                    "scale:siScaleCode" => {
+                        scale_si_scale_code.set(crate::types::scale::SiScaleCodeType::from_str(
+                            read_string(reader, "scale:siScaleCode"),
+                        )?)?
+                    }
+                    "power:powerAttributes" => power_power_attributes.set(
+                        crate::types::power::PowerAttributesType::read(
+                            reader,
+                            &attributes,
+                            "power:powerAttributes",
+                        )?,
+                    )?,
+                    "itemDescription" => {
+                        item_description.set(read_string(reader, "itemDescription")?)?
+                    }
+                    "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
+                    "scale:siScaleCode" => {
+                        scale_si_scale_code.set(crate::types::scale::SiScaleCodeType::from_str(
+                            read_string(reader, "scale:siScaleCode"),
+                        )?)?
+                    }
+                    "power:powerAttributes" => power_power_attributes.set(
+                        crate::types::power::PowerAttributesType::read(
+                            reader,
+                            &attributes,
+                            "power:powerAttributes",
+                        )?,
+                    )?,
+                    _ => return Err(ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(ReadError::UnexpectedEvent)
@@ -158,13 +188,15 @@ impl EnergyApparentType {
         }
 
         // construct the type from the cells
-        Ok(EnergyApparentType {
+        Ok(PowerRealType {
             item_description: item_description.require()?,
             item_units: item_units.require()?,
             scale_si_scale_code: scale_si_scale_code.require()?,
+            power_power_attributes: power_power_attributes.require()?,
             item_description: item_description.require()?,
             item_units: item_units.require()?,
             scale_si_scale_code: scale_si_scale_code.require()?,
+            power_power_attributes: power_power_attributes.require()?,
         })
     }
 
@@ -174,19 +206,19 @@ impl EnergyApparentType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "EnergyApparentType")?;
-        EnergyApparentType::read(reader, &attr, "power:EnergyApparentType")
+        let attr = read_start_tag(reader, "PowerRealType")?;
+        PowerRealType::read(reader, &attr, "power:PowerRealType")
     }
 }
 
-impl ReadXml for EnergyApparentType {
+impl ReadXml for PowerRealType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EnergyApparentType::read_top_level(&mut reader) {
+        match PowerRealType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

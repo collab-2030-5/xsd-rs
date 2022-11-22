@@ -3,12 +3,16 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearRingType {
-    // --- these fields come from gml:LinearRingType ---
-    pub gml_pos_list: f64,
+pub struct VoltageType {
+    // --- these fields come from emix:ItemBaseType ---
+
+    // --- these fields come from power:VoltageType ---
+    pub item_description: String,
+    pub item_units: String,
+    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
 }
 
-impl LinearRingType {
+impl VoltageType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,8 +20,13 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        let value = self.gml_pos_list.to_string();
-        write_simple_tag(writer, "gml:posList", value.as_str())?;
+        write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
+        write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
+        write_simple_tag(
+            writer,
+            "scale:siScaleCode",
+            self.scale_si_scale_code.as_str(),
+        )?;
         Ok(())
     }
 
@@ -37,7 +46,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:LinearRingType")
+            start.attr("xsi:type", "power:VoltageType")
         } else {
             start
         };
@@ -48,18 +57,18 @@ impl LinearRingType {
     }
 }
 
-impl WriteXml for LinearRingType {
+impl WriteXml for VoltageType {
     fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
     where
         W: std::io::Write,
     {
         let mut writer = config.to_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:LinearRingType", true, false)?;
+        self.write_with_name(&mut writer, "power:VoltageType", true, false)?;
         Ok(())
     }
 }
 
-impl LinearRingType {
+impl VoltageType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -69,7 +78,10 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: SetOnce<f64> = Default::default();
+        let mut item_description: SetOnce<String> = Default::default();
+        let mut item_units: SetOnce<String> = Default::default();
+        let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -90,9 +102,16 @@ impl LinearRingType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
+                        "itemDescription" => {
+                            item_description.set(read_string(reader, "itemDescription")?)?
                         }
+                        "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
+                        "scale:siScaleCode" => scale_si_scale_code.set(
+                            crate::types::scale::SiScaleCodeType::from_str(read_string(
+                                reader,
+                                "scale:siScaleCode",
+                            ))?,
+                        )?,
                         _ => return Err(ReadError::UnexpectedEvent),
                     }
                 }
@@ -113,8 +132,10 @@ impl LinearRingType {
         }
 
         // construct the type from the cells
-        Ok(LinearRingType {
-            gml_pos_list: gml_pos_list.require()?,
+        Ok(VoltageType {
+            item_description: item_description.require()?,
+            item_units: item_units.require()?,
+            scale_si_scale_code: scale_si_scale_code.require()?,
         })
     }
 
@@ -124,19 +145,19 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "gml:LinearRingType")
+        let attr = read_start_tag(reader, "VoltageType")?;
+        VoltageType::read(reader, &attr, "power:VoltageType")
     }
 }
 
-impl ReadXml for LinearRingType {
+impl ReadXml for VoltageType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LinearRingType::read_top_level(&mut reader) {
+        match VoltageType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

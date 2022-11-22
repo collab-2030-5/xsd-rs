@@ -2,13 +2,14 @@ use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
+/// A customer ServiceLocation has one or more ServiceDeliveryPoint(s), which in turn relate to Meters. The location may be a point or a polygon, depending on the specific circumstances. For distribution, the ServiceLocation is typically the location of the utility customer's premise.
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearRingType {
-    // --- these fields come from gml:LinearRingType ---
-    pub gml_pos_list: f64,
+pub struct ServiceLocationType {
+    // --- these fields come from power:ServiceLocationType ---
+    pub gml_feature_collection: crate::types::gml::FeatureCollection,
 }
 
-impl LinearRingType {
+impl ServiceLocationType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,8 +17,12 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        let value = self.gml_pos_list.to_string();
-        write_simple_tag(writer, "gml:posList", value.as_str())?;
+        self.gml_feature_collection.write_with_name(
+            writer,
+            "gml:FeatureCollection",
+            false,
+            false,
+        )?;
         Ok(())
     }
 
@@ -37,7 +42,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:LinearRingType")
+            start.attr("xsi:type", "power:ServiceLocationType")
         } else {
             start
         };
@@ -48,18 +53,18 @@ impl LinearRingType {
     }
 }
 
-impl WriteXml for LinearRingType {
+impl WriteXml for ServiceLocationType {
     fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
     where
         W: std::io::Write,
     {
         let mut writer = config.to_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:LinearRingType", true, false)?;
+        self.write_with_name(&mut writer, "power:ServiceLocationType", true, false)?;
         Ok(())
     }
 }
 
-impl LinearRingType {
+impl ServiceLocationType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -69,7 +74,8 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: SetOnce<f64> = Default::default();
+        let mut gml_feature_collection: SetOnce<crate::types::gml::FeatureCollection> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -88,14 +94,18 @@ impl LinearRingType {
                         return Err(ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parser()?)?
-                        }
-                        _ => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "gml:FeatureCollection" => {
+                        gml_feature_collection.set(crate::types::gml::FeatureCollection::read(
+                            reader,
+                            &attributes,
+                            "gml:FeatureCollection",
+                        )?)?
                     }
-                }
+                    _ => return Err(ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(ReadError::UnexpectedEvent)
@@ -113,8 +123,8 @@ impl LinearRingType {
         }
 
         // construct the type from the cells
-        Ok(LinearRingType {
-            gml_pos_list: gml_pos_list.require()?,
+        Ok(ServiceLocationType {
+            gml_feature_collection: gml_feature_collection.require()?,
         })
     }
 
@@ -124,19 +134,19 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "gml:LinearRingType")
+        let attr = read_start_tag(reader, "ServiceLocationType")?;
+        ServiceLocationType::read(reader, &attr, "power:ServiceLocationType")
     }
 }
 
-impl ReadXml for LinearRingType {
+impl ReadXml for ServiceLocationType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LinearRingType::read_top_level(&mut reader) {
+        match ServiceLocationType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

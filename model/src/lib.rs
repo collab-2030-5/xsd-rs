@@ -323,20 +323,29 @@ pub enum WrapperType {
     /// string enum type built into XSD
     Enum(std::rc::Rc<Enumeration>),
     /// numeric enum type
-    EnumU8(std::rc::Rc<config::NumericEnum<u8>>),
+    EnumU8(TypeId, std::rc::Rc<config::NumericEnum<u8>>),
     /// Fixed size number of bytes mapped to a fixed array
-    NamedArray(std::rc::Rc<config::NamedArray>),
+    NamedArray(TypeId, std::rc::Rc<config::NamedArray>),
     /// Bitfield represented as Hex-bytes
-    HexBitField(std::rc::Rc<config::BitField>),
+    HexBitField(TypeId, std::rc::Rc<config::BitField>),
 }
 
 impl WrapperType {
+    pub fn type_id(&self) -> &TypeId {
+        match self {
+            WrapperType::Enum(x) => &x.type_id,
+            WrapperType::EnumU8(id, x) => id,
+            WrapperType::NamedArray(id, x) => id,
+            WrapperType::HexBitField(id, x) => id,
+        }
+    }
+
     pub fn name(&self) -> &str {
         match self {
-            WrapperType::Enum(x) => x.type_id.name.as_str(),
-            WrapperType::EnumU8(x) => x.name.as_str(),
-            WrapperType::NamedArray(x) => x.name.as_str(),
-            WrapperType::HexBitField(x) => x.name.as_str(),
+            WrapperType::Enum(x) => &x.type_id.name,
+            WrapperType::EnumU8(_, x) => &x.name,
+            WrapperType::NamedArray(_, x) => &x.name,
+            WrapperType::HexBitField(_, x) => &x.name,
         }
     }
 }
