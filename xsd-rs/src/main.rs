@@ -111,6 +111,7 @@ fn write_model(dir: PathBuf, model: &Model, config: &BaseTypeConfig) -> Result<(
 
 fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     write_comment(w, &st.comment)?;
+    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(w, "pub struct {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| write_struct_fields(w, st))?;
@@ -118,6 +119,7 @@ fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 }
 
 fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), FatalError> {
+    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
     writeln!(w, "#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]")?;
     writeln!(w, "pub struct {} {{", na.name)?;
     indent(w, |w| writeln!(w, "pub(crate) inner: [u8; Self::SIZE],"))?;
@@ -130,6 +132,7 @@ fn write_named_array_file(w: &mut dyn Write, na: &NamedArray) -> Result<(), Fata
 }
 
 fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalError> {
+    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
     writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]")?;
     writeln!(w, "pub enum {} {{", e.name)?;
     indent(w, |w| {
@@ -182,6 +185,7 @@ fn write_enum_file(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalEr
 
 fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalError> {
     write_comment(w, &bf.comment)?;
+    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
     writeln!(
         w,
         "#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]"
@@ -1124,6 +1128,7 @@ fn write_base_enum_def(
     config: &BaseTypeConfig,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
+    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(w, "pub enum {} {{", base_name)?;
     indent(w, |w| {
