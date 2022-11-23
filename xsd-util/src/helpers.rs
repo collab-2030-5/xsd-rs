@@ -29,7 +29,7 @@ impl<T> SetOnce<T> {
 pub fn read_string<R>(
     reader: &mut xml::reader::EventReader<R>,
     parent_name: &str,
-) -> core::result::Result<String, ReadError>
+) -> Result<String, ReadError>
 where
     R: std::io::Read,
 {
@@ -59,7 +59,7 @@ where
 pub fn expect_end_element<R>(
     reader: &mut xml::reader::EventReader<R>,
     parent_name: &str,
-) -> core::result::Result<(), ReadError>
+) -> Result<(), ReadError>
 where
     R: std::io::Read,
 {
@@ -110,7 +110,7 @@ where
     Ok(pos)
 }
 
-pub fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> {
+pub fn parse_hex_bytes(value: &str) -> Result<Vec<u8>, ReadError> {
     let mut ret = Vec::new();
     iter_hex_bytes(value, |_, x| {
         ret.push(x);
@@ -119,9 +119,7 @@ pub fn parse_hex_bytes(value: &str) -> core::result::Result<Vec<u8>, ReadError> 
     Ok(ret)
 }
 
-pub fn parse_fixed_hex_bytes<const T: usize>(
-    value: &str,
-) -> core::result::Result<[u8; T], ReadError> {
+pub fn parse_fixed_hex_bytes<const T: usize>(value: &str) -> Result<[u8; T], ReadError> {
     let mut ret: [u8; T] = [0; T];
 
     iter_hex_bytes(value, |pos, byte| match ret.get_mut(pos) {
@@ -138,7 +136,7 @@ pub fn parse_fixed_hex_bytes<const T: usize>(
 pub fn read_start_tag<R>(
     reader: &mut xml::reader::EventReader<R>,
     type_name: &str,
-) -> core::result::Result<Vec<xml::attribute::OwnedAttribute>, ReadError>
+) -> Result<Vec<xml::attribute::OwnedAttribute>, ReadError>
 where
     R: std::io::Read,
 {
@@ -146,9 +144,7 @@ where
     read_start_elem(reader, type_name)
 }
 
-pub fn expect_start_doc<R>(
-    reader: &mut xml::reader::EventReader<R>,
-) -> core::result::Result<(), ReadError>
+pub fn expect_start_doc<R>(reader: &mut xml::reader::EventReader<R>) -> Result<(), ReadError>
 where
     R: std::io::Read,
 {
@@ -167,7 +163,7 @@ where
 pub fn read_start_elem<R>(
     reader: &mut xml::reader::EventReader<R>,
     type_name: &str,
-) -> core::result::Result<Vec<xml::attribute::OwnedAttribute>, ReadError>
+) -> Result<Vec<xml::attribute::OwnedAttribute>, ReadError>
 where
     R: std::io::Read,
 {
@@ -200,7 +196,7 @@ pub fn write_hex_tag<W>(
     writer: &mut xml::EventWriter<W>,
     tag_name: &str,
     data: &[u8],
-) -> core::result::Result<(), xml::writer::Error>
+) -> Result<(), xml::writer::Error>
 where
     W: std::io::Write,
 {
@@ -212,7 +208,7 @@ pub fn write_simple_tag<W>(
     writer: &mut xml::EventWriter<W>,
     tag_name: &str,
     data: &str,
-) -> core::result::Result<(), xml::writer::Error>
+) -> Result<(), xml::writer::Error>
 where
     W: std::io::Write,
 {
@@ -221,9 +217,7 @@ where
     writer.write(xml::writer::XmlEvent::end_element())
 }
 
-pub fn find_xsi_type(
-    attrs: &[xml::attribute::OwnedAttribute],
-) -> core::result::Result<&str, ReadError> {
+pub fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> Result<&str, ReadError> {
     let result =
         attrs.iter().find_map(
             |x| match (x.name.prefix.as_deref(), x.name.local_name.as_str()) {
