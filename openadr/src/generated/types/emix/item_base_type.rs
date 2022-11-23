@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -110,7 +109,7 @@ impl ItemBaseType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "ItemBaseType")?;
+        let attr = xsd_util::read_start_tag(reader, "ItemBaseType")?;
         ItemBaseType::read(reader, &attr, "emix:ItemBaseType")
     }
 }

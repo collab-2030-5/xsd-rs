@@ -5,10 +5,7 @@ use std::path::Path;
 use std::io::Write;
 
 pub(crate) fn write(dir: &Path) -> Result<(), FatalError> {
-    let files = [
-        ("helpers.rs", include_str!("../../snippets/helpers.rs")),
-        ("mod.rs", include_str!("../../snippets/mod.rs")),
-    ];
+    let files = [("mod.rs", include_str!("../../snippets/mod.rs"))];
 
     for (file_name, data) in files {
         write_file(&dir.join(file_name), data)?;

@@ -11,7 +11,6 @@ use heck::ToUpperCamelCase;
 use xsd_model::{HexByteConstraints, PrimitiveType, WrapperType};
 
 pub(crate) fn write_struct(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
-    writeln!(w, "use crate::*;")?;
     writeln!(w, "use xml::writer::*;")?;
     writeln!(w, "use xml::common::Position;")?;
     writeln!(w)?;
@@ -173,7 +172,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
         indent(w, |w| {
             writeln!(
                 w,
-                "let attr = read_start_tag(reader, \"{}\")?;",
+                "let attr = xsd_util::read_start_tag(reader, \"{}\")?;",
                 &st.id.name
             )?;
             writeln!(
@@ -213,10 +212,10 @@ fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Res
 fn write_struct_cells(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     for field in st.dedup_fields() {
         let cell_type = match &field.field_type {
-            FieldType::Attribute(_, t) => format!("SetOnce<{}>", t.rust_struct_type()),
+            FieldType::Attribute(_, t) => format!("xsd_util::SetOnce<{}>", t.rust_struct_type()),
             FieldType::Element(m, t) => match m {
                 ElemMultiplicity::Single | ElemMultiplicity::Optional => {
-                    format!("SetOnce<{}>", t.rust_struct_type())
+                    format!("xsd_util::SetOnce<{}>", t.rust_struct_type())
                 }
                 ElemMultiplicity::Vec => format!("Vec<{}>", t.rust_struct_type()),
             },
@@ -343,40 +342,40 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             }
         }
         ElementTransform::Number => {
-            format!("read_string(reader, \"{}\")?.parse()?", &elem.name)
+            format!("xsd_util::read_string(reader, \"{}\")?.parse()?", &elem.name)
         }
         ElementTransform::String => {
-            format!("read_string(reader, \"{}\")?", &elem.name)
+            format!("xsd_util::read_string(reader, \"{}\")?", &elem.name)
         }
         ElementTransform::HexBytes => format!(
-            "parse_hex_bytes(&read_string(reader, \"{}\")?)?",
+            "xsd_util::parse_hex_bytes(&xsd_util::read_string(reader, \"{}\")?)?",
             &elem.name
         ),
         ElementTransform::NumericEnum(x) => {
             format!(
-                "structs::{}::from_value(read_string(reader, \"{}\")?.parse()?)",
+                "structs::{}::from_value(xsd_util::read_string(reader, \"{}\")?.parse()?)",
                 x.name, &elem.name
             )
         }
         ElementTransform::NamedHexArray(buff) => format!(
-            "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&read_string(reader, \"{}\")?)? }}",
+            "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&xsd_util::read_string(reader, \"{}\")?)? }}",
             buff.name, buff.size, &elem.name
         ),
         ElementTransform::HexBitField(x) => format!(
-            "structs::{}::from_hex(&read_string(reader, \"{}\")?)?",
+            "structs::{}::from_hex(&xsd_util::read_string(reader, \"{}\")?)?",
             x.name, elem.name,
         ),
         ElementTransform::NumericDuration(x) => match x {
             NumericDuration::Seconds(_) => {
                 format!(
-                    "std::time::Duration::from_secs(read_string(reader, \"{}\")?.parse()?)",
+                    "std::time::Duration::from_secs(xsd_util::read_string(reader, \"{}\")?.parse()?)",
                     &elem.name
                 )
             }
         },
         ElementTransform::Enumeration(x) => {
             format!(
-                "{}::from_str(&read_string(reader, \"{}\")?)?",
+                "{}::from_str(&xsd_util::read_string(reader, \"{}\")?)?",
                 fully_qualified_name(&x.type_id),
                 &elem.name
             )
@@ -633,7 +632,7 @@ impl ElementTransform {
             ElementTransform::String => {
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    "xsd_util::write_simple_tag(writer, \"{}\", {}.as_str())?;",
                     xsd_name, rust_name
                 )
             }
@@ -641,14 +640,14 @@ impl ElementTransform {
                 writeln!(w, "let value = {}.to_string();", rust_name)?;
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", value.as_str())?;",
+                    "xsd_util::write_simple_tag(writer, \"{}\", value.as_str())?;",
                     xsd_name
                 )
             }
             ElementTransform::HexBytes => {
                 writeln!(
                     w,
-                    "write_hex_tag(writer, \"{}\", &{})?;",
+                    "xsd_util::write_hex_tag(writer, \"{}\", &{})?;",
                     xsd_name, rust_name
                 )
             }
@@ -656,21 +655,21 @@ impl ElementTransform {
                 writeln!(w, "let value = {}.value().to_string();", rust_name)?;
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", value.as_str())?;",
+                    "xsd_util::write_simple_tag(writer, \"{}\", value.as_str())?;",
                     xsd_name
                 )
             }
             ElementTransform::NamedHexArray(_) => {
                 writeln!(
                     w,
-                    "write_hex_tag(writer, \"{}\", {}.inner.as_slice())?;",
+                    "xsd_util::write_hex_tag(writer, \"{}\", {}.inner.as_slice())?;",
                     xsd_name, rust_name
                 )
             }
             ElementTransform::HexBitField(_) => {
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", &{}.to_hex())?;",
+                    "xsd_util::write_simple_tag(writer, \"{}\", &{}.to_hex())?;",
                     xsd_name, rust_name
                 )
             }
@@ -678,7 +677,7 @@ impl ElementTransform {
                 NumericDuration::Seconds(_) => {
                     writeln!(
                         w,
-                        "write_simple_tag(writer, \"{}\", &{}.as_secs().to_string())?;",
+                        "xsd_util::write_simple_tag(writer, \"{}\", &{}.as_secs().to_string())?;",
                         xsd_name, rust_name
                     )
                 }
@@ -686,7 +685,7 @@ impl ElementTransform {
             ElementTransform::Enumeration(_) => {
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", {}.to_str())?;",
+                    "xsd_util::write_simple_tag(writer, \"{}\", {}.to_str())?;",
                     xsd_name, rust_name
                 )
             }

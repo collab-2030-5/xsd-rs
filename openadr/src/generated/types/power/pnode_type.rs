@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -16,7 +15,7 @@ impl PnodeType {
     where
         W: std::io::Write,
     {
-        write_simple_tag(writer, "power:node", self.power_node.as_str())?;
+        xsd_util::write_simple_tag(writer, "power:node", self.power_node.as_str())?;
         Ok(())
     }
 
@@ -72,7 +71,7 @@ impl PnodeType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut power_node: SetOnce<String> = Default::default();
+        let mut power_node: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,7 +92,9 @@ impl PnodeType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:node" => power_node.set(read_string(reader, "power:node")?)?,
+                        "power:node" => {
+                            power_node.set(xsd_util::read_string(reader, "power:node")?)?
+                        }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -129,7 +130,7 @@ impl PnodeType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "PnodeType")?;
+        let attr = xsd_util::read_start_tag(reader, "PnodeType")?;
         PnodeType::read(reader, &attr, "power:PnodeType")
     }
 }

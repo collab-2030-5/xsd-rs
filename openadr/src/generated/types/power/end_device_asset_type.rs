@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -16,7 +15,7 @@ impl EndDeviceAssetType {
     where
         W: std::io::Write,
     {
-        write_simple_tag(writer, "power:mrid", self.power_mrid.as_str())?;
+        xsd_util::write_simple_tag(writer, "power:mrid", self.power_mrid.as_str())?;
         Ok(())
     }
 
@@ -72,7 +71,7 @@ impl EndDeviceAssetType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut power_mrid: SetOnce<String> = Default::default();
+        let mut power_mrid: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,7 +92,9 @@ impl EndDeviceAssetType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:mrid" => power_mrid.set(read_string(reader, "power:mrid")?)?,
+                        "power:mrid" => {
+                            power_mrid.set(xsd_util::read_string(reader, "power:mrid")?)?
+                        }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -129,7 +130,7 @@ impl EndDeviceAssetType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "EndDeviceAssetType")?;
+        let attr = xsd_util::read_start_tag(reader, "EndDeviceAssetType")?;
         EndDeviceAssetType::read(reader, &attr, "power:EndDeviceAssetType")
     }
 }

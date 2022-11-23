@@ -1,8 +1,13 @@
 use xsd_api::ReadError;
 
-#[derive(Default)]
 pub struct SetOnce<T> {
     inner: Option<T>,
+}
+
+impl<T> Default for SetOnce<T> {
+    fn default() -> Self {
+        Self { inner: None }
+    }
 }
 
 impl<T> SetOnce<T> {

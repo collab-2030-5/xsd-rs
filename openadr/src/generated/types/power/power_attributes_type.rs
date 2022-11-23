@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -18,11 +17,11 @@ impl PowerAttributesType {
         W: std::io::Write,
     {
         let value = self.hertz.to_string();
-        write_simple_tag(writer, "hertz", value.as_str())?;
+        xsd_util::write_simple_tag(writer, "hertz", value.as_str())?;
         let value = self.voltage.to_string();
-        write_simple_tag(writer, "voltage", value.as_str())?;
+        xsd_util::write_simple_tag(writer, "voltage", value.as_str())?;
         let value = self.ac.to_string();
-        write_simple_tag(writer, "ac", value.as_str())?;
+        xsd_util::write_simple_tag(writer, "ac", value.as_str())?;
         Ok(())
     }
 
@@ -78,9 +77,9 @@ impl PowerAttributesType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut hertz: SetOnce<f64> = Default::default();
-        let mut voltage: SetOnce<f64> = Default::default();
-        let mut ac: SetOnce<bool> = Default::default();
+        let mut hertz: xsd_util::SetOnce<f64> = Default::default();
+        let mut voltage: xsd_util::SetOnce<f64> = Default::default();
+        let mut ac: xsd_util::SetOnce<bool> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -101,9 +100,11 @@ impl PowerAttributesType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "hertz" => hertz.set(read_string(reader, "hertz")?.parse()?)?,
-                        "voltage" => voltage.set(read_string(reader, "voltage")?.parse()?)?,
-                        "ac" => ac.set(read_string(reader, "ac")?.parse()?)?,
+                        "hertz" => hertz.set(xsd_util::read_string(reader, "hertz")?.parse()?)?,
+                        "voltage" => {
+                            voltage.set(xsd_util::read_string(reader, "voltage")?.parse()?)?
+                        }
+                        "ac" => ac.set(xsd_util::read_string(reader, "ac")?.parse()?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -141,7 +142,7 @@ impl PowerAttributesType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "PowerAttributesType")?;
+        let attr = xsd_util::read_start_tag(reader, "PowerAttributesType")?;
         PowerAttributesType::read(reader, &attr, "power:PowerAttributesType")
     }
 }

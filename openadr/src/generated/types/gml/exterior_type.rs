@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -72,7 +71,8 @@ impl ExteriorType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut linear_ring: SetOnce<crate::types::gml::LinearRingType> = Default::default();
+        let mut linear_ring: xsd_util::SetOnce<crate::types::gml::LinearRingType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -133,7 +133,7 @@ impl ExteriorType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "exteriorType")?;
+        let attr = xsd_util::read_start_tag(reader, "exteriorType")?;
         ExteriorType::read(reader, &attr, "gml:exteriorType")
     }
 }

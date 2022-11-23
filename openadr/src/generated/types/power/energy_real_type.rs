@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -17,9 +16,9 @@ impl EnergyRealType {
     where
         W: std::io::Write,
     {
-        write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
-        write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
-        write_simple_tag(
+        xsd_util::write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
+        xsd_util::write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
+        xsd_util::write_simple_tag(
             writer,
             "scale:siScaleCode",
             self.scale_si_scale_code.to_str(),
@@ -79,9 +78,9 @@ impl EnergyRealType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: SetOnce<String> = Default::default();
-        let mut item_units: SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: SetOnce<crate::types::scale::SiScaleCodeType> =
+        let mut item_description: xsd_util::SetOnce<String> = Default::default();
+        let mut item_units: xsd_util::SetOnce<String> = Default::default();
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -103,15 +102,15 @@ impl EnergyRealType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "itemDescription" => {
-                            item_description.set(read_string(reader, "itemDescription")?)?
+                        "itemDescription" => item_description
+                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
+                        "itemUnits" => {
+                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "itemUnits" => item_units.set(read_string(reader, "itemUnits")?)?,
                         "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(&read_string(
-                                reader,
-                                "scale:siScaleCode",
-                            )?)?,
+                            crate::types::scale::SiScaleCodeType::from_str(
+                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
+                            )?,
                         )?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -150,7 +149,7 @@ impl EnergyRealType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "EnergyRealType")?;
+        let attr = xsd_util::read_start_tag(reader, "EnergyRealType")?;
         EnergyRealType::read(reader, &attr, "power:EnergyRealType")
     }
 }

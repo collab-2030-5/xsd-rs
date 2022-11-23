@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -16,7 +15,7 @@ impl LinearRingType {
         W: std::io::Write,
     {
         let value = self.gml_pos_list.to_string();
-        write_simple_tag(writer, "gml:posList", value.as_str())?;
+        xsd_util::write_simple_tag(writer, "gml:posList", value.as_str())?;
         Ok(())
     }
 
@@ -72,7 +71,7 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: SetOnce<f64> = Default::default();
+        let mut gml_pos_list: xsd_util::SetOnce<f64> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,9 +92,8 @@ impl LinearRingType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "gml:posList" => {
-                            gml_pos_list.set(read_string(reader, "gml:posList")?.parse()?)?
-                        }
+                        "gml:posList" => gml_pos_list
+                            .set(xsd_util::read_string(reader, "gml:posList")?.parse()?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -131,7 +129,7 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "LinearRingType")?;
+        let attr = xsd_util::read_start_tag(reader, "LinearRingType")?;
         LinearRingType::read(reader, &attr, "gml:LinearRingType")
     }
 }

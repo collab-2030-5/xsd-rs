@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -72,7 +71,7 @@ impl LocationType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut polygon: SetOnce<crate::types::gml::PolygonType> = Default::default();
+        let mut polygon: xsd_util::SetOnce<crate::types::gml::PolygonType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -133,7 +132,7 @@ impl LocationType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "locationType")?;
+        let attr = xsd_util::read_start_tag(reader, "locationType")?;
         LocationType::read(reader, &attr, "gml:locationType")
     }
 }

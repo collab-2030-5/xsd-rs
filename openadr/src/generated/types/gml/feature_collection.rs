@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -79,8 +78,8 @@ impl FeatureCollection {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut location: SetOnce<crate::types::gml::LocationType> = Default::default();
-        let mut gml_id: SetOnce<String> = Default::default();
+        let mut location: xsd_util::SetOnce<crate::types::gml::LocationType> = Default::default();
+        let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -143,7 +142,7 @@ impl FeatureCollection {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "FeatureCollection")?;
+        let attr = xsd_util::read_start_tag(reader, "FeatureCollection")?;
         FeatureCollection::read(reader, &attr, "gml:FeatureCollection")
     }
 }

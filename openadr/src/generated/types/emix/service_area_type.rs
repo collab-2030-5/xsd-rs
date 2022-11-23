@@ -1,4 +1,3 @@
-use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
@@ -77,7 +76,7 @@ impl ServiceAreaType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_feature_collection: SetOnce<crate::types::gml::FeatureCollection> =
+        let mut gml_feature_collection: xsd_util::SetOnce<crate::types::gml::FeatureCollection> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -141,7 +140,7 @@ impl ServiceAreaType {
     where
         R: std::io::Read,
     {
-        let attr = read_start_tag(reader, "ServiceAreaType")?;
+        let attr = xsd_util::read_start_tag(reader, "ServiceAreaType")?;
         ServiceAreaType::read(reader, &attr, "emix:ServiceAreaType")
     }
 }
