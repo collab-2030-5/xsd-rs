@@ -1,8 +1,9 @@
 [workspace]
 
 members = [
+    "xsd-api",
     "xsd-model",
     "xsd-rs",
-    "xsd-api",
+    "xsd-util",
     "openadr"
 ]
