@@ -6,7 +6,7 @@ pub struct SetOnce<T> {
 }
 
 impl<T> SetOnce<T> {
-    pub fn set(&mut self, value: T) -> core::result::Result<(), ReadError> {
+    pub fn set(&mut self, value: T) -> Result<(), ReadError> {
         if self.inner.is_some() {
             return Err(ReadError::DuplicateField);
         }
@@ -14,7 +14,7 @@ impl<T> SetOnce<T> {
         Ok(())
     }
 
-    pub fn require(self) -> core::result::Result<T, ReadError> {
+    pub fn require(self) -> Result<T, ReadError> {
         match self.inner {
             Some(x) => Ok(x),
             None => Err(ReadError::MissingMandatoryField),
