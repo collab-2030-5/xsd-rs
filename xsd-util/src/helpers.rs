@@ -172,12 +172,12 @@ where
             xml::reader::XmlEvent::StartElement {
                 name, attributes, ..
             } => {
-                if name.local_name.as_str() == type_name {
-                    return Ok(attributes);
+                return if name.local_name.as_str() == type_name {
+                    Ok(attributes)
                 } else {
                     // TODO - more descriptive
-                    return Err(ReadError::UnexpectedEvent);
-                }
+                    Err(ReadError::UnexpectedEvent)
+                };
             }
             // ignore
             xml::reader::XmlEvent::Comment(_) => {}
