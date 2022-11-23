@@ -26,7 +26,7 @@ pub enum SiScaleCodeType {
 }
 
 impl SiScaleCodeType {
-    pub(crate) fn from_str(s: &str) -> Result<Self, crate::ReadError> {
+    pub(crate) fn from_str(s: &str) -> Result<Self, xsd_api::ReadError> {
         match s {
             "p" => Ok(Self::P),
             "n" => Ok(Self::N),
@@ -39,7 +39,7 @@ impl SiScaleCodeType {
             "G" => Ok(Self::G),
             "T" => Ok(Self::T),
             "none" => Ok(Self::None),
-            _ => Err(crate::ReadError::UnknownEnumVariant),
+            _ => Err(xsd_api::ReadError::UnknownEnumVariant),
         }
     }
 

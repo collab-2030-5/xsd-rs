@@ -6,11 +6,8 @@ use std::io::Write;
 
 pub(crate) fn write(dir: &Path) -> Result<(), FatalError> {
     let files = [
-        ("config.rs", include_str!("../../snippets/config.rs")),
-        ("error.rs", include_str!("../../snippets/error.rs")),
         ("helpers.rs", include_str!("../../snippets/helpers.rs")),
         ("mod.rs", include_str!("../../snippets/mod.rs")),
-        ("traits.rs", include_str!("../../snippets/traits.rs")),
     ];
 
     for (file_name, data) in files {

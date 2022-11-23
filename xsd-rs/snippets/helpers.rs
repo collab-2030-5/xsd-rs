@@ -1,4 +1,4 @@
-use super::ReadError;
+use xsd_api::ReadError;
 
 pub(crate) struct SetOnce<T> {
     inner: Option<T>
@@ -213,7 +213,7 @@ pub(crate) fn write_simple_tag<W>(
     writer.write(xml::writer::XmlEvent::end_element())
 }
 
-pub(crate) fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> core::result::Result<&str, crate::ReadError> {
+pub(crate) fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> core::result::Result<&str, xsd_api::ReadError> {
     let result = attrs.iter().find_map(|x| {
         match (x.name.prefix.as_deref(), x.name.local_name.as_str()) {
             (Some("xsi"), "type") => Some(x.value.as_str()),
@@ -224,5 +224,5 @@ pub(crate) fn find_xsi_type(attrs: &[xml::attribute::OwnedAttribute]) -> core::r
         }
     });
 
-    result.ok_or(crate::ReadError::MissingXsiType)
+    result.ok_or(xsd_api::ReadError::MissingXsiType)
 }

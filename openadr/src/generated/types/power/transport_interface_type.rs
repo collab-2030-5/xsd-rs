@@ -49,12 +49,16 @@ impl TransportInterfaceType {
     }
 }
 
-impl WriteXml for TransportInterfaceType {
-    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
+impl xsd_api::WriteXml for TransportInterfaceType {
+    fn write<W>(
+        &self,
+        config: xsd_api::WriteConfig,
+        writer: &mut W,
+    ) -> core::result::Result<(), xsd_api::WriteError>
     where
         W: std::io::Write,
     {
-        let mut writer = config.to_xml_rs().create_writer(writer);
+        let mut writer = config.build_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "power:TransportInterfaceType", true, false)?;
         Ok(())
     }
@@ -65,7 +69,7 @@ impl TransportInterfaceType {
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
         parent_tag: &str,
-    ) -> core::result::Result<Self, ReadError>
+    ) -> core::result::Result<Self, xsd_api::ReadError>
     where
         R: std::io::Read,
     {
@@ -87,7 +91,7 @@ impl TransportInterfaceType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(ReadError::UnexpectedEvent);
+                        return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
@@ -98,17 +102,21 @@ impl TransportInterfaceType {
                         "pointOfDelivery" => {
                             point_of_delivery.set(read_string(reader, "pointOfDelivery")?)?
                         }
-                        _ => return Err(ReadError::UnexpectedEvent),
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(ReadError::UnexpectedEvent)
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
                 }
-                xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::EndDocument => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::Characters(_) => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(ReadError::UnexpectedEvent)
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -126,7 +134,7 @@ impl TransportInterfaceType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, ReadError>
+    ) -> core::result::Result<Self, xsd_api::ReadError>
     where
         R: std::io::Read,
     {
@@ -135,8 +143,8 @@ impl TransportInterfaceType {
     }
 }
 
-impl ReadXml for TransportInterfaceType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
+impl xsd_api::ReadXml for TransportInterfaceType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -146,7 +154,7 @@ impl ReadXml for TransportInterfaceType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(ErrorWithLocation {
+                Err(xsd_api::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

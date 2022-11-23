@@ -90,15 +90,15 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 
     writeln!(
         w,
-        "impl WriteXml for {} {{",
+        "impl xsd_api::WriteXml for {} {{",
         st.id.name.to_upper_camel_case()
     )?;
     indent(w, |w| {
-        writeln!(w, "fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError> where W: std::io::Write {{")?;
+        writeln!(w, "fn write<W>(&self, config: xsd_api::WriteConfig, writer: &mut W) -> core::result::Result<(), xsd_api::WriteError> where W: std::io::Write {{")?;
         indent(w, |w| {
             writeln!(
                 w,
-                "let mut writer = config.to_xml_rs().create_writer(writer);"
+                "let mut writer = config.build_xml_rs().create_writer(writer);"
             )?;
             writeln!(
                 w,
@@ -116,11 +116,11 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     writeln!(
         w,
-        "impl ReadXml for {} {{",
+        "impl xsd_api::ReadXml for {} {{",
         st.id.name.to_upper_camel_case()
     )?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "let mut reader = xml::reader::EventReader::new(r);")?;
             writeln!(w)?;
@@ -136,7 +136,7 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
                     writeln!(w, "let pos = reader.position();")?;
                     writeln!(
                         w,
-                        "Err(ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
+                        "Err(xsd_api::ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
                     )
                 })?;
                 writeln!(w, "}}")
@@ -153,7 +153,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 
     writeln!(w, "impl {} {{", st.id.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st)?;
@@ -169,7 +169,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
         })?;
         writeln!(w, "}}")?;
         writeln!(w)?;
-        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(
                 w,
@@ -275,7 +275,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                 writeln!(w, "}} else {{")?;
                 indent(w, |w| {
                     writeln!(w, "// TODO - make this more specific")?;
-                    writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                    writeln!(w, "return Err(xsd_api::ReadError::UnexpectedEvent);")
                 })?;
                 writeln!(w, "}}")
             })?;
@@ -285,7 +285,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                 if elems.is_empty() {
                     indent(w, |w| {
                         writeln!(w, "// this struct has no elements")?;
-                        writeln!(w, "return Err(ReadError::UnexpectedEvent);")
+                        writeln!(w, "return Err(xsd_api::ReadError::UnexpectedEvent);")
                     })
                 } else {
                     writeln!(w, "match name.local_name.as_str() {{")?;
@@ -295,23 +295,23 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                             indent(w, |w| write_element_handler(w, elem))?;
                             writeln!(w, "}}")?;
                         }
-                        writeln!(w, "_ => return Err(ReadError::UnexpectedEvent)")
+                        writeln!(w, "_ => return Err(xsd_api::ReadError::UnexpectedEvent)")
                     })?;
                     writeln!(w, "}}")
                 }
             })?;
             writeln!(w, "}}")?;
             writeln!(w, "// treat these events as errors")?;
-            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(xsd_api::ReadError::UnexpectedEvent),")?;
             writeln!(
                 w,
-                "xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),"
+                "xml::reader::XmlEvent::EndDocument => return Err(xsd_api::ReadError::UnexpectedEvent),"
             )?;
             writeln!(
                 w,
-                "xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),"
+                "xml::reader::XmlEvent::Characters(_) => return Err(xsd_api::ReadError::UnexpectedEvent),"
             )?;
-            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(ReadError::UnexpectedEvent),")?;
+            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(xsd_api::ReadError::UnexpectedEvent),")?;
             writeln!(w, "// ignore these events")?;
             writeln!(w, "xml::reader::XmlEvent::CData(_) => {{}}")?;
             writeln!(w, "xml::reader::XmlEvent::Comment(_) => {{}}")?;

@@ -2,7 +2,7 @@ use crate::*;
 use xml::common::Position;
 use xml::writer::*;
 
-/// An aggregated pricing node is a specialized type of pricing node used to xsd-model items such as System Zone, Default Price Zone, Custom Price Zone, Control Area, Aggregated Generation, Aggregated Participating Load, Aggregated Non-Participating Load, Trading Hub, DCA Zone
+/// An aggregated pricing node is a specialized type of pricing node used to model items such as System Zone, Default Price Zone, Custom Price Zone, Control Area, Aggregated Generation, Aggregated Participating Load, Aggregated Non-Participating Load, Trading Hub, DCA Zone
 #[derive(Debug, Clone, PartialEq)]
 pub struct AggregatedPnodeType {
     pub power_node: String,
@@ -47,12 +47,16 @@ impl AggregatedPnodeType {
     }
 }
 
-impl WriteXml for AggregatedPnodeType {
-    fn write<W>(&self, config: WriteConfig, writer: &mut W) -> core::result::Result<(), WriteError>
+impl xsd_api::WriteXml for AggregatedPnodeType {
+    fn write<W>(
+        &self,
+        config: xsd_api::WriteConfig,
+        writer: &mut W,
+    ) -> core::result::Result<(), xsd_api::WriteError>
     where
         W: std::io::Write,
     {
-        let mut writer = config.to_xml_rs().create_writer(writer);
+        let mut writer = config.build_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "power:AggregatedPnodeType", true, false)?;
         Ok(())
     }
@@ -63,7 +67,7 @@ impl AggregatedPnodeType {
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
         parent_tag: &str,
-    ) -> core::result::Result<Self, ReadError>
+    ) -> core::result::Result<Self, xsd_api::ReadError>
     where
         R: std::io::Read,
     {
@@ -84,23 +88,27 @@ impl AggregatedPnodeType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(ReadError::UnexpectedEvent);
+                        return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "power:node" => power_node.set(read_string(reader, "power:node")?)?,
-                        _ => return Err(ReadError::UnexpectedEvent),
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(ReadError::UnexpectedEvent)
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
                 }
-                xml::reader::XmlEvent::EndDocument => return Err(ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::Characters(_) => return Err(ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::EndDocument => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::Characters(_) => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(ReadError::UnexpectedEvent)
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -117,7 +125,7 @@ impl AggregatedPnodeType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, ReadError>
+    ) -> core::result::Result<Self, xsd_api::ReadError>
     where
         R: std::io::Read,
     {
@@ -126,8 +134,8 @@ impl AggregatedPnodeType {
     }
 }
 
-impl ReadXml for AggregatedPnodeType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, ErrorWithLocation>
+impl xsd_api::ReadXml for AggregatedPnodeType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -137,7 +145,7 @@ impl ReadXml for AggregatedPnodeType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(ErrorWithLocation {
+                Err(xsd_api::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

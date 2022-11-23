@@ -31,7 +31,7 @@ fn write_definition(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> 
 fn write_from_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
     writeln!(
         w,
-        "pub(crate) fn from_str(s: &str) -> Result<Self, crate::ReadError> {{"
+        "pub(crate) fn from_str(s: &str) -> Result<Self, xsd_api::ReadError> {{"
     )?;
     indent(w, |w| {
         writeln!(w, "match s {{")?;
@@ -39,7 +39,7 @@ fn write_from_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
             for var in en.variants.iter() {
                 writeln!(w, "\"{}\" => Ok(Self::{}),", var.value, var.name)?;
             }
-            writeln!(w, "_ => Err(crate::ReadError::UnknownEnumVariant)")
+            writeln!(w, "_ => Err(xsd_api::ReadError::UnknownEnumVariant)")
         })?;
         writeln!(w, "}}")
     })?;
