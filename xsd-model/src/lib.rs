@@ -4,11 +4,11 @@ extern crate core;
 pub mod config;
 /// map types used in the models
 pub mod map;
-/// resolved version of the model suitable for code-gen
+/// resolved version of the xsd-model suitable for code-gen
 pub mod resolved;
 /// types used resolving (TypeId -> AnyType)
 pub mod resolver;
-/// unresolved representation of the model
+/// unresolved representation of the xsd-model
 pub mod unresolved;
 
 /// raw XSD parser

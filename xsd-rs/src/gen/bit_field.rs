@@ -1,5 +1,5 @@
 use std::io::Write;
-use xml_model::config::BitField;
+use xsd_model::config::BitField;
 
 use crate::gen::*;
 use crate::FatalError;

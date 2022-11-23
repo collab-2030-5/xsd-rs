@@ -5,8 +5,8 @@ use std::rc::Rc;
 
 use indent_write::io::IndentWriter;
 
-use xml_model::resolved::*;
-use xml_model::{SimpleType, WrapperType};
+use xsd_model::resolved::*;
+use xsd_model::{SimpleType, WrapperType};
 
 use crate::{BaseTypeConfig, FatalError};
 

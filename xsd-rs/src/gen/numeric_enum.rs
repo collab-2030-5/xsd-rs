@@ -1,5 +1,5 @@
 use std::io::Write;
-use xml_model::config::NumericEnum;
+use xsd_model::config::NumericEnum;
 
 use crate::gen::*;
 use crate::FatalError;

@@ -2,7 +2,7 @@ use std::io::Write;
 
 use crate::FatalError;
 use heck::ToUpperCamelCase;
-use xml_model::Enumeration;
+use xsd_model::Enumeration;
 
 use crate::gen::{indent, write_comment};
 

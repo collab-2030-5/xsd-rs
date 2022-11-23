@@ -1,7 +1,7 @@
 use heck::ToUpperCamelCase;
 use std::borrow::Cow;
-use xml_model::resolved::{AnyType, AttrMultiplicity, ElemMultiplicity, FieldType};
-use xml_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
+use xsd_model::resolved::{AnyType, AttrMultiplicity, ElemMultiplicity, FieldType};
+use xsd_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
 
 use heck::ToSnakeCase;
 

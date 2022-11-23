@@ -32,7 +32,7 @@ pub(crate) struct Settings<'a> {
 }
 
 impl UnresolvedModel {
-    /// parser and XSD file and merge it into the unresolved model
+    /// parser and XSD file and merge it into the unresolved xsd-model
     pub fn merge_xsd(&mut self, path: &Path) {
         let data = std::fs::read_to_string(path).unwrap();
         let xsd = parser::parse(&data).unwrap();
@@ -308,7 +308,7 @@ impl UnresolvedType {
     }
 }
 
-/// Extended unresolved types provide additional metadata computed from the entire model
+/// Extended unresolved types provide additional metadata computed from the entire xsd-model
 #[derive(Debug, Clone)]
 enum UnresolvedTypeEx {
     Struct(UnresolvedStruct, StructMetadata),

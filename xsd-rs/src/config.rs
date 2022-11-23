@@ -19,7 +19,7 @@ pub(crate) struct BaseTypeConfig {
 #[derive(Debug, Deserialize)]
 pub(crate) struct Config {
     pub(crate) base_types: BaseTypeConfig,
-    pub(crate) mappings: xml_model::config::Config,
+    pub(crate) mappings: xsd_model::config::Config,
 }
 
 impl BaseTypeConfig {

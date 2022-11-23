@@ -1,14 +1,14 @@
 use std::io::Write;
 
-use xml_model::config::*;
-use xml_model::resolved::*;
+use xsd_model::config::*;
+use xsd_model::resolved::*;
 
 use crate::{FatalError, RustType};
 
 use crate::gen::traits::{fully_qualified_name, RustFieldName};
 use crate::gen::*;
 use heck::ToUpperCamelCase;
-use xml_model::{HexByteConstraints, PrimitiveType, WrapperType};
+use xsd_model::{HexByteConstraints, PrimitiveType, WrapperType};
 
 pub(crate) fn write_struct(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
     writeln!(w, "use crate::*;")?;
@@ -602,11 +602,11 @@ enum ElementTransform {
     Number,
     String,
     HexBytes,
-    NumericEnum(std::rc::Rc<xml_model::config::NumericEnum<u8>>),
+    NumericEnum(std::rc::Rc<xsd_model::config::NumericEnum<u8>>),
     NamedHexArray(std::rc::Rc<NamedArray>),
     HexBitField(std::rc::Rc<BitField>),
     NumericDuration(NumericDuration),
-    Enumeration(std::rc::Rc<xml_model::Enumeration>),
+    Enumeration(std::rc::Rc<xsd_model::Enumeration>),
 }
 
 impl ElementTransform {

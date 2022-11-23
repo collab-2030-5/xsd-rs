@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::path::Path;
 use std::rc::Rc;
-use xml_model::resolved::*;
+use xsd_model::resolved::*;
 
 use heck::{ToSnakeCase, ToUpperCamelCase};
 

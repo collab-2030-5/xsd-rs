@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-xml-model = { path = "../model" }
+xsd-model = { path = "../xsd-model" }
 clap = { version = "4.0.18", features = ["derive"] }
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"

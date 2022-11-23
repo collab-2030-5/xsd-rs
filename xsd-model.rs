@@ -762,7 +762,7 @@ pub struct DeviceInformation {
   mf_id: u32,
   // Manufacturer dependent information related to the manufacture of this device
   mf_info: String,
-  // Manufacturer's model number
+  // Manufacturer's xsd-model number
   mf_model: String,
   // Manufacturer assigned serial number
   mf_ser_num: String,
@@ -1439,7 +1439,7 @@ pub struct File {
   mf_hw_ver: String,
   // This element MUST be set to the manufacturer's Private Enterprise Number (assigned by IANA).
   mf_id: u32,
-  // This element MUST be set to the manufacturer model number for which this file is targeted. The syntax and semantics are left to the manufacturer.
+  // This element MUST be set to the manufacturer xsd-model number for which this file is targeted. The syntax and semantics are left to the manufacturer.
   mf_model: String,
   // This element MUST be set to the manufacturer serial number for which this file is targeted. The syntax and semantics are left to the manufacturer.
   mf_ser_num: String,

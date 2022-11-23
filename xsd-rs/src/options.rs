@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 #[derive(Debug, Parser)]
 #[command(name = "xsd-rs")]
 #[command(version)]
-#[command(about = "Reads model of xml from json and emits rust bindings", long_about = None)]
+#[command(about = "Reads xsd-model of xml from json and emits rust bindings", long_about = None)]
 pub(crate) struct Options {
     #[command(subcommand)]
     pub(crate) command: Commands,

@@ -1,5 +1,5 @@
 use std::io::Write;
-use xml_model::config::NamedArray;
+use xsd_model::config::NamedArray;
 
 use crate::gen::indent;
 use crate::FatalError;

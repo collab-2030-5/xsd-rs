@@ -7,7 +7,7 @@ use std::path::Path;
 use crate::options::{Commands, GenerateOptions, InspectOptions};
 use config::BaseTypeConfig;
 use gen::traits::RustType;
-use xml_model::unresolved::UnresolvedModel;
+use xsd_model::unresolved::UnresolvedModel;
 
 type FatalError = Box<dyn std::error::Error>;
 
@@ -29,7 +29,7 @@ fn inspect(options: &InspectOptions) -> Result<(), FatalError> {
     tracing::info!("reading input file");
     let xsd = std::fs::read_to_string(&options.input)?;
     tracing::info!("parsing XSD");
-    let xsd = xml_model::parse_xsd(&xsd);
+    let xsd = xsd_model::parse_xsd(&xsd);
     tracing::info!("Read: {:#?}", xsd);
     Ok(())
 }
