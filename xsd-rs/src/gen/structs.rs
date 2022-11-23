@@ -683,7 +683,7 @@ impl ElementTransform {
                     )
                 }
             },
-            ElementTransform::Enumeration(x) => {
+            ElementTransform::Enumeration(_) => {
                 writeln!(
                     w,
                     "write_simple_tag(writer, \"{}\", {}.to_str())?;",

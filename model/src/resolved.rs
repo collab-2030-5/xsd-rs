@@ -1,6 +1,5 @@
 use crate::{SimpleType, TypeId};
-use std::collections::{BTreeMap, HashSet};
-use std::process::Output;
+use std::collections::BTreeMap;
 
 use std::rc::Rc;
 

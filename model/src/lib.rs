@@ -334,9 +334,9 @@ impl WrapperType {
     pub fn type_id(&self) -> &TypeId {
         match self {
             WrapperType::Enum(x) => &x.type_id,
-            WrapperType::EnumU8(id, x) => id,
-            WrapperType::NamedArray(id, x) => id,
-            WrapperType::HexBitField(id, x) => id,
+            WrapperType::EnumU8(id, _) => id,
+            WrapperType::NamedArray(id, _) => id,
+            WrapperType::HexBitField(id, _) => id,
         }
     }
 
