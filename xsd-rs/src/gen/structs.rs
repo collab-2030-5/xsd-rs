@@ -5,7 +5,8 @@ use xsd_model::resolved::*;
 
 use crate::{FatalError, RustType};
 
-use crate::gen::traits::{fully_qualified_name, RustFieldName};
+use crate::gen::fields::ElementTransforms;
+use crate::gen::traits::RustFieldName;
 use crate::gen::*;
 use heck::ToUpperCamelCase;
 use xsd_model::{HexByteConstraints, PrimitiveType, WrapperType};
@@ -322,50 +323,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
 }
 
 fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<()> {
-    let transform = get_elem_transform(&elem.field_type);
-
-    let tx: String = match transform {
-        ElementTransform::Struct(s) => {
-            if s.metadata.is_base {
-                format!(
-                    "base::{}::read(reader, &attributes, \"{}\")?",
-                    s.id.name.to_upper_camel_case(),
-                    &elem.name
-                )
-            } else {
-                let name = fully_qualified_name(&s.id);
-                format!("{}::read(reader, &attributes, \"{}\")?", name, &elem.name)
-            }
-        }
-        ElementTransform::Number => {
-            format!(
-                "xsd_util::read_type_from_string(reader, \"{}\")?",
-                &elem.name
-            )
-        }
-        ElementTransform::String => {
-            format!("xsd_util::read_string(reader, \"{}\")?", &elem.name)
-        }
-        ElementTransform::HexBytes => {
-            format!("xsd_util::read_hex_bytes(reader, \"{}\")?", &elem.name)
-        }
-        ElementTransform::NumericEnum(x) => unimplemented!(),
-        ElementTransform::NamedHexArray(buff) => unimplemented!(),
-        ElementTransform::HexBitField(x) => unimplemented!(),
-        ElementTransform::NumericDuration(x) => match x {
-            NumericDuration::Seconds(x) => match x {
-                DurationEncoding::UInt32 => {
-                    format!(
-                        "xsd_util::read_duration_secs_u32(reader, \"{}\")?)",
-                        &elem.name
-                    )
-                }
-            },
-        },
-        ElementTransform::Enumeration(x) => {
-            format!("xsd_util::read_string_enum(reader, \"{}\")?", &elem.name)
-        }
-    };
+    let tx = elem.field_type.read_transform(&elem.name);
 
     match &elem.multiplicity {
         ElemMultiplicity::Single | ElemMultiplicity::Optional => {
@@ -446,9 +404,9 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
 
 enum AttributeTransform {
     Number,
-    NumericEnum(std::rc::Rc<NumericEnum<u8>>),
-    NamedArray(std::rc::Rc<NamedArray>),
-    HexBitfield(std::rc::Rc<BitField>),
+    NumericEnum(Rc<NumericEnum<u8>>),
+    NamedArray(Rc<NamedArray>),
+    HexBitfield(Rc<BitField>),
     Duration(NumericDuration),
 }
 
@@ -474,9 +432,9 @@ impl AttributeTransform {
     }
     fn parse_from_string(&self) -> String {
         match self {
-            Self::Number => "attr.value.parser()?".to_string(),
+            Self::Number => "attr.value.parse()?".to_string(),
             Self::NumericEnum(e) => {
-                format!("structs::{}::from_value(attr.value.parser()?)", e.name)
+                format!("structs::{}::from_value(attr.value.parse()?)", e.name)
             }
             Self::NamedArray(x) => {
                 format!(
@@ -487,7 +445,7 @@ impl AttributeTransform {
             Self::HexBitfield(x) => {
                 format!("structs::{}::from_hex(&attr.value)?", x.name)
             }
-            AttributeTransform::Duration(x) => match x {
+            Self::Duration(x) => match x {
                 NumericDuration::Seconds(enc) => match enc {
                     DurationEncoding::UInt32 => {
                         "Duration::from_secs(u32::from_str_radix(&attr.value, 10)? as u64)"

@@ -12,8 +12,8 @@ use crate::{BaseTypeConfig, FatalError};
 
 use heck::ToSnakeCase;
 
-// pub(crate) mod base_enums;
 pub(crate) mod bit_field;
+pub(crate) mod fields;
 pub(crate) mod named_array;
 pub(crate) mod numeric_enum;
 pub(crate) mod string_enums;

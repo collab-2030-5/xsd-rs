@@ -106,7 +106,7 @@ where
     Ok(Duration::from_secs(value as u64))
 }
 
-fn parse_fixed_hex_bytes<const T: usize>(value: &str) -> Result<[u8; T], ReadError> {
+pub fn parse_fixed_hex_bytes<const T: usize>(value: &str) -> Result<[u8; T], ReadError> {
     let mut ret: [u8; T] = [0; T];
 
     iter_hex_bytes(value, |pos, byte| match ret.get_mut(pos) {
