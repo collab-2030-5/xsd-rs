@@ -60,6 +60,12 @@ pub enum AnyType {
     Choice(Rc<Choice>),
 }
 
+impl AnyType {
+    pub fn is_struct(&self) -> bool {
+        std::matches!(self, Self::Struct(_))
+    }
+}
+
 impl From<SimpleType> for AnyType {
     fn from(x: SimpleType) -> Self {
         Self::Simple(x)

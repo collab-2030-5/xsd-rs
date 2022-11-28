@@ -239,19 +239,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
             "xml::reader::XmlEvent::StartElement { .. }"
         } else {
             // are any of the elements structs?
-            let has_struct = elems
-                .iter()
-                .any(|e| match get_elem_transform(&e.field_type) {
-                    ElementTransform::Struct(_) => true,
-                    ElementTransform::Number => false,
-                    ElementTransform::String => false,
-                    ElementTransform::HexBytes => false,
-                    ElementTransform::NumericEnum(_) => false,
-                    ElementTransform::NamedHexArray(_) => false,
-                    ElementTransform::HexBitField(_) => false,
-                    ElementTransform::NumericDuration(_) => false,
-                    ElementTransform::Enumeration(_) => false,
-                });
+            let has_struct = elems.iter().any(|e| e.field_type.is_struct());
 
             if has_struct {
                 "xml::reader::XmlEvent::StartElement { name, attributes, .. }"
@@ -537,45 +525,6 @@ where
     }
 
     Ok(())
-}
-
-enum ElementTransform {
-    Struct(Rc<Struct>),
-    Number,
-    String,
-    HexBytes,
-    NumericEnum(Rc<NumericEnum<u8>>),
-    NamedHexArray(Rc<NamedArray>),
-    HexBitField(Rc<BitField>),
-    NumericDuration(NumericDuration),
-    Enumeration(Rc<xsd_model::Enumeration>),
-}
-
-fn get_element_transform(st: &SimpleType) -> ElementTransform {
-    match st {
-        SimpleType::Primitive(x) => match x {
-            PrimitiveType::Boolean => ElementTransform::Number,
-            PrimitiveType::HexBytes(HexByteConstraints::Single) => ElementTransform::Number,
-            PrimitiveType::HexBytes(HexByteConstraints::Bytes { .. }) => ElementTransform::HexBytes,
-            PrimitiveType::String(_) => ElementTransform::String,
-            PrimitiveType::Number(_) => ElementTransform::Number,
-            PrimitiveType::NumericDuration(x) => ElementTransform::NumericDuration(*x),
-        },
-        SimpleType::Wrapper(wrapper) => match wrapper {
-            WrapperType::EnumU8(_, x) => ElementTransform::NumericEnum(x.clone()),
-            WrapperType::NamedArray(_, x) => ElementTransform::NamedHexArray(x.clone()),
-            WrapperType::HexBitField(_, x) => ElementTransform::HexBitField(x.clone()),
-            WrapperType::Enum(x) => ElementTransform::Enumeration(x.clone()),
-        },
-    }
-}
-
-fn get_elem_transform(elem_type: &AnyType) -> ElementTransform {
-    match elem_type {
-        AnyType::Simple(x) => get_element_transform(x),
-        AnyType::Struct(x) => ElementTransform::Struct(x.clone()),
-        AnyType::Choice(_) => unimplemented!(),
-    }
 }
 
 fn write_element<W>(w: &mut W, elem: &Element) -> std::io::Result<()>
