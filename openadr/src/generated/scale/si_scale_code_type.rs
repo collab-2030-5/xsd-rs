@@ -25,25 +25,25 @@ pub enum SiScaleCodeType {
     None,
 }
 
-impl SiScaleCodeType {
-    pub(crate) fn from_str(s: &str) -> Result<Self, xsd_api::ReadError> {
+impl xsd_util::StringEnumeration for SiScaleCodeType {
+    fn find(s: &str) -> Option<Self> {
         match s {
-            "p" => Ok(Self::P),
-            "n" => Ok(Self::N),
-            "micro" => Ok(Self::Micro),
-            "m" => Ok(Self::M),
-            "c" => Ok(Self::C),
-            "d" => Ok(Self::D),
-            "k" => Ok(Self::K),
-            "M" => Ok(Self::M2),
-            "G" => Ok(Self::G),
-            "T" => Ok(Self::T),
-            "none" => Ok(Self::None),
-            _ => Err(xsd_api::ReadError::UnknownEnumVariant),
+            "p" => Some(Self::P),
+            "n" => Some(Self::N),
+            "micro" => Some(Self::Micro),
+            "m" => Some(Self::M),
+            "c" => Some(Self::C),
+            "d" => Some(Self::D),
+            "k" => Some(Self::K),
+            "M" => Some(Self::M2),
+            "G" => Some(Self::G),
+            "T" => Some(Self::T),
+            "none" => Some(Self::None),
+            _ => None,
         }
     }
 
-    pub(crate) fn to_str(self) -> &'static str {
+    fn to_str(self) -> &'static str {
         match self {
             Self::P => "p",
             Self::N => "n",

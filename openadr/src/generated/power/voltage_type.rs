@@ -18,11 +18,7 @@ impl VoltageType {
     {
         xsd_util::write_simple_element(writer, "itemDescription", self.item_description.as_str())?;
         xsd_util::write_simple_element(writer, "itemUnits", self.item_units.as_str())?;
-        xsd_util::write_simple_element(
-            writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.to_str(),
-        )?;
+        xsd_util::write_string_enumeration(writer, "scale:siScaleCode", self.scale_si_scale_code)?;
         Ok(())
     }
 
@@ -107,11 +103,8 @@ impl VoltageType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => {
-                            scale_si_scale_code.set(crate::scale::SiScaleCodeType::from_str(
-                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                            )?)?
-                        }
+                        "scale:siScaleCode" => scale_si_scale_code
+                            .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }

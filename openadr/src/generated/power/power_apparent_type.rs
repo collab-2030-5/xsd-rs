@@ -19,11 +19,7 @@ impl PowerApparentType {
     {
         xsd_util::write_simple_element(writer, "itemDescription", self.item_description.as_str())?;
         xsd_util::write_simple_element(writer, "itemUnits", self.item_units.as_str())?;
-        xsd_util::write_simple_element(
-            writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.to_str(),
-        )?;
+        xsd_util::write_string_enumeration(writer, "scale:siScaleCode", self.scale_si_scale_code)?;
         self.power_power_attributes.write_with_name(
             writer,
             "power:powerAttributes",
@@ -116,11 +112,8 @@ impl PowerApparentType {
                         item_description.set(xsd_util::read_string(reader, "itemDescription")?)?
                     }
                     "itemUnits" => item_units.set(xsd_util::read_string(reader, "itemUnits")?)?,
-                    "scale:siScaleCode" => {
-                        scale_si_scale_code.set(crate::scale::SiScaleCodeType::from_str(
-                            &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                        )?)?
-                    }
+                    "scale:siScaleCode" => scale_si_scale_code
+                        .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
                     "power:powerAttributes" => {
                         power_power_attributes.set(crate::power::PowerAttributesType::read(
                             reader,

@@ -1,3 +1,4 @@
+use crate::StringEnumeration;
 use xsd_api::ReadError;
 
 pub fn read_string<R>(
@@ -28,6 +29,18 @@ where
             _ => return Err(ReadError::UnexpectedEvent),
         }
     }
+}
+
+pub fn read_string_enum<R, E>(
+    reader: &mut xml::reader::EventReader<R>,
+    parent_name: &str,
+) -> Result<E, ReadError>
+where
+    R: std::io::Read,
+    E: StringEnumeration,
+{
+    let value = read_string(reader, parent_name)?;
+    E::find(&value).ok_or(ReadError::UnknownEnumVariant)
 }
 
 pub fn expect_end_element<R>(

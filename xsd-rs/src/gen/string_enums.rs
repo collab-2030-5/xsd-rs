@@ -9,7 +9,7 @@ use crate::gen::{indent, write_comment};
 pub(crate) fn write(w: &mut dyn Write, en: &Enumeration) -> Result<(), FatalError> {
     write_definition(w, en)?;
     writeln!(w)?;
-    write_impl(w, en)?;
+    write_trait_impl(w, en)?;
     Ok(())
 }
 
@@ -29,17 +29,14 @@ fn write_definition(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> 
 }
 
 fn write_from_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
-    writeln!(
-        w,
-        "pub(crate) fn from_str(s: &str) -> Result<Self, xsd_api::ReadError> {{"
-    )?;
+    writeln!(w, "fn find(s: &str) -> Option<Self>{{")?;
     indent(w, |w| {
         writeln!(w, "match s {{")?;
         indent(w, |w| {
             for var in en.variants.iter() {
-                writeln!(w, "\"{}\" => Ok(Self::{}),", var.value, var.name)?;
+                writeln!(w, "\"{}\" => Some(Self::{}),", var.value, var.name)?;
             }
-            writeln!(w, "_ => Err(xsd_api::ReadError::UnknownEnumVariant)")
+            writeln!(w, "_ => None")
         })?;
         writeln!(w, "}}")
     })?;
@@ -48,7 +45,7 @@ fn write_from_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
 }
 
 fn write_to_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
-    writeln!(w, "pub(crate) fn to_str(self) -> &'static str {{")?;
+    writeln!(w, "fn to_str(self) -> &'static str {{")?;
     indent(w, |w| {
         writeln!(w, "match self {{")?;
         indent(w, |w| {
@@ -63,8 +60,12 @@ fn write_to_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
     Ok(())
 }
 
-fn write_impl(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
-    writeln!(w, "impl {} {{", en.type_id.name.to_upper_camel_case())?;
+fn write_trait_impl(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
+    writeln!(
+        w,
+        "impl xsd_util::StringEnumeration for {} {{",
+        en.type_id.name.to_upper_camel_case()
+    )?;
     indent(w, |w| {
         write_from_str(w, en)?;
         writeln!(w)?;

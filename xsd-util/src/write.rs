@@ -1,3 +1,4 @@
+use crate::StringEnumeration;
 use xml::EventWriter;
 
 /*
@@ -26,6 +27,18 @@ where
 {
     let hex: String = to_hex(data);
     write_simple_element(writer, tag_name, hex.as_str())
+}
+
+pub fn write_string_enumeration<W, E>(
+    writer: &mut EventWriter<W>,
+    tag_name: &str,
+    data: E,
+) -> Result<(), xml::writer::Error>
+where
+    W: std::io::Write,
+    E: StringEnumeration,
+{
+    write_simple_element(writer, tag_name, data.to_str())
 }
 
 pub fn write_element_using_to_string<W, T>(

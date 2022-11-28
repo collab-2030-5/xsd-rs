@@ -375,8 +375,7 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
         },
         ElementTransform::Enumeration(x) => {
             format!(
-                "{}::from_str(&xsd_util::read_string(reader, \"{}\")?)?",
-                fully_qualified_name(&x.type_id),
+                "xsd_util::read_string_enum(reader, \"{}\")?",
                 &elem.name
             )
         }
@@ -679,7 +678,7 @@ impl ElementTransform {
             ElementTransform::Enumeration(_) => {
                 writeln!(
                     w,
-                    "xsd_util::write_simple_element(writer, \"{}\", {}.to_str())?;",
+                    "xsd_util::write_string_enumeration(writer, \"{}\", {})?;",
                     xsd_name, rust_name
                 )
             }
