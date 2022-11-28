@@ -2,13 +2,13 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EnergyApparentType {
+pub struct EnergyItemType {
     pub item_description: String,
     pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
+    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
 }
 
-impl EnergyApparentType {
+impl EnergyItemType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -42,7 +42,7 @@ impl EnergyApparentType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:EnergyApparentType")
+            start.attr("xsi:type", "power:EnergyItemType")
         } else {
             start
         };
@@ -53,7 +53,7 @@ impl EnergyApparentType {
     }
 }
 
-impl xsd_api::WriteXml for EnergyApparentType {
+impl xsd_api::WriteXml for EnergyItemType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +63,12 @@ impl xsd_api::WriteXml for EnergyApparentType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyApparentType", true, false)?;
+        self.write_with_name(&mut writer, "power:EnergyItemType", true, false)?;
         Ok(())
     }
 }
 
-impl EnergyApparentType {
+impl EnergyItemType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -80,7 +80,7 @@ impl EnergyApparentType {
         // one variable for each attribute and element
         let mut item_description: xsd_util::SetOnce<String> = Default::default();
         let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -107,11 +107,11 @@ impl EnergyApparentType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(
+                        "scale:siScaleCode" => {
+                            scale_si_scale_code.set(crate::scale::SiScaleCodeType::from_str(
                                 &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                            )?,
-                        )?,
+                            )?)?
+                        }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -136,7 +136,7 @@ impl EnergyApparentType {
         }
 
         // construct the type from the cells
-        Ok(EnergyApparentType {
+        Ok(EnergyItemType {
             item_description: item_description.require()?,
             item_units: item_units.require()?,
             scale_si_scale_code: scale_si_scale_code.require()?,
@@ -149,19 +149,19 @@ impl EnergyApparentType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyApparentType")?;
-        EnergyApparentType::read(reader, &attr, "power:EnergyApparentType")
+        let attr = xsd_util::read_start_tag(reader, "EnergyItemType")?;
+        EnergyItemType::read(reader, &attr, "power:EnergyItemType")
     }
 }
 
-impl xsd_api::ReadXml for EnergyApparentType {
+impl xsd_api::ReadXml for EnergyItemType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EnergyApparentType::read_top_level(&mut reader) {
+        match EnergyItemType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

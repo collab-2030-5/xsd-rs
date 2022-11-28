@@ -333,10 +333,10 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
                     &elem.name
                 )
             } else {
+                let name = fully_qualified_name(&s.id);
                 format!(
-                    "crate::types::{}::{}::read(reader, &attributes, \"{}\")?",
-                    s.id.ns.to_snake_case(),
-                    s.id.name.to_upper_camel_case(),
+                    "{}::read(reader, &attributes, \"{}\")?",
+                    name,
                     &elem.name
                 )
             }

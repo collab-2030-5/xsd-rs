@@ -1,13 +1,13 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// The Service Area is the geographic region that is affected by the EMIX market condition
+/// A customer ServiceLocation has one or more ServiceDeliveryPoint(s), which in turn relate to Meters. The location may be a point or a polygon, depending on the specific circumstances. For distribution, the ServiceLocation is typically the location of the utility customer's premise.
 #[derive(Debug, Clone, PartialEq)]
-pub struct ServiceAreaType {
-    pub gml_feature_collection: crate::types::gml::FeatureCollection,
+pub struct ServiceLocationType {
+    pub gml_feature_collection: crate::gml::FeatureCollection,
 }
 
-impl ServiceAreaType {
+impl ServiceLocationType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -40,7 +40,7 @@ impl ServiceAreaType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "emix:ServiceAreaType")
+            start.attr("xsi:type", "power:ServiceLocationType")
         } else {
             start
         };
@@ -51,7 +51,7 @@ impl ServiceAreaType {
     }
 }
 
-impl xsd_api::WriteXml for ServiceAreaType {
+impl xsd_api::WriteXml for ServiceLocationType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -61,12 +61,12 @@ impl xsd_api::WriteXml for ServiceAreaType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "emix:ServiceAreaType", true, false)?;
+        self.write_with_name(&mut writer, "power:ServiceLocationType", true, false)?;
         Ok(())
     }
 }
 
-impl ServiceAreaType {
+impl ServiceLocationType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -76,7 +76,7 @@ impl ServiceAreaType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_feature_collection: xsd_util::SetOnce<crate::types::gml::FeatureCollection> =
+        let mut gml_feature_collection: xsd_util::SetOnce<crate::gml::FeatureCollection> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -100,7 +100,7 @@ impl ServiceAreaType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "gml:FeatureCollection" => {
-                        gml_feature_collection.set(crate::types::gml::FeatureCollection::read(
+                        gml_feature_collection.set(crate::gml::FeatureCollection::read(
                             reader,
                             &attributes,
                             "gml:FeatureCollection",
@@ -129,7 +129,7 @@ impl ServiceAreaType {
         }
 
         // construct the type from the cells
-        Ok(ServiceAreaType {
+        Ok(ServiceLocationType {
             gml_feature_collection: gml_feature_collection.require()?,
         })
     }
@@ -140,19 +140,19 @@ impl ServiceAreaType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ServiceAreaType")?;
-        ServiceAreaType::read(reader, &attr, "emix:ServiceAreaType")
+        let attr = xsd_util::read_start_tag(reader, "ServiceLocationType")?;
+        ServiceLocationType::read(reader, &attr, "power:ServiceLocationType")
     }
 }
 
-impl xsd_api::ReadXml for ServiceAreaType {
+impl xsd_api::ReadXml for ServiceLocationType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match ServiceAreaType::read_top_level(&mut reader) {
+        match ServiceLocationType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

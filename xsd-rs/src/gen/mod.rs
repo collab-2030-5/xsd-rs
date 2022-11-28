@@ -16,7 +16,6 @@ use heck::ToSnakeCase;
 pub(crate) mod bit_field;
 pub(crate) mod named_array;
 pub(crate) mod numeric_enum;
-pub(crate) mod static_files;
 pub(crate) mod string_enums;
 pub(crate) mod structs;
 pub(crate) mod traits;
@@ -64,17 +63,12 @@ pub(crate) fn write_model(
     model: &Model,
     _config: &BaseTypeConfig,
 ) -> Result<(), FatalError> {
-    static_files::write(dir)?;
-
-    let types_dir = dir.join("types");
-    std::fs::create_dir(&types_dir)?;
-
     //
     let mut namespaces: HashMap<String, Vec<String>> = Default::default();
 
     for (id, any) in model.types.iter() {
         if let Some(gen_type) = GeneratedType::from(any) {
-            let ns_dir = types_dir.join(&id.ns.to_snake_case());
+            let ns_dir = dir.join(&id.ns.to_snake_case());
             match namespaces.get_mut(&id.ns) {
                 None => {
                     std::fs::create_dir(&ns_dir)?;
@@ -93,14 +87,14 @@ pub(crate) fn write_model(
 
     // use the extracted namespace info to generate all the parser files
     {
-        let mut w = create(&types_dir.join("mod.rs"))?;
+        let mut w = create(&dir.join("mod.rs"))?;
         for ns in namespaces.keys() {
             writeln!(w, "pub mod {};", ns.to_snake_case())?;
         }
     }
 
     for (ns, types) in namespaces.iter() {
-        let mut w = create(&types_dir.join(ns.to_snake_case()).join("mod.rs"))?;
+        let mut w = create(&dir.join(ns.to_snake_case()).join("mod.rs"))?;
         for typ in types {
             writeln!(&mut w, "mod {};", typ.to_snake_case())?;
         }

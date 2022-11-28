@@ -2,13 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EnergyReactiveType {
-    pub item_description: String,
-    pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
+pub struct PolygonType {
+    pub exterior: crate::gml::ExteriorType,
+    pub gml_id: Option<String>,
 }
 
-impl EnergyReactiveType {
+impl PolygonType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,13 +15,8 @@ impl EnergyReactiveType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
-        xsd_util::write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
-        xsd_util::write_simple_tag(
-            writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.to_str(),
-        )?;
+        self.exterior
+            .write_with_name(writer, "exterior", false, false)?;
         Ok(())
     }
 
@@ -41,8 +35,14 @@ impl EnergyReactiveType {
         } else {
             events::XmlEvent::start_element(name)
         };
+        // ---- start attributes ----
+        let start = match &self.gml_id {
+            Some(attr) => start.attr("gml:id", attr.as_str()),
+            None => start,
+        };
+        // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "power:EnergyReactiveType")
+            start.attr("xsi:type", "gml:PolygonType")
         } else {
             start
         };
@@ -53,7 +53,7 @@ impl EnergyReactiveType {
     }
 }
 
-impl xsd_api::WriteXml for EnergyReactiveType {
+impl xsd_api::WriteXml for PolygonType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +63,12 @@ impl xsd_api::WriteXml for EnergyReactiveType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyReactiveType", true, false)?;
+        self.write_with_name(&mut writer, "gml:PolygonType", true, false)?;
         Ok(())
     }
 }
 
-impl EnergyReactiveType {
+impl PolygonType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,13 +78,12 @@ impl EnergyReactiveType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
-            Default::default();
+        let mut exterior: xsd_util::SetOnce<crate::gml::ExteriorType> = Default::default();
+        let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
+                "gml:id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }
@@ -100,21 +99,16 @@ impl EnergyReactiveType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "itemDescription" => item_description
-                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
-                        "itemUnits" => {
-                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
-                        }
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(
-                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                            )?,
-                        )?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                    }
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "exterior" => exterior.set(crate::gml::ExteriorType::read(
+                        reader,
+                        &attributes,
+                        "exterior",
+                    )?)?,
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -136,10 +130,9 @@ impl EnergyReactiveType {
         }
 
         // construct the type from the cells
-        Ok(EnergyReactiveType {
-            item_description: item_description.require()?,
-            item_units: item_units.require()?,
-            scale_si_scale_code: scale_si_scale_code.require()?,
+        Ok(PolygonType {
+            exterior: exterior.require()?,
+            gml_id: gml_id.get(),
         })
     }
 
@@ -149,19 +142,19 @@ impl EnergyReactiveType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyReactiveType")?;
-        EnergyReactiveType::read(reader, &attr, "power:EnergyReactiveType")
+        let attr = xsd_util::read_start_tag(reader, "PolygonType")?;
+        PolygonType::read(reader, &attr, "gml:PolygonType")
     }
 }
 
-impl xsd_api::ReadXml for EnergyReactiveType {
+impl xsd_api::ReadXml for PolygonType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EnergyReactiveType::read_top_level(&mut reader) {
+        match PolygonType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

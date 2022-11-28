@@ -2,12 +2,11 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PolygonType {
-    pub exterior: crate::types::gml::ExteriorType,
-    pub gml_id: Option<String>,
+pub struct LocationType {
+    pub polygon: crate::gml::PolygonType,
 }
 
-impl PolygonType {
+impl LocationType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -15,8 +14,8 @@ impl PolygonType {
     where
         W: std::io::Write,
     {
-        self.exterior
-            .write_with_name(writer, "exterior", false, false)?;
+        self.polygon
+            .write_with_name(writer, "Polygon", false, false)?;
         Ok(())
     }
 
@@ -35,14 +34,8 @@ impl PolygonType {
         } else {
             events::XmlEvent::start_element(name)
         };
-        // ---- start attributes ----
-        let start = match &self.gml_id {
-            Some(attr) => start.attr("gml:id", attr.as_str()),
-            None => start,
-        };
-        // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "gml:PolygonType")
+            start.attr("xsi:type", "gml:locationType")
         } else {
             start
         };
@@ -53,7 +46,7 @@ impl PolygonType {
     }
 }
 
-impl xsd_api::WriteXml for PolygonType {
+impl xsd_api::WriteXml for LocationType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +56,12 @@ impl xsd_api::WriteXml for PolygonType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:PolygonType", true, false)?;
+        self.write_with_name(&mut writer, "gml:locationType", true, false)?;
         Ok(())
     }
 }
 
-impl PolygonType {
+impl LocationType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,12 +71,10 @@ impl PolygonType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut exterior: xsd_util::SetOnce<crate::types::gml::ExteriorType> = Default::default();
-        let mut gml_id: xsd_util::SetOnce<String> = Default::default();
+        let mut polygon: xsd_util::SetOnce<crate::gml::PolygonType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "gml:id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }
@@ -102,10 +93,10 @@ impl PolygonType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "exterior" => exterior.set(crate::types::gml::ExteriorType::read(
+                    "Polygon" => polygon.set(crate::gml::PolygonType::read(
                         reader,
                         &attributes,
-                        "exterior",
+                        "Polygon",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -130,9 +121,8 @@ impl PolygonType {
         }
 
         // construct the type from the cells
-        Ok(PolygonType {
-            exterior: exterior.require()?,
-            gml_id: gml_id.get(),
+        Ok(LocationType {
+            polygon: polygon.require()?,
         })
     }
 
@@ -142,19 +132,19 @@ impl PolygonType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PolygonType")?;
-        PolygonType::read(reader, &attr, "gml:PolygonType")
+        let attr = xsd_util::read_start_tag(reader, "locationType")?;
+        LocationType::read(reader, &attr, "gml:locationType")
     }
 }
 
-impl xsd_api::ReadXml for PolygonType {
+impl xsd_api::ReadXml for LocationType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match PolygonType::read_top_level(&mut reader) {
+        match LocationType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

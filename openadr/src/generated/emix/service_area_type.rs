@@ -1,14 +1,13 @@
 use xml::common::Position;
 use xml::writer::*;
 
+/// The Service Area is the geographic region that is affected by the EMIX market condition
 #[derive(Debug, Clone, PartialEq)]
-pub struct EnergyItemType {
-    pub item_description: String,
-    pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
+pub struct ServiceAreaType {
+    pub gml_feature_collection: crate::gml::FeatureCollection,
 }
 
-impl EnergyItemType {
+impl ServiceAreaType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -16,12 +15,11 @@ impl EnergyItemType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
-        xsd_util::write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
-        xsd_util::write_simple_tag(
+        self.gml_feature_collection.write_with_name(
             writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.to_str(),
+            "gml:FeatureCollection",
+            false,
+            false,
         )?;
         Ok(())
     }
@@ -42,7 +40,7 @@ impl EnergyItemType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:EnergyItemType")
+            start.attr("xsi:type", "emix:ServiceAreaType")
         } else {
             start
         };
@@ -53,7 +51,7 @@ impl EnergyItemType {
     }
 }
 
-impl xsd_api::WriteXml for EnergyItemType {
+impl xsd_api::WriteXml for ServiceAreaType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +61,12 @@ impl xsd_api::WriteXml for EnergyItemType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyItemType", true, false)?;
+        self.write_with_name(&mut writer, "emix:ServiceAreaType", true, false)?;
         Ok(())
     }
 }
 
-impl EnergyItemType {
+impl ServiceAreaType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +76,7 @@ impl EnergyItemType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
+        let mut gml_feature_collection: xsd_util::SetOnce<crate::gml::FeatureCollection> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -100,21 +96,18 @@ impl EnergyItemType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "itemDescription" => item_description
-                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
-                        "itemUnits" => {
-                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
-                        }
-                        "scale:siScaleCode" => scale_si_scale_code.set(
-                            crate::types::scale::SiScaleCodeType::from_str(
-                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                            )?,
-                        )?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "gml:FeatureCollection" => {
+                        gml_feature_collection.set(crate::gml::FeatureCollection::read(
+                            reader,
+                            &attributes,
+                            "gml:FeatureCollection",
+                        )?)?
                     }
-                }
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -136,10 +129,8 @@ impl EnergyItemType {
         }
 
         // construct the type from the cells
-        Ok(EnergyItemType {
-            item_description: item_description.require()?,
-            item_units: item_units.require()?,
-            scale_si_scale_code: scale_si_scale_code.require()?,
+        Ok(ServiceAreaType {
+            gml_feature_collection: gml_feature_collection.require()?,
         })
     }
 
@@ -149,19 +140,19 @@ impl EnergyItemType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyItemType")?;
-        EnergyItemType::read(reader, &attr, "power:EnergyItemType")
+        let attr = xsd_util::read_start_tag(reader, "ServiceAreaType")?;
+        ServiceAreaType::read(reader, &attr, "emix:ServiceAreaType")
     }
 }
 
-impl xsd_api::ReadXml for EnergyItemType {
+impl xsd_api::ReadXml for ServiceAreaType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EnergyItemType::read_top_level(&mut reader) {
+        match ServiceAreaType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

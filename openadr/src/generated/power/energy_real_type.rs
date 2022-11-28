@@ -2,11 +2,13 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ExteriorType {
-    pub linear_ring: crate::types::gml::LinearRingType,
+pub struct EnergyRealType {
+    pub item_description: String,
+    pub item_units: String,
+    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
 }
 
-impl ExteriorType {
+impl EnergyRealType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,8 +16,13 @@ impl ExteriorType {
     where
         W: std::io::Write,
     {
-        self.linear_ring
-            .write_with_name(writer, "LinearRing", false, false)?;
+        xsd_util::write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
+        xsd_util::write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
+        xsd_util::write_simple_tag(
+            writer,
+            "scale:siScaleCode",
+            self.scale_si_scale_code.to_str(),
+        )?;
         Ok(())
     }
 
@@ -35,7 +42,7 @@ impl ExteriorType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:exteriorType")
+            start.attr("xsi:type", "power:EnergyRealType")
         } else {
             start
         };
@@ -46,7 +53,7 @@ impl ExteriorType {
     }
 }
 
-impl xsd_api::WriteXml for ExteriorType {
+impl xsd_api::WriteXml for EnergyRealType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -56,12 +63,12 @@ impl xsd_api::WriteXml for ExteriorType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:exteriorType", true, false)?;
+        self.write_with_name(&mut writer, "power:EnergyRealType", true, false)?;
         Ok(())
     }
 }
 
-impl ExteriorType {
+impl EnergyRealType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -71,7 +78,9 @@ impl ExteriorType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut linear_ring: xsd_util::SetOnce<crate::types::gml::LinearRingType> =
+        let mut item_description: xsd_util::SetOnce<String> = Default::default();
+        let mut item_units: xsd_util::SetOnce<String> = Default::default();
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -91,16 +100,21 @@ impl ExteriorType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "LinearRing" => linear_ring.set(crate::types::gml::LinearRingType::read(
-                        reader,
-                        &attributes,
-                        "LinearRing",
-                    )?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                xml::reader::XmlEvent::StartElement { name, .. } => {
+                    match name.local_name.as_str() {
+                        "itemDescription" => item_description
+                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
+                        "itemUnits" => {
+                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
+                        }
+                        "scale:siScaleCode" => {
+                            scale_si_scale_code.set(crate::scale::SiScaleCodeType::from_str(
+                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
+                            )?)?
+                        }
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    }
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -122,8 +136,10 @@ impl ExteriorType {
         }
 
         // construct the type from the cells
-        Ok(ExteriorType {
-            linear_ring: linear_ring.require()?,
+        Ok(EnergyRealType {
+            item_description: item_description.require()?,
+            item_units: item_units.require()?,
+            scale_si_scale_code: scale_si_scale_code.require()?,
         })
     }
 
@@ -133,19 +149,19 @@ impl ExteriorType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "exteriorType")?;
-        ExteriorType::read(reader, &attr, "gml:exteriorType")
+        let attr = xsd_util::read_start_tag(reader, "EnergyRealType")?;
+        EnergyRealType::read(reader, &attr, "power:EnergyRealType")
     }
 }
 
-impl xsd_api::ReadXml for ExteriorType {
+impl xsd_api::ReadXml for EnergyRealType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match ExteriorType::read_top_level(&mut reader) {
+        match EnergyRealType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

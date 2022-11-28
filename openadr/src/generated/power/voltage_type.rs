@@ -2,14 +2,13 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PowerItemType {
+pub struct VoltageType {
     pub item_description: String,
     pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
-    pub power_power_attributes: crate::types::power::PowerAttributesType,
+    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
 }
 
-impl PowerItemType {
+impl VoltageType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -23,12 +22,6 @@ impl PowerItemType {
             writer,
             "scale:siScaleCode",
             self.scale_si_scale_code.to_str(),
-        )?;
-        self.power_power_attributes.write_with_name(
-            writer,
-            "power:powerAttributes",
-            false,
-            false,
         )?;
         Ok(())
     }
@@ -49,7 +42,7 @@ impl PowerItemType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:PowerItemType")
+            start.attr("xsi:type", "power:VoltageType")
         } else {
             start
         };
@@ -60,7 +53,7 @@ impl PowerItemType {
     }
 }
 
-impl xsd_api::WriteXml for PowerItemType {
+impl xsd_api::WriteXml for VoltageType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -70,12 +63,12 @@ impl xsd_api::WriteXml for PowerItemType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:PowerItemType", true, false)?;
+        self.write_with_name(&mut writer, "power:VoltageType", true, false)?;
         Ok(())
     }
 }
 
-impl PowerItemType {
+impl VoltageType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -87,11 +80,8 @@ impl PowerItemType {
         // one variable for each attribute and element
         let mut item_description: xsd_util::SetOnce<String> = Default::default();
         let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
             Default::default();
-        let mut power_power_attributes: xsd_util::SetOnce<
-            crate::types::power::PowerAttributesType,
-        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -110,27 +100,21 @@ impl PowerItemType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "itemDescription" => {
-                        item_description.set(xsd_util::read_string(reader, "itemDescription")?)?
+                xml::reader::XmlEvent::StartElement { name, .. } => {
+                    match name.local_name.as_str() {
+                        "itemDescription" => item_description
+                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
+                        "itemUnits" => {
+                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
+                        }
+                        "scale:siScaleCode" => {
+                            scale_si_scale_code.set(crate::scale::SiScaleCodeType::from_str(
+                                &xsd_util::read_string(reader, "scale:siScaleCode")?,
+                            )?)?
+                        }
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    "itemUnits" => item_units.set(xsd_util::read_string(reader, "itemUnits")?)?,
-                    "scale:siScaleCode" => {
-                        scale_si_scale_code.set(crate::types::scale::SiScaleCodeType::from_str(
-                            &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                        )?)?
-                    }
-                    "power:powerAttributes" => power_power_attributes.set(
-                        crate::types::power::PowerAttributesType::read(
-                            reader,
-                            &attributes,
-                            "power:powerAttributes",
-                        )?,
-                    )?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -152,11 +136,10 @@ impl PowerItemType {
         }
 
         // construct the type from the cells
-        Ok(PowerItemType {
+        Ok(VoltageType {
             item_description: item_description.require()?,
             item_units: item_units.require()?,
             scale_si_scale_code: scale_si_scale_code.require()?,
-            power_power_attributes: power_power_attributes.require()?,
         })
     }
 
@@ -166,19 +149,19 @@ impl PowerItemType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PowerItemType")?;
-        PowerItemType::read(reader, &attr, "power:PowerItemType")
+        let attr = xsd_util::read_start_tag(reader, "VoltageType")?;
+        VoltageType::read(reader, &attr, "power:VoltageType")
     }
 }
 
-impl xsd_api::ReadXml for PowerItemType {
+impl xsd_api::ReadXml for VoltageType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match PowerItemType::read_top_level(&mut reader) {
+        match VoltageType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

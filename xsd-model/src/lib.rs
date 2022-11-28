@@ -120,6 +120,10 @@ impl StringConstraints {
                 tracing::warn!("ignoring {:?} for string type", facet_type);
                 self
             }
+            FacetType::Pattern(_) => {
+                tracing::warn!("ignoring {:?} for string type", facet_type);
+                self
+            }
             _ => panic!("unsupported facet for string type: {:?}", facet_type),
         }
     }

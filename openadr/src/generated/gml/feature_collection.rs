@@ -2,14 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PowerApparentType {
-    pub item_description: String,
-    pub item_units: String,
-    pub scale_si_scale_code: crate::types::scale::SiScaleCodeType,
-    pub power_power_attributes: crate::types::power::PowerAttributesType,
+pub struct FeatureCollection {
+    pub location: crate::gml::LocationType,
+    pub gml_id: Option<String>,
 }
 
-impl PowerApparentType {
+impl FeatureCollection {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -17,19 +15,8 @@ impl PowerApparentType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_tag(writer, "itemDescription", self.item_description.as_str())?;
-        xsd_util::write_simple_tag(writer, "itemUnits", self.item_units.as_str())?;
-        xsd_util::write_simple_tag(
-            writer,
-            "scale:siScaleCode",
-            self.scale_si_scale_code.to_str(),
-        )?;
-        self.power_power_attributes.write_with_name(
-            writer,
-            "power:powerAttributes",
-            false,
-            false,
-        )?;
+        self.location
+            .write_with_name(writer, "location", false, false)?;
         Ok(())
     }
 
@@ -48,8 +35,14 @@ impl PowerApparentType {
         } else {
             events::XmlEvent::start_element(name)
         };
+        // ---- start attributes ----
+        let start = match &self.gml_id {
+            Some(attr) => start.attr("gml:id", attr.as_str()),
+            None => start,
+        };
+        // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "power:PowerApparentType")
+            start.attr("xsi:type", "gml:FeatureCollection")
         } else {
             start
         };
@@ -60,7 +53,7 @@ impl PowerApparentType {
     }
 }
 
-impl xsd_api::WriteXml for PowerApparentType {
+impl xsd_api::WriteXml for FeatureCollection {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -70,12 +63,12 @@ impl xsd_api::WriteXml for PowerApparentType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:PowerApparentType", true, false)?;
+        self.write_with_name(&mut writer, "gml:FeatureCollection", true, false)?;
         Ok(())
     }
 }
 
-impl PowerApparentType {
+impl FeatureCollection {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -85,16 +78,12 @@ impl PowerApparentType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::types::scale::SiScaleCodeType> =
-            Default::default();
-        let mut power_power_attributes: xsd_util::SetOnce<
-            crate::types::power::PowerAttributesType,
-        > = Default::default();
+        let mut location: xsd_util::SetOnce<crate::gml::LocationType> = Default::default();
+        let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
+                "gml:id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }
@@ -113,22 +102,11 @@ impl PowerApparentType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "itemDescription" => {
-                        item_description.set(xsd_util::read_string(reader, "itemDescription")?)?
-                    }
-                    "itemUnits" => item_units.set(xsd_util::read_string(reader, "itemUnits")?)?,
-                    "scale:siScaleCode" => {
-                        scale_si_scale_code.set(crate::types::scale::SiScaleCodeType::from_str(
-                            &xsd_util::read_string(reader, "scale:siScaleCode")?,
-                        )?)?
-                    }
-                    "power:powerAttributes" => power_power_attributes.set(
-                        crate::types::power::PowerAttributesType::read(
-                            reader,
-                            &attributes,
-                            "power:powerAttributes",
-                        )?,
-                    )?,
+                    "location" => location.set(crate::gml::LocationType::read(
+                        reader,
+                        &attributes,
+                        "location",
+                    )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -152,11 +130,9 @@ impl PowerApparentType {
         }
 
         // construct the type from the cells
-        Ok(PowerApparentType {
-            item_description: item_description.require()?,
-            item_units: item_units.require()?,
-            scale_si_scale_code: scale_si_scale_code.require()?,
-            power_power_attributes: power_power_attributes.require()?,
+        Ok(FeatureCollection {
+            location: location.require()?,
+            gml_id: gml_id.get(),
         })
     }
 
@@ -166,19 +142,19 @@ impl PowerApparentType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PowerApparentType")?;
-        PowerApparentType::read(reader, &attr, "power:PowerApparentType")
+        let attr = xsd_util::read_start_tag(reader, "FeatureCollection")?;
+        FeatureCollection::read(reader, &attr, "gml:FeatureCollection")
     }
 }
 
-impl xsd_api::ReadXml for PowerApparentType {
+impl xsd_api::ReadXml for FeatureCollection {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match PowerApparentType::read_top_level(&mut reader) {
+        match FeatureCollection::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
