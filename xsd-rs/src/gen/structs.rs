@@ -334,47 +334,36 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
                 )
             } else {
                 let name = fully_qualified_name(&s.id);
-                format!(
-                    "{}::read(reader, &attributes, \"{}\")?",
-                    name,
-                    &elem.name
-                )
+                format!("{}::read(reader, &attributes, \"{}\")?", name, &elem.name)
             }
         }
         ElementTransform::Number => {
-            format!("xsd_util::read_type_from_string(reader, \"{}\")?", &elem.name)
+            format!(
+                "xsd_util::read_type_from_string(reader, \"{}\")?",
+                &elem.name
+            )
         }
         ElementTransform::String => {
             format!("xsd_util::read_string(reader, \"{}\")?", &elem.name)
         }
-        ElementTransform::HexBytes => format!(
-            "xsd_util::read_hex_bytes(reader, \"{}\")?",
-            &elem.name
-        ),
-        ElementTransform::NumericEnum(x) => {
-            unimplemented!()
+        ElementTransform::HexBytes => {
+            format!("xsd_util::read_hex_bytes(reader, \"{}\")?", &elem.name)
         }
-        ElementTransform::NamedHexArray(buff) => format!(
-            "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&xsd_util::read_string(reader, \"{}\")?)? }}",
-            buff.name, buff.size, &elem.name
-        ),
-        ElementTransform::HexBitField(x) => format!(
-            "structs::{}::from_hex(&xsd_util::read_string(reader, \"{}\")?)?",
-            x.name, elem.name,
-        ),
+        ElementTransform::NumericEnum(x) => unimplemented!(),
+        ElementTransform::NamedHexArray(buff) => unimplemented!(),
+        ElementTransform::HexBitField(x) => unimplemented!(),
         ElementTransform::NumericDuration(x) => match x {
-            NumericDuration::Seconds(_) => {
-                format!(
-                    "std::time::Duration::from_secs(xsd_util::read_string(reader, \"{}\")?.parse()?)",
-                    &elem.name
-                )
-            }
+            NumericDuration::Seconds(x) => match x {
+                DurationEncoding::UInt32 => {
+                    format!(
+                        "xsd_util::read_duration_secs_u32(reader, \"{}\")?)",
+                        &elem.name
+                    )
+                }
+            },
         },
         ElementTransform::Enumeration(x) => {
-            format!(
-                "xsd_util::read_string_enum(reader, \"{}\")?",
-                &elem.name
-            )
+            format!("xsd_util::read_string_enum(reader, \"{}\")?", &elem.name)
         }
     };
 

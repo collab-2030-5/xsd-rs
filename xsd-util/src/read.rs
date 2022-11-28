@@ -1,5 +1,6 @@
 use crate::StringEnumeration;
 use std::str::FromStr;
+use std::time::Duration;
 use xsd_api::ReadError;
 
 pub fn read_string<R>(
@@ -78,6 +79,7 @@ where
     let value = read_string(reader, parent_name)?;
     parse_hex_bytes(&value)
 }
+//"std::time::Duration::from_secs(xsd_util::read_string(reader, \"{}\")?.parse()?)",
 
 pub fn read_type_from_string<R, T>(
     reader: &mut xml::reader::EventReader<R>,
@@ -91,6 +93,17 @@ where
     let value = read_string(reader, parent_name)?;
     let value = T::from_str(&value)?;
     Ok(value)
+}
+
+pub fn read_duration_secs_u32<R>(
+    reader: &mut xml::reader::EventReader<R>,
+    parent_name: &str,
+) -> Result<Duration, ReadError>
+where
+    R: std::io::Read,
+{
+    let value: u32 = read_type_from_string(reader, parent_name)?;
+    Ok(Duration::from_secs(value as u64))
 }
 
 fn parse_fixed_hex_bytes<const T: usize>(value: &str) -> Result<[u8; T], ReadError> {
