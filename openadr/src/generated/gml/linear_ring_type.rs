@@ -14,8 +14,7 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        let value = self.gml_pos_list.to_string();
-        xsd_util::write_simple_element(writer, "gml:posList", value.as_str())?;
+        xsd_util::write_element_using_to_string(writer, "gml:posList", self.gml_pos_list)?;
         Ok(())
     }
 

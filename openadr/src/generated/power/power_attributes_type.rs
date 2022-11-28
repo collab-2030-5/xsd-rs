@@ -16,12 +16,9 @@ impl PowerAttributesType {
     where
         W: std::io::Write,
     {
-        let value = self.hertz.to_string();
-        xsd_util::write_simple_element(writer, "hertz", value.as_str())?;
-        let value = self.voltage.to_string();
-        xsd_util::write_simple_element(writer, "voltage", value.as_str())?;
-        let value = self.ac.to_string();
-        xsd_util::write_simple_element(writer, "ac", value.as_str())?;
+        xsd_util::write_element_using_to_string(writer, "hertz", self.hertz)?;
+        xsd_util::write_element_using_to_string(writer, "voltage", self.voltage)?;
+        xsd_util::write_element_using_to_string(writer, "ac", self.ac)?;
         Ok(())
     }
 

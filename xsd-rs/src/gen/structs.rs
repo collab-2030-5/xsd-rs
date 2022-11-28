@@ -632,16 +632,15 @@ impl ElementTransform {
             ElementTransform::String => {
                 writeln!(
                     w,
-                    "xsd_util::write_simple_tag(writer, \"{}\", {}.as_str())?;",
+                    "xsd_util::write_simple_element(writer, \"{}\", {}.as_str())?;",
                     xsd_name, rust_name
                 )
             }
             ElementTransform::Number => {
-                writeln!(w, "let value = {}.to_string();", rust_name)?;
                 writeln!(
                     w,
-                    "xsd_util::write_simple_tag(writer, \"{}\", value.as_str())?;",
-                    xsd_name
+                    "xsd_util::write_element_using_to_string(writer, \"{}\", {})?;",
+                    xsd_name, rust_name
                 )
             }
             ElementTransform::HexBytes => {
@@ -652,12 +651,7 @@ impl ElementTransform {
                 )
             }
             ElementTransform::NumericEnum(_) => {
-                writeln!(w, "let value = {}.value().to_string();", rust_name)?;
-                writeln!(
-                    w,
-                    "xsd_util::write_simple_tag(writer, \"{}\", value.as_str())?;",
-                    xsd_name
-                )
+                unimplemented!()
             }
             ElementTransform::NamedHexArray(_) => {
                 writeln!(
@@ -669,7 +663,7 @@ impl ElementTransform {
             ElementTransform::HexBitField(_) => {
                 writeln!(
                     w,
-                    "xsd_util::write_simple_tag(writer, \"{}\", &{}.to_hex())?;",
+                    "xsd_util::write_simple_element(writer, \"{}\", &{}.to_hex())?;",
                     xsd_name, rust_name
                 )
             }
@@ -677,7 +671,7 @@ impl ElementTransform {
                 NumericDuration::Seconds(_) => {
                     writeln!(
                         w,
-                        "xsd_util::write_simple_tag(writer, \"{}\", &{}.as_secs().to_string())?;",
+                        "xsd_util::write_duration_as_seconds(writer, \"{}\", {})?;",
                         xsd_name, rust_name
                     )
                 }
@@ -685,7 +679,7 @@ impl ElementTransform {
             ElementTransform::Enumeration(_) => {
                 writeln!(
                     w,
-                    "xsd_util::write_simple_tag(writer, \"{}\", {}.to_str())?;",
+                    "xsd_util::write_simple_element(writer, \"{}\", {}.to_str())?;",
                     xsd_name, rust_name
                 )
             }

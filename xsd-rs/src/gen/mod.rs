@@ -46,13 +46,13 @@ impl GeneratedType {
 
     fn write(&self, w: &mut dyn Write) -> Result<(), FatalError> {
         match self {
-            Self::Struct(x) => crate::gen::structs::write_struct(w, x),
+            Self::Struct(x) => structs::write_struct(w, x),
             Self::Choice(_) => unimplemented!(),
             Self::Wrapper(x) => match x {
-                WrapperType::Enum(x) => crate::gen::string_enums::write(w, x),
-                WrapperType::EnumU8(_, x) => crate::gen::numeric_enum::write(w, x),
-                WrapperType::NamedArray(_, x) => crate::gen::named_array::write(w, x),
-                WrapperType::HexBitField(_, x) => crate::gen::bit_field::write(w, x),
+                WrapperType::Enum(x) => string_enums::write(w, x),
+                WrapperType::EnumU8(_, x) => numeric_enum::write(w, x),
+                WrapperType::NamedArray(_, x) => named_array::write(w, x),
+                WrapperType::HexBitField(_, x) => bit_field::write(w, x),
             },
         }
     }
