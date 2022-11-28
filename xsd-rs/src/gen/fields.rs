@@ -6,6 +6,7 @@ use xsd_model::{PrimitiveType, SimpleType, WrapperType};
 
 pub(crate) trait ElementTransforms {
     fn read_transform(&self, elem_name: &str) -> String;
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String;
 }
 
 impl ElementTransforms for AnyType {
@@ -13,6 +14,14 @@ impl ElementTransforms for AnyType {
         match self {
             AnyType::Simple(x) => x.read_transform(elem_name),
             AnyType::Struct(x) => x.read_transform(elem_name),
+            AnyType::Choice(_) => unimplemented!(),
+        }
+    }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        match self {
+            AnyType::Simple(x) => x.write_transform(rust_field_name, xsd_field_name),
+            AnyType::Struct(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Choice(_) => unimplemented!(),
         }
     }
@@ -31,6 +40,20 @@ impl ElementTransforms for Struct {
             format!("{}::read(reader, &attributes, \"{}\")?", name, elem_name)
         }
     }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        if self.metadata.is_base {
+            format!(
+                "{}.write_with_name(writer, \"{}\")?;",
+                rust_field_name, xsd_field_name
+            )
+        } else {
+            format!(
+                "{}.write_with_name(writer, \"{}\", false, false)?;",
+                rust_field_name, xsd_field_name
+            )
+        }
+    }
 }
 
 impl ElementTransforms for SimpleType {
@@ -38,6 +61,13 @@ impl ElementTransforms for SimpleType {
         match self {
             SimpleType::Primitive(x) => x.read_transform(elem_name),
             SimpleType::Wrapper(x) => x.read_transform(elem_name),
+        }
+    }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        match self {
+            SimpleType::Primitive(x) => x.write_transform(rust_field_name, xsd_field_name),
+            SimpleType::Wrapper(x) => x.write_transform(rust_field_name, xsd_field_name),
         }
     }
 }
@@ -69,6 +99,37 @@ impl ElementTransforms for PrimitiveType {
             },
         }
     }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        match self {
+            PrimitiveType::Boolean | PrimitiveType::Number(_) => {
+                format!(
+                    "xsd_util::write_element_using_to_string(writer, \"{}\", {})?;",
+                    xsd_field_name, rust_field_name
+                )
+            }
+            PrimitiveType::HexBytes(_) => {
+                format!(
+                    "xsd_util::write_hex_tag(writer, \"{}\", &{})?;",
+                    xsd_field_name, rust_field_name
+                )
+            }
+            PrimitiveType::String(_) => {
+                format!(
+                    "xsd_util::write_simple_element(writer, \"{}\", {}.as_str())?;",
+                    xsd_field_name, rust_field_name
+                )
+            }
+            PrimitiveType::NumericDuration(x) => match x {
+                NumericDuration::Seconds(_) => {
+                    format!(
+                        "xsd_util::write_duration_as_seconds(writer, \"{}\", {})?;",
+                        xsd_field_name, rust_field_name
+                    )
+                }
+            },
+        }
+    }
 }
 
 impl ElementTransforms for WrapperType {
@@ -76,6 +137,20 @@ impl ElementTransforms for WrapperType {
         match self {
             WrapperType::Enum(_) => {
                 format!("xsd_util::read_string_enum(reader, \"{}\")?", elem_name)
+            }
+            WrapperType::EnumU8(_, _) => unimplemented!(),
+            WrapperType::NamedArray(_, _) => unimplemented!(),
+            WrapperType::HexBitField(_, _) => unimplemented!(),
+        }
+    }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        match self {
+            WrapperType::Enum(_) => {
+                format!(
+                    "xsd_util::write_string_enumeration(writer, \"{}\", {})?;",
+                    xsd_field_name, rust_field_name
+                )
             }
             WrapperType::EnumU8(_, _) => unimplemented!(),
             WrapperType::NamedArray(_, _) => unimplemented!(),

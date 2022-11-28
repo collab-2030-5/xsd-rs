@@ -551,85 +551,6 @@ enum ElementTransform {
     Enumeration(Rc<xsd_model::Enumeration>),
 }
 
-impl ElementTransform {
-    fn write_value<W>(&self, w: &mut W, rust_name: &str, xsd_name: &str) -> std::io::Result<()>
-    where
-        W: Write,
-    {
-        match self {
-            ElementTransform::Struct(x) => {
-                if x.metadata.is_base {
-                    writeln!(
-                        w,
-                        "{}.write_with_name(writer, \"{}\")?;",
-                        rust_name, xsd_name
-                    )
-                } else {
-                    writeln!(
-                        w,
-                        "{}.write_with_name(writer, \"{}\", false, false)?;",
-                        rust_name, xsd_name
-                    )
-                }
-            }
-            ElementTransform::String => {
-                writeln!(
-                    w,
-                    "xsd_util::write_simple_element(writer, \"{}\", {}.as_str())?;",
-                    xsd_name, rust_name
-                )
-            }
-            ElementTransform::Number => {
-                writeln!(
-                    w,
-                    "xsd_util::write_element_using_to_string(writer, \"{}\", {})?;",
-                    xsd_name, rust_name
-                )
-            }
-            ElementTransform::HexBytes => {
-                writeln!(
-                    w,
-                    "xsd_util::write_hex_tag(writer, \"{}\", &{})?;",
-                    xsd_name, rust_name
-                )
-            }
-            ElementTransform::NumericEnum(_) => {
-                unimplemented!()
-            }
-            ElementTransform::NamedHexArray(_) => {
-                writeln!(
-                    w,
-                    "xsd_util::write_hex_tag(writer, \"{}\", {}.inner.as_slice())?;",
-                    xsd_name, rust_name
-                )
-            }
-            ElementTransform::HexBitField(_) => {
-                writeln!(
-                    w,
-                    "xsd_util::write_simple_element(writer, \"{}\", &{}.to_hex())?;",
-                    xsd_name, rust_name
-                )
-            }
-            ElementTransform::NumericDuration(x) => match x {
-                NumericDuration::Seconds(_) => {
-                    writeln!(
-                        w,
-                        "xsd_util::write_duration_as_seconds(writer, \"{}\", {})?;",
-                        xsd_name, rust_name
-                    )
-                }
-            },
-            ElementTransform::Enumeration(_) => {
-                writeln!(
-                    w,
-                    "xsd_util::write_string_enumeration(writer, \"{}\", {})?;",
-                    xsd_name, rust_name
-                )
-            }
-        }
-    }
-}
-
 fn get_element_transform(st: &SimpleType) -> ElementTransform {
     match st {
         SimpleType::Primitive(x) => match x {
@@ -661,16 +582,16 @@ fn write_element<W>(w: &mut W, elem: &Element) -> std::io::Result<()>
 where
     W: Write,
 {
-    let transform = get_elem_transform(&elem.field_type);
-
     match &elem.multiplicity {
         ElemMultiplicity::Single => {
             let name = format!("self.{}", elem.name.rust_field_name());
-            transform.write_value(w, &name, &elem.name)?;
+            let tx = elem.field_type.write_transform(&name, &elem.name);
+            writeln!(w, "{}", tx)?;
         }
         ElemMultiplicity::Vec => {
+            let tx = elem.field_type.write_transform("item", &elem.name);
             writeln!(w, "for item in &self.{} {{", elem.name.rust_field_name())?;
-            indent(w, |w| transform.write_value(w, "item", &elem.name))?;
+            indent(w, |w| writeln!(w, "{}", tx))?;
             writeln!(w, "}}")?;
         }
         ElemMultiplicity::Optional => {
@@ -679,7 +600,8 @@ where
                 "if let Some(elem) = &self.{} {{",
                 elem.name.to_snake_case()
             )?;
-            indent(w, |w| transform.write_value(w, "elem", &elem.name))?;
+            let tx = elem.field_type.write_transform("elem", &elem.name);
+            indent(w, |w| writeln!(w, "{}", tx))?;
             writeln!(w, "}}")?;
         }
     }
