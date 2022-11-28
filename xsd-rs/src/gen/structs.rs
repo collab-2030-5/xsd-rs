@@ -597,15 +597,15 @@ where
 }
 
 enum ElementTransform {
-    Struct(std::rc::Rc<Struct>),
+    Struct(Rc<Struct>),
     Number,
     String,
     HexBytes,
-    NumericEnum(std::rc::Rc<xsd_model::config::NumericEnum<u8>>),
-    NamedHexArray(std::rc::Rc<NamedArray>),
-    HexBitField(std::rc::Rc<BitField>),
+    NumericEnum(Rc<NumericEnum<u8>>),
+    NamedHexArray(Rc<NamedArray>),
+    HexBitField(Rc<BitField>),
     NumericDuration(NumericDuration),
-    Enumeration(std::rc::Rc<xsd_model::Enumeration>),
+    Enumeration(Rc<xsd_model::Enumeration>),
 }
 
 impl ElementTransform {
