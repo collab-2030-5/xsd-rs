@@ -97,11 +97,11 @@ impl PowerAttributesType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "hertz" => hertz.set(xsd_util::read_string(reader, "hertz")?.parse()?)?,
+                        "hertz" => hertz.set(xsd_util::read_type_from_string(reader, "hertz")?)?,
                         "voltage" => {
-                            voltage.set(xsd_util::read_string(reader, "voltage")?.parse()?)?
+                            voltage.set(xsd_util::read_type_from_string(reader, "voltage")?)?
                         }
-                        "ac" => ac.set(xsd_util::read_string(reader, "ac")?.parse()?)?,
+                        "ac" => ac.set(xsd_util::read_type_from_string(reader, "ac")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }

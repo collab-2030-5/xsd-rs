@@ -342,20 +342,17 @@ fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<(
             }
         }
         ElementTransform::Number => {
-            format!("xsd_util::read_string(reader, \"{}\")?.parse()?", &elem.name)
+            format!("xsd_util::read_type_from_string(reader, \"{}\")?", &elem.name)
         }
         ElementTransform::String => {
             format!("xsd_util::read_string(reader, \"{}\")?", &elem.name)
         }
         ElementTransform::HexBytes => format!(
-            "xsd_util::parse_hex_bytes(&xsd_util::read_string(reader, \"{}\")?)?",
+            "xsd_util::read_hex_bytes(reader, \"{}\")?",
             &elem.name
         ),
         ElementTransform::NumericEnum(x) => {
-            format!(
-                "structs::{}::from_value(xsd_util::read_string(reader, \"{}\")?.parse()?)",
-                x.name, &elem.name
-            )
+            unimplemented!()
         }
         ElementTransform::NamedHexArray(buff) => format!(
             "structs::{} {{ inner: parse_fixed_hex_bytes::<{}>(&xsd_util::read_string(reader, \"{}\")?)? }}",
