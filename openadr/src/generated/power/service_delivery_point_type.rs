@@ -15,7 +15,7 @@ impl ServiceDeliveryPointType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_tag(writer, "power:node", self.power_node.as_str())?;
+        xsd_util::write_simple_element(writer, "power:node", self.power_node.as_str())?;
         Ok(())
     }
 

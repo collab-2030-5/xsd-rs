@@ -15,7 +15,7 @@ impl EndDeviceAssetType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_tag(writer, "power:mrid", self.power_mrid.as_str())?;
+        xsd_util::write_simple_element(writer, "power:mrid", self.power_mrid.as_str())?;
         Ok(())
     }
 
