@@ -13,7 +13,6 @@ use crate::resolved::{AnyType, StructMetadata};
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;
 use crate::unresolved::structs::UnresolvedStruct;
-use crate::unresolved::tuple_struct::UnresolvedTupleStruct;
 use crate::unresolved::{
     AttributeType, ElementType, FieldTypeInfo, UnresolvedChoiceVariant, UnresolvedField,
 };
@@ -228,7 +227,7 @@ impl UnresolvedModel {
                 UnresolvedTypeEx::Struct(x.clone(), metadata)
             }
             UnresolvedType::Choice(x) => UnresolvedTypeEx::Choice(x.clone()),
-            UnresolvedType::Tuple(x) => UnresolvedTypeEx::Tuple(x.clone()),
+            //UnresolvedType::Tuple(x) => UnresolvedTypeEx::Tuple(x.clone()),
         }
     }
 
@@ -287,7 +286,7 @@ impl UnresolvedModel {
 pub(crate) enum UnresolvedType {
     Struct(UnresolvedStruct),
     Choice(UnresolvedChoice),
-    Tuple(UnresolvedTupleStruct),
+    //Tuple(UnresolvedTupleStruct),
 }
 
 impl UnresolvedType {
@@ -295,7 +294,7 @@ impl UnresolvedType {
         match self {
             UnresolvedType::Struct(x) => Some(x),
             UnresolvedType::Choice(_) => None,
-            UnresolvedType::Tuple(_) => None,
+            //UnresolvedType::Tuple(_) => None,
         }
     }
 
@@ -303,7 +302,7 @@ impl UnresolvedType {
         match self {
             UnresolvedType::Struct(x) => &x.type_id,
             UnresolvedType::Choice(x) => &x.type_id,
-            UnresolvedType::Tuple(x) => &x.type_id,
+            //UnresolvedType::Tuple(x) => &x.type_id,
         }
     }
 }
@@ -313,7 +312,7 @@ impl UnresolvedType {
 enum UnresolvedTypeEx {
     Struct(UnresolvedStruct, StructMetadata),
     Choice(UnresolvedChoice),
-    Tuple(UnresolvedTupleStruct),
+    //Tuple(UnresolvedTupleStruct),
 }
 
 impl UnresolvedTypeEx {
@@ -321,7 +320,7 @@ impl UnresolvedTypeEx {
         match self {
             UnresolvedTypeEx::Struct(x, metadata) => x.resolve(*metadata, resolver),
             UnresolvedTypeEx::Choice(x) => x.resolve(resolver),
-            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+            //UnresolvedTypeEx::Tuple(_) => unimplemented!(),
         }
     }
 
@@ -329,7 +328,7 @@ impl UnresolvedTypeEx {
         match self {
             UnresolvedTypeEx::Struct(x, metadata) => x.analyze(*metadata, resolver),
             UnresolvedTypeEx::Choice(x) => x.analyze(resolver),
-            UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+            //UnresolvedTypeEx::Tuple(_) => unimplemented!(),
         }
     }
 }

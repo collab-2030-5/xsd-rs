@@ -181,9 +181,11 @@ impl From<Substitution> for SimpleType {
 }
 
 impl Substitution {
+    /*
     pub(crate) fn new(target: TypeId, variant: SubstitutedTypeVariant) -> Self {
         Self { target, variant }
     }
+     */
 
     pub fn type_name(&self) -> Option<&str> {
         match &self.variant {
