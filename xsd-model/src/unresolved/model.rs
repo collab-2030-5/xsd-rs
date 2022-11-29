@@ -150,7 +150,7 @@ impl UnresolvedModel {
                 tracing::debug!("Adding {} as an unresolved choice", choice.type_id);
                 self.unresolved_types.push(UnresolvedType::Choice(choice));
             }
-            _ => panic!("Unsupported enum source type: {:?}", en.source),
+            _ => panic!("Unsupported enum source type: {:?} in {:#?}", en.source, en),
         }
     }
 
