@@ -52,8 +52,7 @@ impl UnresolvedField {
 
         tracing::debug!("resolving: {}", field_id);
 
-        if let Some(x) = resolver.resolve_field(&field_id, &self.field_type) {
-            let any_type: AnyType = x.clone().into();
+        if let Some(any_type) = resolver.resolve_field(&field_id, &self.field_type) {
             return Some(Field {
                 comment: self.comment.clone(),
                 name: self.name.clone(),
@@ -101,7 +100,7 @@ impl UnresolvedStruct {
                         // base class isn't resolved yet, can't resolve this struct
                         return None;
                     }
-                    Some(AnyType::Struct(x)) => Some(x.clone()),
+                    Some(AnyType::Struct(x)) => Some(x),
                     Some(x) => {
                         panic!("Base type of {} is not a struct: {:?}", self.type_id, x)
                     }
@@ -137,10 +136,8 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
             AnyType::Choice(_) => panic!("attributes may not reference choice types"),
             AnyType::Simple(x) => match attr_type {
-                AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, x.clone()),
-                AttributeType::Option => {
-                    FieldType::Attribute(AttrMultiplicity::Optional, x.clone())
-                }
+                AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, x),
+                AttributeType::Option => FieldType::Attribute(AttrMultiplicity::Optional, x),
             },
         },
         FieldTypeInfo::Element(x) => match x {

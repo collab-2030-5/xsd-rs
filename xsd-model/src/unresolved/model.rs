@@ -408,7 +408,7 @@ fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
         variants.push(UnresolvedChoiceVariant {
             comment: v.comment.clone(),
             element_name: name.clone(),
-            type_id: TypeId::parse(&name, settings.namespace),
+            type_id: TypeId::parse(name, settings.namespace),
         });
     }
     UnresolvedChoice {

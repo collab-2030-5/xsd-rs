@@ -57,7 +57,7 @@ impl UnresolvedChoiceVariant {
         resolver.resolve(&self.type_id).map(|any| ChoiceVariant {
             comment: self.comment.clone(),
             element_name: self.element_name.clone(),
-            type_info: any.clone(),
+            type_info: any,
         })
     }
 }

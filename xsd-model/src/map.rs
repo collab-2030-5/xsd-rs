@@ -63,14 +63,15 @@ where
     }
 }
 
-impl<K,V> IntoIterator for Map<K,V> where
+impl<K, V> IntoIterator for Map<K, V>
+where
     K: Debug + Display + Ord,
-    V: Debug {
-
-    type Item = (K,V);
-    type IntoIter = IntoIter<K,V>;
+    V: Debug,
+{
+    type Item = (K, V);
+    type IntoIter = IntoIter<K, V>;
 
     fn into_iter(self) -> Self::IntoIter {
-       self.inner.into_iter()
+        self.inner.into_iter()
     }
 }
