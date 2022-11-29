@@ -23,7 +23,7 @@ where
 
 impl<K, V> Map<K, V>
 where
-    K: Debug + Display + std::cmp::Ord,
+    K: Debug + Display + Ord,
     V: Debug,
 {
     pub fn new() -> Self {
@@ -34,10 +34,6 @@ where
 
     pub fn to_inner(self) -> BTreeMap<K, V> {
         self.inner
-    }
-
-    pub fn into_iter(self) -> IntoIter<K, V> {
-        self.inner.into_iter()
     }
 
     pub fn insert(&mut self, key: K, value: V) {
@@ -64,5 +60,17 @@ where
 
     pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
         self.inner.get_mut(key)
+    }
+}
+
+impl<K,V> IntoIterator for Map<K,V> where
+    K: Debug + Display + Ord,
+    V: Debug {
+
+    type Item = (K,V);
+    type IntoIter = IntoIter<K,V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+       self.inner.into_iter()
     }
 }
