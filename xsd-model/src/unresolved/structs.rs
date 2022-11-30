@@ -135,6 +135,7 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
         FieldTypeInfo::Attribute(attr_type) => match t {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
             AnyType::Choice(_) => panic!("attributes may not reference choice types"),
+            AnyType::Union(_) => panic!("attributes do not currently support unions"),
             AnyType::Simple(x) => match attr_type {
                 AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, x),
                 AttributeType::Option => FieldType::Attribute(AttrMultiplicity::Optional, x),

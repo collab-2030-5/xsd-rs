@@ -17,6 +17,7 @@ use crate::unresolved::{
     AttributeType, ElementType, FieldTypeInfo, UnresolvedChoiceVariant, UnresolvedField,
 };
 
+use crate::unresolved::union::{UnresolvedUnion, UnresolvedUnionVariant};
 use crate::*;
 
 #[derive(Debug, Default)]
@@ -150,6 +151,11 @@ impl UnresolvedModel {
                 tracing::debug!("Adding {} as an unresolved choice", choice.type_id);
                 self.unresolved_types.push(UnresolvedType::Choice(choice));
             }
+            EnumSource::Union => {
+                let union = convert_union_enum(en, settings);
+                tracing::debug!("Adding {} as an unresolved union", union.type_id);
+                self.unresolved_types.push(UnresolvedType::Union(union));
+            }
             _ => panic!("Unsupported enum source type: {:?} in {:#?}", en.source, en),
         }
     }
@@ -227,7 +233,7 @@ impl UnresolvedModel {
                 UnresolvedTypeEx::Struct(x.clone(), metadata)
             }
             UnresolvedType::Choice(x) => UnresolvedTypeEx::Choice(x.clone()),
-            //UnresolvedType::Tuple(x) => UnresolvedTypeEx::Tuple(x.clone()),
+            UnresolvedType::Union(x) => UnresolvedTypeEx::Union(x.clone()),
         }
     }
 
@@ -286,23 +292,23 @@ impl UnresolvedModel {
 pub(crate) enum UnresolvedType {
     Struct(UnresolvedStruct),
     Choice(UnresolvedChoice),
-    //Tuple(UnresolvedTupleStruct),
+    Union(UnresolvedUnion),
 }
 
 impl UnresolvedType {
     fn get_struct(&self) -> Option<&UnresolvedStruct> {
         match self {
-            UnresolvedType::Struct(x) => Some(x),
-            UnresolvedType::Choice(_) => None,
-            //UnresolvedType::Tuple(_) => None,
+            Self::Struct(x) => Some(x),
+            Self::Choice(_) => None,
+            Self::Union(_) => None,
         }
     }
 
     fn get_type_id(&self) -> &TypeId {
         match self {
-            UnresolvedType::Struct(x) => &x.type_id,
-            UnresolvedType::Choice(x) => &x.type_id,
-            //UnresolvedType::Tuple(x) => &x.type_id,
+            Self::Struct(x) => &x.type_id,
+            Self::Choice(x) => &x.type_id,
+            Self::Union(x) => &x.type_id,
         }
     }
 }
@@ -312,7 +318,7 @@ impl UnresolvedType {
 enum UnresolvedTypeEx {
     Struct(UnresolvedStruct, StructMetadata),
     Choice(UnresolvedChoice),
-    //Tuple(UnresolvedTupleStruct),
+    Union(UnresolvedUnion),
 }
 
 impl UnresolvedTypeEx {
@@ -320,7 +326,7 @@ impl UnresolvedTypeEx {
         match self {
             UnresolvedTypeEx::Struct(x, metadata) => x.resolve(*metadata, resolver),
             UnresolvedTypeEx::Choice(x) => x.resolve(resolver),
-            //UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+            UnresolvedTypeEx::Union(x) => x.resolve(resolver),
         }
     }
 
@@ -328,7 +334,7 @@ impl UnresolvedTypeEx {
         match self {
             UnresolvedTypeEx::Struct(x, metadata) => x.analyze(*metadata, resolver),
             UnresolvedTypeEx::Choice(x) => x.analyze(resolver),
-            //UnresolvedTypeEx::Tuple(_) => unimplemented!(),
+            UnresolvedTypeEx::Union(_) => unimplemented!(),
         }
     }
 }
@@ -393,9 +399,9 @@ fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
 fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
     if !en.subtypes.is_empty() {
         tracing::warn!(
-            "Choice-based enum {} has {} ignored subtypes",
+            "Choice-based enum {} has ignored subtypes: {:#?}",
             en.name,
-            en.subtypes.len()
+            en.subtypes
         )
     }
 
@@ -412,6 +418,35 @@ fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
         });
     }
     UnresolvedChoice {
+        type_id: TypeId::parse(&en.name, settings.namespace),
+        comment: en.comment.clone(),
+        variants,
+    }
+}
+
+fn convert_union_enum(en: &Enum, settings: &Settings) -> UnresolvedUnion {
+    if !en.subtypes.is_empty() {
+        tracing::warn!(
+            "Union-based enum {} has ignored subtypes: {:#?}",
+            en.name,
+            en.subtypes
+        )
+    }
+
+    let mut variants: Vec<UnresolvedUnionVariant> = Vec::new();
+    for v in en.cases.iter() {
+        let type_name = v
+            .type_name
+            .as_ref()
+            .expect("union case must include a type name");
+
+        variants.push(UnresolvedUnionVariant {
+            name: TypeId::parse(&v.name, settings.namespace),
+            comment: v.comment.clone(),
+            type_name: TypeId::parse(&type_name, settings.namespace),
+        });
+    }
+    UnresolvedUnion {
         type_id: TypeId::parse(&en.name, settings.namespace),
         comment: en.comment.clone(),
         variants,

@@ -100,6 +100,7 @@ impl RustType for AnyType {
                 }
             }
             AnyType::Choice(x) => fully_qualified_name(&x.id).into(),
+            AnyType::Union(x) => fully_qualified_name(&x.id).into(),
         }
     }
 }

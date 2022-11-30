@@ -52,10 +52,25 @@ pub struct ChoiceVariant {
     pub type_info: AnyType,
 }
 
+#[derive(Debug, Clone)]
+pub struct Union {
+    pub comment: Option<String>,
+    pub id: TypeId,
+    pub variants: Vec<UnionVariant>,
+}
+
+#[derive(Debug, Clone)]
+pub struct UnionVariant {
+    pub comment: Option<String>,
+    pub name: String,
+    pub type_info: SimpleType,
+}
+
 /// Simple or composite like a struct
 #[derive(Debug, Clone)]
 pub enum AnyType {
     Simple(SimpleType),
+    Union(Union),
     Struct(Rc<Struct>),
     Choice(Rc<Choice>),
 }

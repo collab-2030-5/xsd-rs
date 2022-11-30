@@ -1,6 +1,7 @@
 mod choice;
 mod model;
 mod structs;
+mod union;
 //mod tuple_struct;
 
 pub(crate) use choice::*;

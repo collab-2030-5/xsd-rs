@@ -24,6 +24,7 @@ enum GeneratedType {
     Struct(Rc<Struct>),
     Choice(Rc<Choice>),
     Wrapper(WrapperType),
+    Union(Union),
 }
 
 impl GeneratedType {
@@ -32,6 +33,7 @@ impl GeneratedType {
             GeneratedType::Struct(x) => x.id.name.as_str(),
             GeneratedType::Wrapper(x) => x.name(),
             GeneratedType::Choice(x) => x.id.name.as_str(),
+            GeneratedType::Union(x) => x.id.name.as_str(),
         }
     }
 
@@ -41,6 +43,7 @@ impl GeneratedType {
             AnyType::Simple(SimpleType::Wrapper(x)) => Some(GeneratedType::Wrapper(x.clone())),
             AnyType::Struct(x) => Some(GeneratedType::Struct(x.clone())),
             AnyType::Choice(x) => Some(GeneratedType::Choice(x.clone())),
+            AnyType::Union(x) => Some(GeneratedType::Union(x.clone())),
         }
     }
 
@@ -48,6 +51,7 @@ impl GeneratedType {
         match self {
             Self::Struct(x) => structs::write_struct(w, x),
             Self::Choice(_) => unimplemented!(),
+            Self::Union(_) => unimplemented!(),
             Self::Wrapper(x) => match x {
                 WrapperType::Enum(x) => string_enums::write(w, x),
                 WrapperType::EnumU8(_, x) => numeric_enum::write(w, x),
