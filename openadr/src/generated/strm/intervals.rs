@@ -1,16 +1,12 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
-    pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
+pub struct Intervals {
+    pub ei_interval: Vec<crate::ei::IntervalType>,
 }
 
-impl SpecifierPayloadType {
+impl Intervals {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +14,9 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
-        if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
+        for item in &self.ei_interval {
+            item.write_with_name(writer, "ei:interval", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
         Ok(())
     }
 
@@ -42,7 +36,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "strm:intervals")
         } else {
             start
         };
@@ -53,7 +47,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for Intervals {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +57,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "strm:intervals", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl Intervals {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +72,7 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_interval: Vec<crate::ei::IntervalType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,15 +94,11 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
+                    "ei:interval" => ei_interval.push(crate::ei::IntervalType::read(
                         reader,
                         &attributes,
-                        "emix:itemBase",
-                    )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
-                    }
+                        "ei:interval",
+                    )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -134,11 +122,7 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
-            emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
-        })
+        Ok(Intervals { ei_interval })
     }
 
     fn read_top_level<R>(
@@ -147,19 +131,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "intervals")?;
+        Intervals::read(reader, &attr, "strm:intervals")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for Intervals {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match Intervals::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

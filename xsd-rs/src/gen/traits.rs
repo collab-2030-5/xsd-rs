@@ -1,6 +1,6 @@
 use heck::ToUpperCamelCase;
 use std::borrow::Cow;
-use xsd_model::resolved::{AnyType, AttrMultiplicity, ElemMultiplicity, FieldType};
+use xsd_model::resolved::{AnyType, AttrMultiplicity, Choice, ElemMultiplicity, FieldType};
 use xsd_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
 
 use heck::ToSnakeCase;
@@ -88,6 +88,12 @@ pub(crate) fn fully_qualified_name(id: &TypeId) -> String {
     )
 }
 
+impl RustType for Choice {
+    fn rust_struct_type(&self) -> Cow<'static, str> {
+        fully_qualified_name(&self.id).into()
+    }
+}
+
 impl RustType for AnyType {
     fn rust_struct_type(&self) -> Cow<'static, str> {
         match self {
@@ -99,7 +105,7 @@ impl RustType for AnyType {
                     fully_qualified_name(&x.id).into()
                 }
             }
-            AnyType::Choice(x) => fully_qualified_name(&x.id).into(),
+            AnyType::Choice(x) => x.rust_struct_type(),
         }
     }
 }

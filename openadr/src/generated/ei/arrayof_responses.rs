@@ -1,23 +1,41 @@
-use xml::writer::*;
 use xml::common::Position;
+use xml::writer::*;
 
 /// Collection of Responses. When a service operation regards multiple referenceable items, each referenced item may have its own response. Always accompanied by an overall Response Type.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayofResponses {
     pub response: Vec<crate::ei::EiResponseType>,
-
 }
 
 impl ArrayofResponses {
-    fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
+    fn write_elem<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
         for item in &self.response {
             item.write_with_name(writer, "response", false, false)?;
         }
         Ok(())
     }
 
-    pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        let start = if top_level { super::add_schema_attr(events::XmlEvent::start_element(name)) } else { events::XmlEvent::start_element(name) };
+    pub(crate) fn write_with_name<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+        name: &str,
+        top_level: bool,
+        write_type: bool,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        let start = if top_level {
+            super::add_schema_attr(events::XmlEvent::start_element(name))
+        } else {
+            events::XmlEvent::start_element(name)
+        };
         let start = if write_type {
             start.attr("xsi:type", "ei:ArrayofResponses")
         } else {
@@ -31,7 +49,14 @@ impl ArrayofResponses {
 }
 
 impl xsd_api::WriteXml for ArrayofResponses {
-    fn write<W>(&self, config: xsd_api::WriteConfig, writer: &mut W) -> core::result::Result<(), xsd_api::WriteError> where W: std::io::Write {
+    fn write<W>(
+        &self,
+        config: xsd_api::WriteConfig,
+        writer: &mut W,
+    ) -> core::result::Result<(), xsd_api::WriteError>
+    where
+        W: std::io::Write,
+    {
         let mut writer = config.build_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "ei:ArrayofResponses", true, false)?;
         Ok(())
@@ -39,13 +64,20 @@ impl xsd_api::WriteXml for ArrayofResponses {
 }
 
 impl ArrayofResponses {
-    pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
+    pub(crate) fn read<R>(
+        reader: &mut xml::reader::EventReader<R>,
+        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        parent_tag: &str,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
         // one variable for each attribute and element
-        let mut response : Vec<crate::ei::EiResponseType> = Default::default();
+        let mut response: Vec<crate::ei::EiResponseType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                _ => {}, // ignore unknown attributes
+                _ => {} // ignore unknown attributes
             };
         }
 
@@ -60,19 +92,29 @@ impl ArrayofResponses {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, attributes, .. } => {
-                    match name.local_name.as_str() {
-                        "response" => {
-                            response.push(crate::ei::EiResponseType::read(reader, &attributes, "response")?)
-                        }
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent)
-                    }
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "response" => response.push(crate::ei::EiResponseType::read(
+                        reader,
+                        &attributes,
+                        "response",
+                    )?),
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
-                xml::reader::XmlEvent::StartDocument { .. } => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::EndDocument => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::Characters(_) => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::ProcessingInstruction { .. } => return Err(xsd_api::ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartDocument { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::EndDocument => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::Characters(_) => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::ProcessingInstruction { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
                 xml::reader::XmlEvent::Comment(_) => {}
@@ -81,26 +123,36 @@ impl ArrayofResponses {
         }
 
         // construct the type from the cells
-        Ok(ArrayofResponses {
-            response,
-        })
+        Ok(ArrayofResponses { response })
     }
 
-    fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
+    fn read_top_level<R>(
+        reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
         let attr = xsd_util::read_start_tag(reader, "ArrayofResponses")?;
         ArrayofResponses::read(reader, &attr, "ei:ArrayofResponses")
     }
 }
 
 impl xsd_api::ReadXml for ArrayofResponses {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation> where R: std::io::Read {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+    where
+        R: std::io::Read,
+    {
         let mut reader = xml::reader::EventReader::new(r);
 
         match ArrayofResponses::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation { err, line: pos.row, col: pos.column })
+                Err(xsd_api::ErrorWithLocation {
+                    err,
+                    line: pos.row,
+                    col: pos.column,
+                })
             }
         }
     }

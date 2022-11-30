@@ -1,16 +1,12 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
-    pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
+pub struct VavailabilityType {
+    pub components: crate::xcal::ArrayOfVavailabilityContainedComponents,
 }
 
-impl SpecifierPayloadType {
+impl VavailabilityType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +14,8 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
-        if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
-        }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        self.components
+            .write_with_name(writer, "components", false, false)?;
         Ok(())
     }
 
@@ -42,7 +35,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "xcal:VavailabilityType")
         } else {
             start
         };
@@ -53,7 +46,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for VavailabilityType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +56,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "xcal:VavailabilityType", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl VavailabilityType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +71,9 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut components: xsd_util::SetOnce<
+            crate::xcal::ArrayOfVavailabilityContainedComponents,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,15 +95,13 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
-                        reader,
-                        &attributes,
-                        "emix:itemBase",
-                    )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
-                    }
+                    "components" => components.set(
+                        crate::xcal::ArrayOfVavailabilityContainedComponents::read(
+                            reader,
+                            &attributes,
+                            "components",
+                        )?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -134,10 +125,8 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
-            emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
+        Ok(VavailabilityType {
+            components: components.require()?,
         })
     }
 
@@ -147,19 +136,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "VavailabilityType")?;
+        VavailabilityType::read(reader, &attr, "xcal:VavailabilityType")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for VavailabilityType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match VavailabilityType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

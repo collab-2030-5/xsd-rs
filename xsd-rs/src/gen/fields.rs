@@ -57,12 +57,12 @@ impl ElementTransforms for Struct {
 }
 
 impl ElementTransforms for Choice {
-    fn read_transform(&self, elem_name: &str) -> String {
+    fn read_transform(&self, _elem_name: &str) -> String {
         "unimplemented!()".to_string()
     }
 
-    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
-        "unimplemented!()".to_string()
+    fn write_transform(&self, _rust_field_name: &str, _xsd_field_name: &str) -> String {
+        "unimplemented!();".to_string()
     }
 }
 

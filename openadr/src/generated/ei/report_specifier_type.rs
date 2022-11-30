@@ -1,5 +1,5 @@
-use xml::writer::*;
 use xml::common::Position;
+use xml::writer::*;
 
 /// Parameters that define the content of a Report Stream
 #[derive(Debug, Clone, PartialEq)]
@@ -12,14 +12,25 @@ pub struct ReportSpecifierType {
     /// This is the overall period of reporting.
     pub report_interval: Option<crate::xcal::WsCalendarIntervalType>,
     pub ei_specifier_payload: Vec<crate::ei::SpecifierPayloadType>,
-
 }
 
 impl ReportSpecifierType {
-    fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        xsd_util::write_simple_element(writer, "ei:reportSpecifierID", self.ei_report_specifier_id.as_str())?;
-        self.xcal_granularity.write_with_name(writer, "xcal:granularity", false, false)?;
-        self.report_back_duration.write_with_name(writer, "reportBackDuration", false, false)?;
+    fn write_elem<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        xsd_util::write_simple_element(
+            writer,
+            "ei:reportSpecifierID",
+            self.ei_report_specifier_id.as_str(),
+        )?;
+        self.xcal_granularity
+            .write_with_name(writer, "xcal:granularity", false, false)?;
+        self.report_back_duration
+            .write_with_name(writer, "reportBackDuration", false, false)?;
         if let Some(elem) = &self.report_interval {
             elem.write_with_name(writer, "reportInterval", false, false)?;
         }
@@ -29,8 +40,21 @@ impl ReportSpecifierType {
         Ok(())
     }
 
-    pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        let start = if top_level { super::add_schema_attr(events::XmlEvent::start_element(name)) } else { events::XmlEvent::start_element(name) };
+    pub(crate) fn write_with_name<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+        name: &str,
+        top_level: bool,
+        write_type: bool,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        let start = if top_level {
+            super::add_schema_attr(events::XmlEvent::start_element(name))
+        } else {
+            events::XmlEvent::start_element(name)
+        };
         let start = if write_type {
             start.attr("xsi:type", "ei:ReportSpecifierType")
         } else {
@@ -44,7 +68,14 @@ impl ReportSpecifierType {
 }
 
 impl xsd_api::WriteXml for ReportSpecifierType {
-    fn write<W>(&self, config: xsd_api::WriteConfig, writer: &mut W) -> core::result::Result<(), xsd_api::WriteError> where W: std::io::Write {
+    fn write<W>(
+        &self,
+        config: xsd_api::WriteConfig,
+        writer: &mut W,
+    ) -> core::result::Result<(), xsd_api::WriteError>
+    where
+        W: std::io::Write,
+    {
         let mut writer = config.build_xml_rs().create_writer(writer);
         self.write_with_name(&mut writer, "ei:ReportSpecifierType", true, false)?;
         Ok(())
@@ -52,17 +83,27 @@ impl xsd_api::WriteXml for ReportSpecifierType {
 }
 
 impl ReportSpecifierType {
-    pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
+    pub(crate) fn read<R>(
+        reader: &mut xml::reader::EventReader<R>,
+        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        parent_tag: &str,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
         // one variable for each attribute and element
-        let mut ei_report_specifier_id : xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_granularity : xsd_util::SetOnce<crate::xcal::DurationPropType> = Default::default();
-        let mut report_back_duration : xsd_util::SetOnce<crate::xcal::DurationPropType> = Default::default();
-        let mut report_interval : xsd_util::SetOnce<crate::xcal::WsCalendarIntervalType> = Default::default();
-        let mut ei_specifier_payload : Vec<crate::ei::SpecifierPayloadType> = Default::default();
+        let mut ei_report_specifier_id: xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_granularity: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+            Default::default();
+        let mut report_back_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+            Default::default();
+        let mut report_interval: xsd_util::SetOnce<crate::xcal::WsCalendarIntervalType> =
+            Default::default();
+        let mut ei_specifier_payload: Vec<crate::ei::SpecifierPayloadType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                _ => {}, // ignore unknown attributes
+                _ => {} // ignore unknown attributes
             };
         }
 
@@ -77,31 +118,54 @@ impl ReportSpecifierType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, attributes, .. } => {
-                    match name.local_name.as_str() {
-                        "ei:reportSpecifierID" => {
-                            ei_report_specifier_id.set(xsd_util::read_string(reader, "ei:reportSpecifierID")?)?
-                        }
-                        "xcal:granularity" => {
-                            xcal_granularity.set(crate::xcal::DurationPropType::read(reader, &attributes, "xcal:granularity")?)?
-                        }
-                        "reportBackDuration" => {
-                            report_back_duration.set(crate::xcal::DurationPropType::read(reader, &attributes, "reportBackDuration")?)?
-                        }
-                        "reportInterval" => {
-                            report_interval.set(crate::xcal::WsCalendarIntervalType::read(reader, &attributes, "reportInterval")?)?
-                        }
-                        "ei:specifierPayload" => {
-                            ei_specifier_payload.push(crate::ei::SpecifierPayloadType::read(reader, &attributes, "ei:specifierPayload")?)
-                        }
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent)
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "ei:reportSpecifierID" => ei_report_specifier_id
+                        .set(xsd_util::read_string(reader, "ei:reportSpecifierID")?)?,
+                    "xcal:granularity" => {
+                        xcal_granularity.set(crate::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "xcal:granularity",
+                        )?)?
                     }
-                }
+                    "reportBackDuration" => {
+                        report_back_duration.set(crate::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "reportBackDuration",
+                        )?)?
+                    }
+                    "reportInterval" => {
+                        report_interval.set(crate::xcal::WsCalendarIntervalType::read(
+                            reader,
+                            &attributes,
+                            "reportInterval",
+                        )?)?
+                    }
+                    "ei:specifierPayload" => {
+                        ei_specifier_payload.push(crate::ei::SpecifierPayloadType::read(
+                            reader,
+                            &attributes,
+                            "ei:specifierPayload",
+                        )?)
+                    }
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
-                xml::reader::XmlEvent::StartDocument { .. } => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::EndDocument => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::Characters(_) => return Err(xsd_api::ReadError::UnexpectedEvent),
-                xml::reader::XmlEvent::ProcessingInstruction { .. } => return Err(xsd_api::ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartDocument { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::EndDocument => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::Characters(_) => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::ProcessingInstruction { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
                 xml::reader::XmlEvent::Comment(_) => {}
@@ -111,29 +175,41 @@ impl ReportSpecifierType {
 
         // construct the type from the cells
         Ok(ReportSpecifierType {
-            ei_report_specifier_id : ei_report_specifier_id.require()?,
-            xcal_granularity : xcal_granularity.require()?,
-            report_back_duration : report_back_duration.require()?,
-            report_interval : report_interval.get(),
+            ei_report_specifier_id: ei_report_specifier_id.require()?,
+            xcal_granularity: xcal_granularity.require()?,
+            report_back_duration: report_back_duration.require()?,
+            report_interval: report_interval.get(),
             ei_specifier_payload,
         })
     }
 
-    fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
+    fn read_top_level<R>(
+        reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
         let attr = xsd_util::read_start_tag(reader, "ReportSpecifierType")?;
         ReportSpecifierType::read(reader, &attr, "ei:ReportSpecifierType")
     }
 }
 
 impl xsd_api::ReadXml for ReportSpecifierType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation> where R: std::io::Read {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+    where
+        R: std::io::Read,
+    {
         let mut reader = xml::reader::EventReader::new(r);
 
         match ReportSpecifierType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation { err, line: pos.row, col: pos.column })
+                Err(xsd_api::ErrorWithLocation {
+                    err,
+                    line: pos.row,
+                    col: pos.column,
+                })
             }
         }
     }

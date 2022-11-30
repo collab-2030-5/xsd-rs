@@ -13,6 +13,7 @@ use crate::{BaseTypeConfig, FatalError};
 use heck::ToSnakeCase;
 
 pub(crate) mod bit_field;
+pub(crate) mod choice;
 pub(crate) mod fields;
 pub(crate) mod named_array;
 pub(crate) mod numeric_enum;
@@ -47,7 +48,7 @@ impl GeneratedType {
     fn write(&self, w: &mut dyn Write) -> Result<(), FatalError> {
         match self {
             Self::Struct(x) => structs::write(w, x),
-            Self::Choice(_) => unimplemented!(),
+            Self::Choice(x) => choice::write(w, x),
             Self::Wrapper(x) => match x {
                 WrapperType::Enum(x) => string_enums::write(w, x),
                 WrapperType::EnumU8(_, x) => numeric_enum::write(w, x),

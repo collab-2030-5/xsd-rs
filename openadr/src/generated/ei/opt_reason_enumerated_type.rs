@@ -20,7 +20,7 @@ pub enum OptReasonEnumeratedType {
 }
 
 impl xsd_util::StringEnumeration for OptReasonEnumeratedType {
-    fn find(s: &str) -> Option<Self>{
+    fn find(s: &str) -> Option<Self> {
         match s {
             "economic" => Some(Self::Economic),
             "emergency" => Some(Self::Emergency),
@@ -30,7 +30,7 @@ impl xsd_util::StringEnumeration for OptReasonEnumeratedType {
             "overrideStatus" => Some(Self::OverrideStatus),
             "participating" => Some(Self::Participating),
             "x-schedule" => Some(Self::XSchedule),
-            _ => None
+            _ => None,
         }
     }
 

@@ -1,16 +1,21 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
+pub struct EiEventBaselineType {
+    pub xcal_dtstart: crate::xcal::Dtstart,
+    pub xcal_duration: crate::xcal::DurationPropType,
+    pub strm_intervals: crate::strm::Intervals,
+    /// Unique ID for a specific baseline
+    pub baseline_id: String,
+    pub ei_resource_id: Vec<String>,
+    /// Descriptive name for baseline
+    pub baseline_name: String,
+    /// This is the unit of the signal.
     pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
 }
 
-impl SpecifierPayloadType {
+impl EiEventBaselineType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +23,20 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
+        self.xcal_dtstart
+            .write_with_name(writer, "xcal:dtstart", false, false)?;
+        self.xcal_duration
+            .write_with_name(writer, "xcal:duration", false, false)?;
+        self.strm_intervals
+            .write_with_name(writer, "strm:intervals", false, false)?;
+        xsd_util::write_simple_element(writer, "baselineID", self.baseline_id.as_str())?;
+        for item in &self.ei_resource_id {
+            xsd_util::write_simple_element(writer, "ei:resourceID", item.as_str())?;
+        }
+        xsd_util::write_simple_element(writer, "baselineName", self.baseline_name.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write_with_name(writer, "emix:itemBase")?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
         Ok(())
     }
 
@@ -42,7 +56,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "ei:eiEventBaselineType")
         } else {
             start
         };
@@ -53,7 +67,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for EiEventBaselineType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +77,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiEventBaselineType", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl EiEventBaselineType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +92,14 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+            Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
+        let mut baseline_id: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_resource_id: Vec<String> = Default::default();
+        let mut baseline_name: xsd_util::SetOnce<String> = Default::default();
         let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,15 +121,35 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
+                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                        reader,
+                        &attributes,
+                        "xcal:dtstart",
+                    )?)?,
+                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                        reader,
+                        &attributes,
+                        "xcal:duration",
+                    )?)?,
+                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                        reader,
+                        &attributes,
+                        "strm:intervals",
+                    )?)?,
+                    "baselineID" => {
+                        baseline_id.set(xsd_util::read_string(reader, "baselineID")?)?
+                    }
+                    "ei:resourceID" => {
+                        ei_resource_id.push(xsd_util::read_string(reader, "ei:resourceID")?)
+                    }
+                    "baselineName" => {
+                        baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
+                    }
                     "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
                         reader,
                         &attributes,
                         "emix:itemBase",
                     )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
-                    }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -134,10 +173,14 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
+        Ok(EiEventBaselineType {
+            xcal_dtstart: xcal_dtstart.require()?,
+            xcal_duration: xcal_duration.require()?,
+            strm_intervals: strm_intervals.require()?,
+            baseline_id: baseline_id.require()?,
+            ei_resource_id,
+            baseline_name: baseline_name.require()?,
             emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
         })
     }
 
@@ -147,19 +190,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "eiEventBaselineType")?;
+        EiEventBaselineType::read(reader, &attr, "ei:eiEventBaselineType")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for EiEventBaselineType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match EiEventBaselineType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

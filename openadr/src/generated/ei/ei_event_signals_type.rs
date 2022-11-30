@@ -1,20 +1,15 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Opts are used by the VEN to temporarily override the pre-existing agreement. For example, a VEN may opt in to events during the evening, or opt out from events during the world series.
 #[derive(Debug, Clone, PartialEq)]
-pub struct EiOptType {
-    pub ei_opt_id: String,
-    pub ei_opt_type: crate::ei::OptTypeType,
-    pub ei_opt_reason: String,
-    pub emix_market_context: Option<String>,
-    pub ei_ven_id: String,
-    pub xcal_vavailability: Option<crate::xcal::VavailabilityType>,
-    pub ei_created_date_time: String,
-    pub ei_schema_version: Option<String>,
+pub struct EiEventSignalsType {
+    /// Interval data for an event
+    pub ei_ei_event_signal: Vec<crate::ei::EiEventSignalType>,
+    /// Interval data for a baseline
+    pub ei_ei_event_baseline: Option<crate::ei::EiEventBaselineType>,
 }
 
-impl EiOptType {
+impl EiEventSignalsType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -22,21 +17,12 @@ impl EiOptType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:optID", self.ei_opt_id.as_str())?;
-        xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
-        xsd_util::write_simple_element(writer, "ei:optReason", self.ei_opt_reason.as_str())?;
-        if let Some(elem) = &self.emix_market_context {
-            xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
+        for item in &self.ei_ei_event_signal {
+            item.write_with_name(writer, "ei:eiEventSignal", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:venID", self.ei_ven_id.as_str())?;
-        if let Some(elem) = &self.xcal_vavailability {
-            elem.write_with_name(writer, "xcal:vavailability", false, false)?;
+        if let Some(elem) = &self.ei_ei_event_baseline {
+            elem.write_with_name(writer, "ei:eiEventBaseline", false, false)?;
         }
-        xsd_util::write_simple_element(
-            writer,
-            "ei:createdDateTime",
-            self.ei_created_date_time.as_str(),
-        )?;
         Ok(())
     }
 
@@ -55,14 +41,8 @@ impl EiOptType {
         } else {
             events::XmlEvent::start_element(name)
         };
-        // ---- start attributes ----
-        let start = match &self.ei_schema_version {
-            Some(attr) => start.attr("ei:schemaVersion", attr.as_str()),
-            None => start,
-        };
-        // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "ei:EiOptType")
+            start.attr("xsi:type", "ei:eiEventSignalsType")
         } else {
             start
         };
@@ -73,7 +53,7 @@ impl EiOptType {
     }
 }
 
-impl xsd_api::WriteXml for EiOptType {
+impl xsd_api::WriteXml for EiEventSignalsType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -83,12 +63,12 @@ impl xsd_api::WriteXml for EiOptType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:EiOptType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiEventSignalsType", true, false)?;
         Ok(())
     }
 }
 
-impl EiOptType {
+impl EiEventSignalsType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -98,19 +78,12 @@ impl EiOptType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
-        let mut ei_opt_reason: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_vavailability: xsd_util::SetOnce<crate::xcal::VavailabilityType> =
+        let mut ei_ei_event_signal: Vec<crate::ei::EiEventSignalType> = Default::default();
+        let mut ei_ei_event_baseline: xsd_util::SetOnce<crate::ei::EiEventBaselineType> =
             Default::default();
-        let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "ei:schemaVersion" => ei_schema_version.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }
@@ -129,25 +102,20 @@ impl EiOptType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:optID" => ei_opt_id.set(xsd_util::read_string(reader, "ei:optID")?)?,
-                    "ei:optType" => {
-                        ei_opt_type.set(xsd_util::read_string_enum(reader, "ei:optType")?)?
-                    }
-                    "ei:optReason" => {
-                        ei_opt_reason.set(xsd_util::read_string(reader, "ei:optReason")?)?
-                    }
-                    "emix:marketContext" => emix_market_context
-                        .set(xsd_util::read_string(reader, "emix:marketContext")?)?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    "xcal:vavailability" => {
-                        xcal_vavailability.set(crate::xcal::VavailabilityType::read(
+                    "ei:eiEventSignal" => {
+                        ei_ei_event_signal.push(crate::ei::EiEventSignalType::read(
                             reader,
                             &attributes,
-                            "xcal:vavailability",
+                            "ei:eiEventSignal",
+                        )?)
+                    }
+                    "ei:eiEventBaseline" => {
+                        ei_ei_event_baseline.set(crate::ei::EiEventBaselineType::read(
+                            reader,
+                            &attributes,
+                            "ei:eiEventBaseline",
                         )?)?
                     }
-                    "ei:createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "ei:createdDateTime")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -171,15 +139,9 @@ impl EiOptType {
         }
 
         // construct the type from the cells
-        Ok(EiOptType {
-            ei_opt_id: ei_opt_id.require()?,
-            ei_opt_type: ei_opt_type.require()?,
-            ei_opt_reason: ei_opt_reason.require()?,
-            emix_market_context: emix_market_context.get(),
-            ei_ven_id: ei_ven_id.require()?,
-            xcal_vavailability: xcal_vavailability.get(),
-            ei_created_date_time: ei_created_date_time.require()?,
-            ei_schema_version: ei_schema_version.get(),
+        Ok(EiEventSignalsType {
+            ei_ei_event_signal,
+            ei_ei_event_baseline: ei_ei_event_baseline.get(),
         })
     }
 
@@ -189,19 +151,19 @@ impl EiOptType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EiOptType")?;
-        EiOptType::read(reader, &attr, "ei:EiOptType")
+        let attr = xsd_util::read_start_tag(reader, "eiEventSignalsType")?;
+        EiEventSignalsType::read(reader, &attr, "ei:eiEventSignalsType")
     }
 }
 
-impl xsd_api::ReadXml for EiOptType {
+impl xsd_api::ReadXml for EiEventSignalsType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EiOptType::read_top_level(&mut reader) {
+        match EiEventSignalsType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

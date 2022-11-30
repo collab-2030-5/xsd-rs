@@ -52,7 +52,7 @@ pub enum ReportEnumeratedType {
 }
 
 impl xsd_util::StringEnumeration for ReportEnumeratedType {
-    fn find(s: &str) -> Option<Self>{
+    fn find(s: &str) -> Option<Self> {
         match s {
             "reading" => Some(Self::Reading),
             "usage" => Some(Self::Usage),
@@ -78,7 +78,7 @@ impl xsd_util::StringEnumeration for ReportEnumeratedType {
             "percentUsage" => Some(Self::PercentUsage),
             "percentDemand" => Some(Self::PercentDemand),
             "x-resourceStatus" => Some(Self::XResourceStatus),
-            _ => None
+            _ => None,
         }
     }
 

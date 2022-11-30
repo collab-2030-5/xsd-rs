@@ -15,7 +15,7 @@ pub enum EventStatusEnumeratedType {
 }
 
 impl xsd_util::StringEnumeration for EventStatusEnumeratedType {
-    fn find(s: &str) -> Option<Self>{
+    fn find(s: &str) -> Option<Self> {
         match s {
             "none" => Some(Self::None),
             "far" => Some(Self::Far),
@@ -23,7 +23,7 @@ impl xsd_util::StringEnumeration for EventStatusEnumeratedType {
             "active" => Some(Self::Active),
             "completed" => Some(Self::Completed),
             "cancelled" => Some(Self::Cancelled),
-            _ => None
+            _ => None,
         }
     }
 

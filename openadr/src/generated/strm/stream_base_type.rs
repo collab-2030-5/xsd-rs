@@ -1,16 +1,15 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
+/// abstract base for communication of schedules for signals and observations
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
-    pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
+pub struct StreamBaseType {
+    pub xcal_dtstart: Option<crate::xcal::Dtstart>,
+    pub xcal_duration: Option<crate::xcal::DurationPropType>,
+    pub strm_intervals: Option<crate::strm::Intervals>,
 }
 
-impl SpecifierPayloadType {
+impl StreamBaseType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +17,15 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
-        if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
+        if let Some(elem) = &self.xcal_dtstart {
+            elem.write_with_name(writer, "xcal:dtstart", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        if let Some(elem) = &self.xcal_duration {
+            elem.write_with_name(writer, "xcal:duration", false, false)?;
+        }
+        if let Some(elem) = &self.strm_intervals {
+            elem.write_with_name(writer, "strm:intervals", false, false)?;
+        }
         Ok(())
     }
 
@@ -42,7 +45,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "strm:StreamBaseType")
         } else {
             start
         };
@@ -53,7 +56,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for StreamBaseType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +66,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "strm:StreamBaseType", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl StreamBaseType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +81,10 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+            Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,15 +106,21 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
+                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "emix:itemBase",
+                        "xcal:dtstart",
                     )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
-                    }
+                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                        reader,
+                        &attributes,
+                        "xcal:duration",
+                    )?)?,
+                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                        reader,
+                        &attributes,
+                        "strm:intervals",
+                    )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -134,10 +144,10 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
-            emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
+        Ok(StreamBaseType {
+            xcal_dtstart: xcal_dtstart.get(),
+            xcal_duration: xcal_duration.get(),
+            strm_intervals: strm_intervals.get(),
         })
     }
 
@@ -147,19 +157,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "StreamBaseType")?;
+        StreamBaseType::read(reader, &attr, "strm:StreamBaseType")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for StreamBaseType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match StreamBaseType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

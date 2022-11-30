@@ -1,16 +1,22 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
+pub struct EiEventSignalType {
+    pub strm_intervals: crate::strm::Intervals,
+    /// Optionally identifies the device class associated with the signal. Only the endDeviceAsset subelement is used
+    pub ei_ei_target: Option<crate::ei::EiTargetType>,
+    /// Descriptive name for signal.
+    pub ei_signal_name: String,
+    pub ei_signal_type: crate::ei::SignalTypeEnumeratedType,
+    /// unique Identifier for a specific event signal
+    pub signal_id: String,
+    /// This is the unit of the signal.
     pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
+    pub ei_current_value: Option<crate::ei::CurrentValueType>,
 }
 
-impl SpecifierPayloadType {
+impl EiEventSignalType {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +24,20 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
+        self.strm_intervals
+            .write_with_name(writer, "strm:intervals", false, false)?;
+        if let Some(elem) = &self.ei_ei_target {
+            elem.write_with_name(writer, "ei:eiTarget", false, false)?;
+        }
+        xsd_util::write_simple_element(writer, "ei:signalName", self.ei_signal_name.as_str())?;
+        xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
+        xsd_util::write_simple_element(writer, "signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write_with_name(writer, "emix:itemBase")?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        if let Some(elem) = &self.ei_current_value {
+            elem.write_with_name(writer, "ei:currentValue", false, false)?;
+        }
         Ok(())
     }
 
@@ -42,7 +57,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "ei:eiEventSignalType")
         } else {
             start
         };
@@ -53,7 +68,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for EiEventSignalType {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +78,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiEventSignalType", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl EiEventSignalType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +93,15 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
+        let mut ei_ei_target: xsd_util::SetOnce<crate::ei::EiTargetType> = Default::default();
+        let mut ei_signal_name: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_signal_type: xsd_util::SetOnce<crate::ei::SignalTypeEnumeratedType> =
+            Default::default();
+        let mut signal_id: xsd_util::SetOnce<String> = Default::default();
         let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_current_value: xsd_util::SetOnce<crate::ei::CurrentValueType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,15 +123,31 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
+                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                        reader,
+                        &attributes,
+                        "strm:intervals",
+                    )?)?,
+                    "ei:eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                        reader,
+                        &attributes,
+                        "ei:eiTarget",
+                    )?)?,
+                    "ei:signalName" => {
+                        ei_signal_name.set(xsd_util::read_string(reader, "ei:signalName")?)?
+                    }
+                    "ei:signalType" => {
+                        ei_signal_type.set(xsd_util::read_string_enum(reader, "ei:signalType")?)?
+                    }
+                    "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
                     "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
                         reader,
                         &attributes,
                         "emix:itemBase",
                     )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
-                    }
+                    "ei:currentValue" => ei_current_value.set(
+                        crate::ei::CurrentValueType::read(reader, &attributes, "ei:currentValue")?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -134,10 +171,14 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
+        Ok(EiEventSignalType {
+            strm_intervals: strm_intervals.require()?,
+            ei_ei_target: ei_ei_target.get(),
+            ei_signal_name: ei_signal_name.require()?,
+            ei_signal_type: ei_signal_type.require()?,
+            signal_id: signal_id.require()?,
             emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
+            ei_current_value: ei_current_value.get(),
         })
     }
 
@@ -147,19 +188,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "eiEventSignalType")?;
+        EiEventSignalType::read(reader, &attr, "ei:eiEventSignalType")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for EiEventSignalType {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match EiEventSignalType::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

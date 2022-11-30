@@ -1,16 +1,12 @@
 use xml::common::Position;
 use xml::writer::*;
 
-/// Payload for use in Report Specifiers.
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpecifierPayloadType {
-    pub ei_r_id: String,
-    /// What is measured or tracked in this report (Units).
-    pub emix_item_base: Option<base::ItemBaseType>,
-    pub ei_reading_type: String,
+pub struct Uid {
+    pub xcal_text: String,
 }
 
-impl SpecifierPayloadType {
+impl Uid {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,11 +14,7 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
-        if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
-        }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        xsd_util::write_simple_element(writer, "xcal:text", self.xcal_text.as_str())?;
         Ok(())
     }
 
@@ -42,7 +34,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "xcal:uid")
         } else {
             start
         };
@@ -53,7 +45,7 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl xsd_api::WriteXml for Uid {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +55,12 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "xcal:uid", true, false)?;
         Ok(())
     }
 }
 
-impl SpecifierPayloadType {
+impl Uid {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +70,7 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_text: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -99,20 +89,14 @@ impl SpecifierPayloadType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
-                        reader,
-                        &attributes,
-                        "emix:itemBase",
-                    )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
+                xml::reader::XmlEvent::StartElement { name, .. } => {
+                    match name.local_name.as_str() {
+                        "xcal:text" => {
+                            xcal_text.set(xsd_util::read_string(reader, "xcal:text")?)?
+                        }
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -134,10 +118,8 @@ impl SpecifierPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SpecifierPayloadType {
-            ei_r_id: ei_r_id.require()?,
-            emix_item_base: emix_item_base.get(),
-            ei_reading_type: ei_reading_type.require()?,
+        Ok(Uid {
+            xcal_text: xcal_text.require()?,
         })
     }
 
@@ -147,19 +129,19 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "uid")?;
+        Uid::read(reader, &attr, "xcal:uid")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
+impl xsd_api::ReadXml for Uid {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match SpecifierPayloadType::read_top_level(&mut reader) {
+        match Uid::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

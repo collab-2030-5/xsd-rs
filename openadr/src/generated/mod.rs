@@ -1,5 +1,9 @@
 pub mod clm5_iso42173a;
+pub mod ei;
 pub mod emix;
 pub mod gml;
 pub mod power;
+pub mod pyld;
 pub mod scale;
+pub mod strm;
+pub mod xcal;

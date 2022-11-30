@@ -26,7 +26,7 @@ pub enum SignalTypeEnumeratedType {
 }
 
 impl xsd_util::StringEnumeration for SignalTypeEnumeratedType {
-    fn find(s: &str) -> Option<Self>{
+    fn find(s: &str) -> Option<Self> {
         match s {
             "delta" => Some(Self::Delta),
             "level" => Some(Self::Level),
@@ -39,7 +39,7 @@ impl xsd_util::StringEnumeration for SignalTypeEnumeratedType {
             "x-loadControlLevelOffset" => Some(Self::XLoadControlLevelOffset),
             "x-loadControlPercentOffset" => Some(Self::XLoadControlPercentOffset),
             "x-loadControlSetpoint" => Some(Self::XLoadControlSetpoint),
-            _ => None
+            _ => None,
         }
     }
 

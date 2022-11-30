@@ -7,11 +7,11 @@ pub enum OptTypeType {
 }
 
 impl xsd_util::StringEnumeration for OptTypeType {
-    fn find(s: &str) -> Option<Self>{
+    fn find(s: &str) -> Option<Self> {
         match s {
             "optIn" => Some(Self::OptIn),
             "optOut" => Some(Self::OptOut),
-            _ => None
+            _ => None,
         }
     }
 
