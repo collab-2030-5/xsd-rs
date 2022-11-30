@@ -1,6 +1,7 @@
 use crate::resolved::{AnyType, Union, UnionVariant};
 use crate::resolver::Resolver;
 use crate::TypeId;
+use std::rc::Rc;
 
 /// One of multiple possible simple types
 #[derive(Clone, Debug)]
@@ -49,6 +50,6 @@ impl UnresolvedUnion {
             variants,
         };
 
-        Some(AnyType::Union(resolved))
+        Some(AnyType::Union(Rc::new(resolved)))
     }
 }

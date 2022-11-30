@@ -1,6 +1,7 @@
 use crate::config::FieldId;
 use crate::resolved::{
-    AnyType, AttrMultiplicity, ElemMultiplicity, Field, FieldType, Struct, StructMetadata,
+    AnyType, AttrMultiplicity, ElemMultiplicity, Field, FieldType, SimpleAttributeType, Struct,
+    StructMetadata,
 };
 use crate::resolver::Resolver;
 use crate::TypeId;
@@ -130,16 +131,26 @@ impl UnresolvedStruct {
     }
 }
 
+impl From<AttributeType> for AttrMultiplicity {
+    fn from(x: AttributeType) -> Self {
+        match x {
+            AttributeType::Single => Self::Single,
+            AttributeType::Option => Self::Optional,
+        }
+    }
+}
+
 fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
     match info {
         FieldTypeInfo::Attribute(attr_type) => match t {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
             AnyType::Choice(_) => panic!("attributes may not reference choice types"),
-            AnyType::Union(_) => panic!("attributes do not currently support unions"),
-            AnyType::Simple(x) => match attr_type {
-                AttributeType::Single => FieldType::Attribute(AttrMultiplicity::Single, x),
-                AttributeType::Option => FieldType::Attribute(AttrMultiplicity::Optional, x),
-            },
+            AnyType::Union(x) => {
+                FieldType::Attribute(attr_type.into(), SimpleAttributeType::Union(x.clone()))
+            }
+            AnyType::Simple(x) => {
+                FieldType::Attribute(attr_type.into(), SimpleAttributeType::Simple(x))
+            }
         },
         FieldTypeInfo::Element(x) => match x {
             ElementType::Single => FieldType::Element(ElemMultiplicity::Single, t),

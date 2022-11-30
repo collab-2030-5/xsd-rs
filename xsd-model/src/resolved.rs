@@ -17,9 +17,15 @@ pub enum AttrMultiplicity {
 }
 
 #[derive(Clone, Debug)]
+pub enum SimpleAttributeType {
+    Simple(SimpleType),
+    Union(Rc<Union>),
+}
+
+#[derive(Clone, Debug)]
 pub enum FieldType {
     Element(ElemMultiplicity, AnyType),
-    Attribute(AttrMultiplicity, SimpleType),
+    Attribute(AttrMultiplicity, SimpleAttributeType),
 }
 
 #[derive(Debug, Clone)]
@@ -70,7 +76,7 @@ pub struct UnionVariant {
 #[derive(Debug, Clone)]
 pub enum AnyType {
     Simple(SimpleType),
-    Union(Union),
+    Union(Rc<Union>),
     Struct(Rc<Struct>),
     Choice(Rc<Choice>),
 }

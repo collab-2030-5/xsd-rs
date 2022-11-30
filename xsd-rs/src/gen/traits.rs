@@ -1,6 +1,8 @@
 use heck::ToUpperCamelCase;
 use std::borrow::Cow;
-use xsd_model::resolved::{AnyType, AttrMultiplicity, ElemMultiplicity, FieldType};
+use xsd_model::resolved::{
+    AnyType, AttrMultiplicity, ElemMultiplicity, FieldType, SimpleAttributeType,
+};
 use xsd_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
 
 use heck::ToSnakeCase;
@@ -117,6 +119,15 @@ impl RustType for FieldType {
                 AttrMultiplicity::Single => t.rust_struct_type(),
                 AttrMultiplicity::Optional => format!("Option<{}>", t.rust_struct_type()).into(),
             },
+        }
+    }
+}
+
+impl RustType for SimpleAttributeType {
+    fn rust_struct_type(&self) -> Cow<'static, str> {
+        match self {
+            SimpleAttributeType::Simple(x) => x.rust_struct_type(),
+            SimpleAttributeType::Union(x) => fully_qualified_name(&x.id).into(),
         }
     }
 }

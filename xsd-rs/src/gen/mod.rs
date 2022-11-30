@@ -24,7 +24,7 @@ enum GeneratedType {
     Struct(Rc<Struct>),
     Choice(Rc<Choice>),
     Wrapper(WrapperType),
-    Union(Union),
+    Union(Rc<Union>),
 }
 
 impl GeneratedType {
