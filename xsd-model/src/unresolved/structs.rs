@@ -1,7 +1,6 @@
 use crate::config::FieldId;
 use crate::resolved::{
-    AnyType, AttrMultiplicity, ElemMultiplicity, Field, FieldType, SimpleAttributeType, Struct,
-    StructMetadata,
+    AnyType, AttrMultiplicity, ElemMultiplicity, Field, FieldType, Struct, StructMetadata,
 };
 use crate::resolver::Resolver;
 use crate::TypeId;
@@ -145,12 +144,7 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
         FieldTypeInfo::Attribute(attr_type) => match t {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
             AnyType::Choice(_) => panic!("attributes may not reference choice types"),
-            AnyType::Union(x) => {
-                FieldType::Attribute(attr_type.into(), SimpleAttributeType::Union(x.clone()))
-            }
-            AnyType::Simple(x) => {
-                FieldType::Attribute(attr_type.into(), SimpleAttributeType::Simple(x))
-            }
+            AnyType::Simple(x) => FieldType::Attribute(attr_type.into(), x),
         },
         FieldTypeInfo::Element(x) => match x {
             ElementType::Single => FieldType::Element(ElemMultiplicity::Single, t),

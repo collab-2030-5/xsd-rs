@@ -445,26 +445,21 @@ impl AttributeTransform {
     }
 }
 
-fn get_attr_transform(attr_type: &SimpleAttributeType) -> Option<AttributeTransform> {
+fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
     match attr_type {
-        SimpleAttributeType::Union(x) => unimplemented!(),
-        SimpleAttributeType::Simple(x) => match x {
-            SimpleType::Primitive(primitive) => match primitive {
-                PrimitiveType::Boolean => Some(AttributeTransform::Number),
-                PrimitiveType::HexBytes(HexByteConstraints::Single) => {
-                    Some(AttributeTransform::Number)
-                }
-                PrimitiveType::HexBytes(HexByteConstraints::Bytes { .. }) => None,
-                PrimitiveType::String(_) => None,
-                PrimitiveType::Number(_) => Some(AttributeTransform::Number),
-                PrimitiveType::NumericDuration(x) => Some(AttributeTransform::Duration(*x)),
-            },
-            SimpleType::Wrapper(wrapper) => match wrapper {
-                WrapperType::EnumU8(_, x) => Some(AttributeTransform::NumericEnum(x.clone())),
-                WrapperType::NamedArray(_, x) => Some(AttributeTransform::NamedArray(x.clone())),
-                WrapperType::HexBitField(_, x) => Some(AttributeTransform::HexBitfield(x.clone())),
-                WrapperType::Enum(_) => unimplemented!(),
-            },
+        SimpleType::Primitive(primitive) => match primitive {
+            PrimitiveType::Boolean => Some(AttributeTransform::Number),
+            PrimitiveType::HexBytes(HexByteConstraints::Single) => Some(AttributeTransform::Number),
+            PrimitiveType::HexBytes(HexByteConstraints::Bytes { .. }) => None,
+            PrimitiveType::String(_) => None,
+            PrimitiveType::Number(_) => Some(AttributeTransform::Number),
+            PrimitiveType::NumericDuration(x) => Some(AttributeTransform::Duration(*x)),
+        },
+        SimpleType::Wrapper(wrapper) => match wrapper {
+            WrapperType::EnumU8(_, x) => Some(AttributeTransform::NumericEnum(x.clone())),
+            WrapperType::NamedArray(_, x) => Some(AttributeTransform::NamedArray(x.clone())),
+            WrapperType::HexBitField(_, x) => Some(AttributeTransform::HexBitfield(x.clone())),
+            WrapperType::Enum(_) => unimplemented!(),
         },
     }
 }
@@ -565,7 +560,7 @@ where
 
 struct Attribute {
     name: String,
-    field_type: SimpleAttributeType,
+    field_type: SimpleType,
     multiplicity: AttrMultiplicity,
 }
 

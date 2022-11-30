@@ -1,7 +1,6 @@
-use crate::resolved::{AnyType, Union, UnionVariant};
+use crate::resolved::AnyType;
 use crate::resolver::Resolver;
-use crate::TypeId;
-use std::rc::Rc;
+use crate::{PrimitiveType, SimpleType, StringConstraints, TypeId};
 
 /// One of multiple possible simple types
 #[derive(Clone, Debug)]
@@ -19,7 +18,11 @@ pub struct UnresolvedUnionVariant {
 }
 
 impl UnresolvedUnion {
-    pub(crate) fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
+    pub(crate) fn resolve(&self, _resolver: &Resolver) -> Option<AnyType> {
+        // just punt on this for now and make all unions strings
+        Some(SimpleType::Primitive(PrimitiveType::String(StringConstraints::default())).into())
+
+        /*
         let mut variants: Vec<UnionVariant> = Default::default();
 
         for v in self.variants.iter() {
@@ -51,5 +54,6 @@ impl UnresolvedUnion {
         };
 
         Some(AnyType::Union(Rc::new(resolved)))
+             */
     }
 }

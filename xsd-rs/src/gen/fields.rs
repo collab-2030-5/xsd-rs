@@ -15,7 +15,6 @@ impl ElementTransforms for AnyType {
             AnyType::Simple(x) => x.read_transform(elem_name),
             AnyType::Struct(x) => x.read_transform(elem_name),
             AnyType::Choice(_) => unimplemented!(),
-            AnyType::Union(_) => unimplemented!(),
         }
     }
 
@@ -24,7 +23,6 @@ impl ElementTransforms for AnyType {
             AnyType::Simple(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Struct(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Choice(_) => unimplemented!(),
-            AnyType::Union(_) => unimplemented!(),
         }
     }
 }

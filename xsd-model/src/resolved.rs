@@ -17,15 +17,9 @@ pub enum AttrMultiplicity {
 }
 
 #[derive(Clone, Debug)]
-pub enum SimpleAttributeType {
-    Simple(SimpleType),
-    Union(Rc<Union>),
-}
-
-#[derive(Clone, Debug)]
 pub enum FieldType {
     Element(ElemMultiplicity, AnyType),
-    Attribute(AttrMultiplicity, SimpleAttributeType),
+    Attribute(AttrMultiplicity, SimpleType),
 }
 
 #[derive(Debug, Clone)]
@@ -58,6 +52,7 @@ pub struct ChoiceVariant {
     pub type_info: AnyType,
 }
 
+/*
 #[derive(Debug, Clone)]
 pub struct Union {
     pub comment: Option<String>,
@@ -71,12 +66,12 @@ pub struct UnionVariant {
     pub name: String,
     pub type_info: SimpleType,
 }
+*/
 
 /// Simple or composite like a struct
 #[derive(Debug, Clone)]
 pub enum AnyType {
     Simple(SimpleType),
-    Union(Rc<Union>),
     Struct(Rc<Struct>),
     Choice(Rc<Choice>),
 }
