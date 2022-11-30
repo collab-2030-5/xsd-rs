@@ -101,34 +101,27 @@ impl UnresolvedModel {
                 self.merge_entity(en, settings);
             }
 
-            let field = match field.source {
-                StructFieldSource::Attribute => {
-                    let field = UnresolvedField {
-                        comment: field.comment.clone(),
-                        name: field.name.clone(),
-                        field_type: TypeId::parse(&field.type_name, settings.namespace),
-                        info: FieldTypeInfo::Attribute(get_attribute_type(&field.type_modifiers)),
-                    };
-                    Some(field)
-                }
+            let info: Option<FieldTypeInfo> = match field.source {
+                StructFieldSource::Attribute => Some(FieldTypeInfo::Attribute(get_attribute_type(
+                    &field.type_modifiers,
+                ))),
                 StructFieldSource::Element | StructFieldSource::Choice => {
-                    let element_type = match get_element_type(&field.type_modifiers) {
-                        None => ElementType::Single,
-                        Some(x) => x,
-                    };
-                    let field = UnresolvedField {
-                        comment: field.comment.clone(),
-                        name: field.name.clone(),
-                        field_type: TypeId::parse(&field.type_name, settings.namespace),
-                        info: FieldTypeInfo::Element(element_type),
-                    };
-                    Some(field)
+                    match get_element_type(&field.type_modifiers) {
+                        None => Some(FieldTypeInfo::Element(ElementType::Single)),
+                        Some(x) => Some(FieldTypeInfo::Element(x)),
+                    }
                 }
                 StructFieldSource::Base => None,
                 StructFieldSource::NA => unimplemented!(),
             };
 
-            if let Some(field) = field {
+            if let Some(info) = info {
+                let field = UnresolvedField {
+                    comment: field.comment.clone(),
+                    name: field.name.clone(),
+                    field_type: TypeId::parse(&field.type_name, settings.namespace),
+                    info,
+                };
                 output.push(field);
             }
         }
