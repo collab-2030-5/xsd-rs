@@ -111,7 +111,7 @@ impl UnresolvedModel {
                     };
                     Some(field)
                 }
-                StructFieldSource::Element => {
+                StructFieldSource::Element | StructFieldSource::Choice => {
                     let element_type = match get_element_type(&field.type_modifiers) {
                         None => ElementType::Single,
                         Some(x) => x,
@@ -125,7 +125,6 @@ impl UnresolvedModel {
                     Some(field)
                 }
                 StructFieldSource::Base => None,
-                StructFieldSource::Choice => unimplemented!(),
                 StructFieldSource::NA => unimplemented!(),
             };
 
@@ -138,6 +137,11 @@ impl UnresolvedModel {
     }
 
     fn merge_enum(&mut self, en: &Enum, settings: &Settings) {
+        for entity in en.subtypes.iter() {
+            tracing::info!("enum sub-type: {:#?}", entity);
+            self.merge_entity(entity, settings);
+        }
+
         match en.source {
             EnumSource::Restriction => {
                 let en = convert_restricted_enum(en, settings);
@@ -340,14 +344,6 @@ impl UnresolvedTypeEx {
 }
 
 fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
-    if !en.subtypes.is_empty() {
-        panic!(
-            "Restriction-based enum {} has {} subtypes",
-            en.name,
-            en.subtypes.len()
-        )
-    }
-
     let mut variants: Vec<NamedEnumVariant> = Vec::new();
     let mut set: HashSet<String> = Default::default();
     for v in en.cases.iter() {
@@ -397,14 +393,6 @@ fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
 }
 
 fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
-    if !en.subtypes.is_empty() {
-        tracing::warn!(
-            "Choice-based enum {} has ignored subtypes: {:#?}",
-            en.name,
-            en.subtypes
-        )
-    }
-
     let mut variants: Vec<UnresolvedChoiceVariant> = Vec::new();
     for v in en.cases.iter() {
         let name = v
@@ -425,14 +413,6 @@ fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
 }
 
 fn convert_union_enum(en: &Enum, settings: &Settings) -> UnresolvedUnion {
-    if !en.subtypes.is_empty() {
-        tracing::warn!(
-            "Union-based enum {} has ignored subtypes: {:#?}",
-            en.name,
-            en.subtypes
-        )
-    }
-
     let mut variants: Vec<UnresolvedUnionVariant> = Vec::new();
     for v in en.cases.iter() {
         let type_name = v
@@ -462,7 +442,7 @@ fn extract_base_type(x: &Struct, settings: &Settings) -> Option<TypeId> {
             StructFieldSource::Attribute => None,
             StructFieldSource::Element => None,
             StructFieldSource::Base => Some(x.type_name.clone()),
-            StructFieldSource::Choice => unimplemented!(),
+            StructFieldSource::Choice => None,
             StructFieldSource::NA => unimplemented!(),
         })
         .collect();
