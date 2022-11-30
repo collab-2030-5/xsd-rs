@@ -1,7 +1,7 @@
 use crate::gen::traits::fully_qualified_name;
 use heck::ToUpperCamelCase;
 use xsd_model::config::{DurationEncoding, NumericDuration};
-use xsd_model::resolved::{AnyType, Struct};
+use xsd_model::resolved::{AnyType, Choice, Struct};
 use xsd_model::{PrimitiveType, SimpleType, WrapperType};
 
 pub(crate) trait ElementTransforms {
@@ -14,7 +14,7 @@ impl ElementTransforms for AnyType {
         match self {
             AnyType::Simple(x) => x.read_transform(elem_name),
             AnyType::Struct(x) => x.read_transform(elem_name),
-            AnyType::Choice(_) => unimplemented!(),
+            AnyType::Choice(x) => x.read_transform(elem_name),
         }
     }
 
@@ -22,7 +22,7 @@ impl ElementTransforms for AnyType {
         match self {
             AnyType::Simple(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Struct(x) => x.write_transform(rust_field_name, xsd_field_name),
-            AnyType::Choice(_) => unimplemented!(),
+            AnyType::Choice(x) => x.write_transform(rust_field_name, xsd_field_name),
         }
     }
 }
@@ -53,6 +53,16 @@ impl ElementTransforms for Struct {
                 rust_field_name, xsd_field_name
             )
         }
+    }
+}
+
+impl ElementTransforms for Choice {
+    fn read_transform(&self, elem_name: &str) -> String {
+        "unimplemented!()".to_string()
+    }
+
+    fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
+        "unimplemented!()".to_string()
     }
 }
 

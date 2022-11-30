@@ -46,7 +46,7 @@ impl GeneratedType {
 
     fn write(&self, w: &mut dyn Write) -> Result<(), FatalError> {
         match self {
-            Self::Struct(x) => structs::write_struct(w, x),
+            Self::Struct(x) => structs::write(w, x),
             Self::Choice(_) => unimplemented!(),
             Self::Wrapper(x) => match x {
                 WrapperType::Enum(x) => string_enums::write(w, x),

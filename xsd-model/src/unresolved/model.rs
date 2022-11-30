@@ -131,7 +131,7 @@ impl UnresolvedModel {
 
     fn merge_enum(&mut self, en: &Enum, settings: &Settings) {
         for entity in en.subtypes.iter() {
-            tracing::info!("enum sub-type: {:#?}", entity);
+            tracing::debug!("enum sub-type: {:#?}", entity);
             self.merge_entity(entity, settings);
         }
 

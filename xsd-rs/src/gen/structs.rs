@@ -11,7 +11,7 @@ use crate::gen::*;
 use heck::ToUpperCamelCase;
 use xsd_model::{HexByteConstraints, PrimitiveType, WrapperType};
 
-pub(crate) fn write_struct(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
+pub(crate) fn write(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
     writeln!(w, "use xml::writer::*;")?;
     writeln!(w, "use xml::common::Position;")?;
     writeln!(w)?;
