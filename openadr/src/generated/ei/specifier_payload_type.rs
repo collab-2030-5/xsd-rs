@@ -6,7 +6,7 @@ use xml::writer::*;
 pub struct SpecifierPayloadType {
     pub ei_r_id: String,
     /// What is measured or tracked in this report (Units).
-    pub emix_item_base: Option<base::ItemBaseType>,
+    pub emix_item_base: Option<crate::emix::ItemBaseType>,
     pub ei_reading_type: String,
 }
 
@@ -20,7 +20,7 @@ impl SpecifierPayloadType {
     {
         xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
+            elem.write_with_name(writer, "emix:itemBase", false, false)?;
         }
         xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
         Ok(())
@@ -79,7 +79,7 @@ impl SpecifierPayloadType {
     {
         // one variable for each attribute and element
         let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
+        let mut emix_item_base: xsd_util::SetOnce<crate::emix::ItemBaseType> = Default::default();
         let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
@@ -103,7 +103,7 @@ impl SpecifierPayloadType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
+                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
                         "emix:itemBase",

@@ -12,7 +12,7 @@ pub struct EiEventSignalType {
     /// unique Identifier for a specific event signal
     pub signal_id: String,
     /// This is the unit of the signal.
-    pub emix_item_base: Option<base::ItemBaseType>,
+    pub emix_item_base: Option<crate::emix::ItemBaseType>,
     pub ei_current_value: Option<crate::ei::CurrentValueType>,
 }
 
@@ -33,7 +33,7 @@ impl EiEventSignalType {
         xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
         xsd_util::write_simple_element(writer, "signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
+            elem.write_with_name(writer, "emix:itemBase", false, false)?;
         }
         if let Some(elem) = &self.ei_current_value {
             elem.write_with_name(writer, "ei:currentValue", false, false)?;
@@ -99,7 +99,7 @@ impl EiEventSignalType {
         let mut ei_signal_type: xsd_util::SetOnce<crate::ei::SignalTypeEnumeratedType> =
             Default::default();
         let mut signal_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
+        let mut emix_item_base: xsd_util::SetOnce<crate::emix::ItemBaseType> = Default::default();
         let mut ei_current_value: xsd_util::SetOnce<crate::ei::CurrentValueType> =
             Default::default();
 
@@ -140,7 +140,7 @@ impl EiEventSignalType {
                         ei_signal_type.set(xsd_util::read_string_enum(reader, "ei:signalType")?)?
                     }
                     "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
+                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
                         "emix:itemBase",

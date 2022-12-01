@@ -1,5 +1,4 @@
-use crate::gen::traits::fully_qualified_name;
-use heck::ToUpperCamelCase;
+use crate::RustType;
 use xsd_model::config::{DurationEncoding, NumericDuration};
 use xsd_model::resolved::{AnyType, Choice, Struct};
 use xsd_model::{PrimitiveType, SimpleType, WrapperType};
@@ -29,30 +28,18 @@ impl ElementTransforms for AnyType {
 
 impl ElementTransforms for Struct {
     fn read_transform(&self, elem_name: &str) -> String {
-        if self.metadata.is_base {
-            format!(
-                "base::{}::read(reader, &attributes, \"{}\")?",
-                self.id.name.to_upper_camel_case(),
-                elem_name
-            )
-        } else {
-            let name = fully_qualified_name(&self.id);
-            format!("{}::read(reader, &attributes, \"{}\")?", name, elem_name)
-        }
+        format!(
+            "{}::read(reader, &attributes, \"{}\")?",
+            self.rust_struct_type(),
+            elem_name
+        )
     }
 
     fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
-        if self.metadata.is_base {
-            format!(
-                "{}.write_with_name(writer, \"{}\")?;",
-                rust_field_name, xsd_field_name
-            )
-        } else {
-            format!(
-                "{}.write_with_name(writer, \"{}\", false, false)?;",
-                rust_field_name, xsd_field_name
-            )
-        }
+        format!(
+            "{}.write_with_name(writer, \"{}\", false, false)?;",
+            rust_field_name, xsd_field_name
+        )
     }
 }
 

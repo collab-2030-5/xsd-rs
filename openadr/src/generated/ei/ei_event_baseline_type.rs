@@ -12,7 +12,7 @@ pub struct EiEventBaselineType {
     /// Descriptive name for baseline
     pub baseline_name: String,
     /// This is the unit of the signal.
-    pub emix_item_base: Option<base::ItemBaseType>,
+    pub emix_item_base: Option<crate::emix::ItemBaseType>,
 }
 
 impl EiEventBaselineType {
@@ -35,7 +35,7 @@ impl EiEventBaselineType {
         }
         xsd_util::write_simple_element(writer, "baselineName", self.baseline_name.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase")?;
+            elem.write_with_name(writer, "emix:itemBase", false, false)?;
         }
         Ok(())
     }
@@ -99,7 +99,7 @@ impl EiEventBaselineType {
         let mut baseline_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_resource_id: Vec<String> = Default::default();
         let mut baseline_name: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<base::ItemBaseType> = Default::default();
+        let mut emix_item_base: xsd_util::SetOnce<crate::emix::ItemBaseType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -145,7 +145,7 @@ impl EiEventBaselineType {
                     "baselineName" => {
                         baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
                     }
-                    "emix:itemBase" => emix_item_base.set(base::ItemBaseType::read(
+                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
                         "emix:itemBase",

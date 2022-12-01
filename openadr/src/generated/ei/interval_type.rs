@@ -6,7 +6,7 @@ pub struct IntervalType {
     pub xcal_dtstart: Option<crate::xcal::Dtstart>,
     pub xcal_duration: Option<crate::xcal::DurationPropType>,
     pub xcal_uid: Option<crate::xcal::Uid>,
-    pub strm_stream_payload_base: Vec<base::StreamPayloadBaseType>,
+    pub strm_stream_payload_base: Vec<crate::strm::StreamPayloadBaseType>,
 }
 
 impl IntervalType {
@@ -27,7 +27,7 @@ impl IntervalType {
             elem.write_with_name(writer, "xcal:uid", false, false)?;
         }
         for item in &self.strm_stream_payload_base {
-            item.write_with_name(writer, "strm:streamPayloadBase")?;
+            item.write_with_name(writer, "strm:streamPayloadBase", false, false)?;
         }
         Ok(())
     }
@@ -88,7 +88,8 @@ impl IntervalType {
         let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
             Default::default();
         let mut xcal_uid: xsd_util::SetOnce<crate::xcal::Uid> = Default::default();
-        let mut strm_stream_payload_base: Vec<base::StreamPayloadBaseType> = Default::default();
+        let mut strm_stream_payload_base: Vec<crate::strm::StreamPayloadBaseType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -124,7 +125,7 @@ impl IntervalType {
                         xcal_uid.set(crate::xcal::Uid::read(reader, &attributes, "xcal:uid")?)?
                     }
                     "strm:streamPayloadBase" => {
-                        strm_stream_payload_base.push(base::StreamPayloadBaseType::read(
+                        strm_stream_payload_base.push(crate::strm::StreamPayloadBaseType::read(
                             reader,
                             &attributes,
                             "strm:streamPayloadBase",

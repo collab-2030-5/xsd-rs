@@ -9,7 +9,7 @@ pub struct ReportPayloadType {
     pub ei_confidence: Option<u32>,
     /// Accuracy in same units as interval payload value
     pub ei_accuracy: Option<f32>,
-    pub ei_payload_base: base::PayloadBaseType,
+    pub ei_payload_base: crate::ei::PayloadBaseType,
 }
 
 impl ReportPayloadType {
@@ -28,7 +28,7 @@ impl ReportPayloadType {
             xsd_util::write_element_using_to_string(writer, "ei:accuracy", elem)?;
         }
         self.ei_payload_base
-            .write_with_name(writer, "ei:payloadBase")?;
+            .write_with_name(writer, "ei:payloadBase", false, false)?;
         Ok(())
     }
 
@@ -87,7 +87,7 @@ impl ReportPayloadType {
         let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_confidence: xsd_util::SetOnce<u32> = Default::default();
         let mut ei_accuracy: xsd_util::SetOnce<f32> = Default::default();
-        let mut ei_payload_base: xsd_util::SetOnce<base::PayloadBaseType> = Default::default();
+        let mut ei_payload_base: xsd_util::SetOnce<crate::ei::PayloadBaseType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -115,7 +115,7 @@ impl ReportPayloadType {
                     "ei:accuracy" => {
                         ei_accuracy.set(xsd_util::read_type_from_string(reader, "ei:accuracy")?)?
                     }
-                    "ei:payloadBase" => ei_payload_base.set(base::PayloadBaseType::read(
+                    "ei:payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
                         reader,
                         &attributes,
                         "ei:payloadBase",

@@ -1,6 +1,6 @@
 use heck::ToUpperCamelCase;
 use std::borrow::Cow;
-use xsd_model::resolved::{AnyType, AttrMultiplicity, Choice, ElemMultiplicity, FieldType};
+use xsd_model::resolved::{AnyType, AttrMultiplicity, Choice, ElemMultiplicity, FieldType, Struct};
 use xsd_model::{HexByteConstraints, NumericType, PrimitiveType, SimpleType, TypeId, WrapperType};
 
 use heck::ToSnakeCase;
@@ -94,17 +94,17 @@ impl RustType for Choice {
     }
 }
 
+impl RustType for Struct {
+    fn rust_struct_type(&self) -> Cow<'static, str> {
+        fully_qualified_name(&self.id).into()
+    }
+}
+
 impl RustType for AnyType {
     fn rust_struct_type(&self) -> Cow<'static, str> {
         match self {
             AnyType::Simple(x) => x.rust_struct_type(),
-            AnyType::Struct(x) => {
-                if x.metadata.is_base {
-                    format!("base::{}", x.id.name.to_upper_camel_case()).into()
-                } else {
-                    fully_qualified_name(&x.id).into()
-                }
-            }
+            AnyType::Struct(x) => x.rust_struct_type(),
             AnyType::Choice(x) => x.rust_struct_type(),
         }
     }
