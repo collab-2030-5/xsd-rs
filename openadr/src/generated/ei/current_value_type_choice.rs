@@ -3,5 +3,5 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CurrentValueTypeChoice {
-    // variants
+    EiPayloadFloat(crate::ei::PayloadFloatType),
 }
