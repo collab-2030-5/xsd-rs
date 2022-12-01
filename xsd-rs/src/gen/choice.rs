@@ -48,9 +48,8 @@ fn write_impl(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::Error> 
 }
 
 fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::Error> {
-    writeln!(w, "pub(crate) fn write<W>(&self, writer: &mut EventWriter<W>, name: &str) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
+    writeln!(w, "pub(crate) fn write<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {{")?;
     indent(w, |w| {
-        writeln!(w, "writer.write(events::XmlEvent::start_element(name))?;")?;
         writeln!(w, "match self {{")?;
         indent(w, |w| {
             for var in choice.variants.iter() {
@@ -70,7 +69,6 @@ fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::E
             Ok(())
         })?;
         writeln!(w, "}}")?;
-        writeln!(w, "writer.write(events::XmlEvent::end_element())?;")?;
         writeln!(w, "Ok(())")?;
         Ok(())
     })?;

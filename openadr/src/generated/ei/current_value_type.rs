@@ -14,7 +14,7 @@ impl CurrentValueType {
     where
         W: std::io::Write,
     {
-        unimplemented!();
+        self.current_value_type_choice.write(writer)?;
         Ok(())
     }
 
