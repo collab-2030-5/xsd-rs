@@ -23,4 +23,13 @@ impl CurrentValueTypeChoice {
         writer.write(events::XmlEvent::end_element())?;
         Ok(())
     }
+
+    pub(crate) fn read<R>(
+        _reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
+        unimplemented!()
+    }
 }
