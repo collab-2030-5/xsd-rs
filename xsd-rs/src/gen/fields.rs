@@ -45,7 +45,7 @@ impl ElementTransforms for Struct {
 
 impl ElementTransforms for Choice {
     fn read_transform(&self, _elem_name: &str) -> String {
-        "unimplemented!()".to_string()
+        format!("{}::read(reader)?", self.rust_struct_type())
     }
 
     fn write_transform(&self, rust_field_name: &str, _xsd_field_name: &str) -> String {

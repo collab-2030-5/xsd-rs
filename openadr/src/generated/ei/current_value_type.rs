@@ -92,9 +92,8 @@ impl CurrentValueType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "currentValueTypeChoice" => {
-                            current_value_type_choice.set(unimplemented!())?
-                        }
+                        "currentValueTypeChoice" => current_value_type_choice
+                            .set(crate::ei::CurrentValueTypeChoice::read(reader)?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
