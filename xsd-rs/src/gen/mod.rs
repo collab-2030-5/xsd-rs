@@ -61,30 +61,10 @@ impl GeneratedType {
 
 pub(crate) fn write_model(
     dir: &Path,
-    model: &Model,
+    model: Model,
     _config: &BaseTypeConfig,
 ) -> Result<(), FatalError> {
-    //
-    let mut namespaces: HashMap<String, Vec<String>> = Default::default();
-
-    for (id, any) in model.types.iter() {
-        if let Some(gen_type) = GeneratedType::from(any) {
-            let ns_dir = dir.join(&id.ns.to_snake_case());
-            match namespaces.get_mut(&id.ns) {
-                None => {
-                    std::fs::create_dir(&ns_dir)?;
-                    namespaces.insert(id.ns.clone(), vec![gen_type.name().to_snake_case()]);
-                }
-                Some(existing) => {
-                    existing.push(gen_type.name().to_snake_case());
-                }
-            }
-
-            let path = ns_dir.join(format!("{}.rs", gen_type.name().to_snake_case()));
-            let mut writer = create(&path)?;
-            gen_type.write(&mut writer)?;
-        }
-    }
+    let mut namespaces = split_into_namespaces(model);
 
     // use the extracted namespace info to generate all the parser files
     {
@@ -95,28 +75,61 @@ pub(crate) fn write_model(
     }
 
     for (ns, types) in namespaces.iter() {
-        let mut w = create(&dir.join(ns.to_snake_case()).join("mod.rs"))?;
-        for typ in types {
-            writeln!(&mut w, "mod {};", typ.to_snake_case())?;
+        // create the directory for the namespace
+        let ns_dir = dir.join(&ns.to_snake_case());
+
+        std::fs::create_dir(&ns_dir)?;
+        write_ns_mod_file(&ns_dir, ns, &types)?;
+
+        for gen_type in types {
+            let path = ns_dir.join(format!("{}.rs", gen_type.name().to_snake_case()));
+            let mut writer = create(&path)?;
+            gen_type.write(&mut writer)?;
         }
-
-        writeln!(&mut w)?;
-        writeln!(&mut w, "// re-export all the types in this namespace")?;
-        writeln!(&mut w)?;
-
-        for typ in types {
-            writeln!(&mut w, "pub use {}::*;", typ.to_snake_case())?;
-        }
-
-        writeln!(&mut w)?;
-        writeln!(&mut w, "// helpers specific to this namespace")?;
-        write_add_schema_attr(&mut w, ns.as_ref())?;
     }
 
     Ok(())
 }
 
-fn create(path: &std::path::Path) -> Result<impl std::io::Write, FatalError> {
+fn write_ns_mod_file(dir: &Path, ns: &str, types: &[GeneratedType]) -> Result<(), FatalError> {
+    let mut w = create(&dir.join("mod.rs"))?;
+
+    for typ in types {
+        writeln!(w, "mod {};", typ.name().to_snake_case())?;
+    }
+
+    writeln!(w)?;
+
+    writeln!(w, "// re-export all the types in this namespace")?;
+    writeln!(w)?;
+    for typ in types {
+        writeln!(w, "pub use {}::*;", typ.name().to_snake_case())?;
+    }
+
+    writeln!(w)?;
+    writeln!(w, "// helpers specific to this namespace")?;
+    write_add_schema_attr(&mut w, ns.as_ref())?;
+    Ok(())
+}
+
+fn split_into_namespaces(model: Model) -> HashMap<String, Vec<GeneratedType>> {
+    let mut namespaces: HashMap<String, Vec<GeneratedType>> = Default::default();
+    for (id, any) in model.types.iter() {
+        if let Some(gen_type) = GeneratedType::from(any) {
+            match namespaces.get_mut(&id.ns) {
+                None => {
+                    namespaces.insert(id.ns.clone(), vec![gen_type]);
+                }
+                Some(existing) => {
+                    existing.push(gen_type);
+                }
+            }
+        }
+    }
+    namespaces
+}
+
+fn create(path: &Path) -> Result<impl std::io::Write, FatalError> {
     let output = std::fs::File::create(path)?;
     tracing::info!("create: {}", path.display());
     Ok(LineWriter::new(output))

@@ -61,7 +61,7 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
 
     let span = tracing::info_span!("generate");
     let _guard = span.enter();
-    gen::write_model(&options.output, &model, &config.base_types)?;
+    gen::write_model(&options.output, model, &config.base_types)?;
 
     Ok(())
 }
