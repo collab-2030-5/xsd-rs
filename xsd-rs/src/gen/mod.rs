@@ -64,7 +64,7 @@ pub(crate) fn write_model(
     model: Model,
     _config: &BaseTypeConfig,
 ) -> Result<(), FatalError> {
-    let mut namespaces = split_into_namespaces(model);
+    let namespaces = split_into_namespaces(model);
 
     // use the extracted namespace info to generate all the parser files
     {
@@ -106,9 +106,13 @@ fn write_ns_mod_file(dir: &Path, ns: &str, types: &[GeneratedType]) -> Result<()
         writeln!(w, "pub use {}::*;", typ.name().to_snake_case())?;
     }
 
-    writeln!(w)?;
-    writeln!(w, "// helpers specific to this namespace")?;
-    write_add_schema_attr(&mut w, ns.as_ref())?;
+    // for now, we only need to write this if there's a struct present
+    if types.iter().any(|x| matches!(x, GeneratedType::Struct(_))) {
+        writeln!(w)?;
+        writeln!(w, "// helpers specific to this namespace")?;
+        write_add_schema_attr(&mut w, ns.as_ref())?;
+    }
+
     Ok(())
 }
 
