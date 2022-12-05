@@ -53,7 +53,7 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
         model
     };
 
-    let model = model.resolve(config.mappings);
+    let model = model.resolve(config);
 
     create_main_output_dir(&options.output, options.remove_dir)?;
 
