@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::config::Config;
+use crate::config::MappingConfig;
 use crate::map::Map;
 use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
@@ -234,7 +234,7 @@ impl UnresolvedModel {
         }
     }
 
-    pub fn resolve(self, config: Config) -> crate::resolved::Model {
+    pub fn resolve(self, config: MappingConfig) -> crate::resolved::Model {
         // unresolved types with extended metadata
         let mut unresolved = self.compute_metadata().to_inner();
 

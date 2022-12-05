@@ -1,11 +1,9 @@
-pub(crate) mod config;
 pub(crate) mod gen;
 pub(crate) mod options;
 
 use std::path::Path;
 
 use crate::options::{Commands, GenerateOptions, InspectOptions};
-use config::BaseTypeConfig;
 use gen::traits::RustType;
 use xsd_model::unresolved::UnresolvedModel;
 
@@ -39,7 +37,7 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
         let span = tracing::info_span!("init");
         let _guard = span.enter();
         tracing::info!("reading configuration");
-        let config: config::Config =
+        let config: xsd_model::config::Config =
             serde_json::from_reader(std::fs::File::open(&options.config)?)?;
         config
     };
@@ -61,7 +59,7 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
 
     let span = tracing::info_span!("generate");
     let _guard = span.enter();
-    gen::write_model(&options.output, model, &config.base_types)?;
+    gen::write_model(&options.output, model)?;
 
     Ok(())
 }

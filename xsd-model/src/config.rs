@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::resolved::AnyType;
 use crate::{PrimitiveType, SimpleType, TypeId, WrapperType};
@@ -228,7 +228,7 @@ pub struct FieldMapping {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Config {
+pub struct MappingConfig {
     /// map of substituted types which may be mapped from and XSD type or a FieldId
     pub types: HashMap<TypeId, Substitution>,
     /// maps an existing XSD Type to substituted type
@@ -237,7 +237,7 @@ pub struct Config {
     pub field_mappings: Vec<FieldMapping>,
 }
 
-impl Config {
+impl MappingConfig {
     pub fn resolve(self) -> ResolvedConfig {
         let mut type_mappings: HashMap<TypeId, Substitution> = Default::default();
         let mut field_mappings: HashMap<FieldId, Substitution> = Default::default();
@@ -255,6 +255,40 @@ impl Config {
         ResolvedConfig {
             type_mappings,
             field_mappings,
+        }
+    }
+}
+
+/// controls enum generation for base types used as elements
+#[derive(Clone, Debug, Deserialize)]
+pub enum BaseTypeEntry {
+    /// automatically discover the base types and use all of them
+    Auto,
+    /// automatically discover the base types but only use the ones from this whitelist
+    Whitelist(HashSet<String>),
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BaseTypeConfig {
+    pub(crate) whitelist: HashMap<String, BaseTypeEntry>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Config {
+    pub base_types: BaseTypeConfig,
+    pub mappings: MappingConfig,
+}
+
+impl BaseTypeConfig {
+    pub(crate) fn generate_base_type(&self, base_name: &str, child_name: &str) -> bool {
+        match self.whitelist.get(base_name) {
+            None => {
+                panic!("base type {} requires a configuration entry", base_name);
+            }
+            Some(x) => match x {
+                BaseTypeEntry::Auto => true,
+                BaseTypeEntry::Whitelist(x) => x.contains(child_name),
+            },
         }
     }
 }

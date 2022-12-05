@@ -8,7 +8,7 @@ use indent_write::io::IndentWriter;
 use xsd_model::resolved::*;
 use xsd_model::{SimpleType, WrapperType};
 
-use crate::{BaseTypeConfig, FatalError};
+use crate::FatalError;
 
 use heck::ToSnakeCase;
 
@@ -59,11 +59,7 @@ impl GeneratedType {
     }
 }
 
-pub(crate) fn write_model(
-    dir: &Path,
-    model: Model,
-    _config: &BaseTypeConfig,
-) -> Result<(), FatalError> {
+pub(crate) fn write_model(dir: &Path, model: Model) -> Result<(), FatalError> {
     let namespaces = split_into_namespaces(model);
 
     // use the extracted namespace info to generate all the parser files

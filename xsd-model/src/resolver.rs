@@ -1,4 +1,4 @@
-use crate::config::{Config, FieldId, ResolvedConfig};
+use crate::config::{FieldId, MappingConfig, ResolvedConfig};
 use crate::map::Map;
 use crate::resolved::{AnyType, Model};
 use crate::{
@@ -53,7 +53,7 @@ pub(crate) struct Resolver {
 
 impl Resolver {
     pub(crate) fn new(
-        config: Config,
+        config: MappingConfig,
         simple: Map<TypeId, SimpleType>,
         aliases: Map<TypeId, TypeId>,
     ) -> Self {
