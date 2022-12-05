@@ -1,10 +1,10 @@
 use heck::ToUpperCamelCase;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::fmt::Debug;
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::config::{Config, MappingConfig};
+use crate::config::{BaseTypeConfig, Config};
 use crate::map::Map;
 use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
@@ -234,11 +234,27 @@ impl UnresolvedModel {
         }
     }
 
+    // find all structs that inherit from this struct
+    fn get_parents_of(&self, st: &UnresolvedStruct) -> Vec<UnresolvedStruct> {
+        let mut parents: Vec<UnresolvedStruct> = Default::default();
+
+        for t in self.unresolved_types.iter() {
+            if let UnresolvedType::Struct(x) = t {
+                if x.base_type.as_ref() == Some(&st.type_id) {
+                    parents.push(x.clone());
+                    parents.extend(self.get_parents_of(x));
+                }
+            }
+        }
+
+        parents
+    }
+
     pub fn resolve(self, config: Config) -> crate::resolved::Model {
         // unresolved types with extended metadata
-        let mut unresolved = self.compute_metadata().to_inner();
+        let mut unresolved = self.resolve_base_types(&config.base_types);
 
-        //  type used to resolve them
+        // type used to resolve them
         let mut resolver = Resolver::new(config.mappings, self.simple_types, self.aliases);
 
         let mut count: usize = 0;
@@ -271,6 +287,34 @@ impl UnresolvedModel {
 
             count += 1;
         }
+    }
+
+    fn resolve_base_types(&self, _config: &BaseTypeConfig) -> BTreeMap<TypeId, UnresolvedTypeEx> {
+        let unresolved = self.compute_metadata().to_inner();
+
+        // look for structs that are base types
+        for unresolved in unresolved.values() {
+            match unresolved {
+                UnresolvedTypeEx::Struct(st, meta) => {
+                    if meta.is_base {
+                        let inherited_types = self.get_parents_of(st);
+                        let names: Vec<String> = inherited_types
+                            .iter()
+                            .map(|x| format!("{}", x.type_id))
+                            .collect();
+                        tracing::warn!(
+                            "base struct: {} with inherited types: {:?}",
+                            st.type_id,
+                            names
+                        );
+                    }
+                }
+                UnresolvedTypeEx::Choice(_) => {}
+                UnresolvedTypeEx::Union(_) => {}
+            }
+        }
+
+        unresolved
     }
 
     fn compute_metadata(&self) -> Map<TypeId, UnresolvedTypeEx> {
