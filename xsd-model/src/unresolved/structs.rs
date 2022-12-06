@@ -5,6 +5,7 @@ use crate::resolved::{
 use crate::resolver::Resolver;
 use crate::TypeId;
 use std::rc::Rc;
+use tracing::warn;
 
 #[derive(Copy, Clone, Debug)]
 pub enum ElementType {
@@ -102,7 +103,8 @@ impl UnresolvedStruct {
                     }
                     Some(AnyType::Struct(x)) => Some(x),
                     Some(x) => {
-                        panic!("Base type of {} is not a struct: {:?}", self.type_id, x)
+                        warn!("Base type of {} is not a struct: {:?}", self.type_id, x);
+                        None
                     }
                 }
             }

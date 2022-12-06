@@ -19,16 +19,26 @@ pub fn parse_sequence(sequence: &Node, parent: &Node) -> RsEntity {
 }
 
 fn elements_to_fields(sequence: &Node, parent_name: &str) -> Vec<StructField> {
-    sequence
+    tracing::debug!("parent_name is: {}", &parent_name);
+
+    let mut fields: Vec<StructField> = Default::default();
+
+    for n in sequence
         .children()
         .filter(|n| n.is_element() && n.xsd_type() != ElementType::Annotation)
-        .map(|n| match parse_node(&n, sequence) {
-            RsEntity::StructField(sf) => sf,
+    {
+        match parse_node(&n, sequence) {
+            RsEntity::StructField(sf) => fields.push(sf),
             RsEntity::Enum(mut en) => {
                 en.name = format!("{}Choice", parent_name);
-                enum_to_field(en)
+                fields.push(enum_to_field(en))
+            }
+            RsEntity::Struct(x) => {
+                tracing::warn!("ignoring inner struct: {}", x.name);
             }
             _ => unreachable!("\nError: {:?}\n{:?}", n, parse_node(&n, sequence)),
-        })
-        .collect()
+        }
+    }
+
+    fields
 }

@@ -124,6 +124,7 @@ impl Resolver {
             "boolean" => Some(PrimitiveType::Boolean.into()),
             "anyURI" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "hexBinary" => Some(PrimitiveType::HexBytes(HexByteConstraints::default()).into()),
+            "base64Binary" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "string" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "ID" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "NMTOKEN" => Some(PrimitiveType::String(StringConstraints::default()).into()),

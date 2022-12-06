@@ -297,8 +297,9 @@ impl PrimitiveType {
             "token" | "string" | "normalizedString" | "anyURI" => {
                 PrimitiveType::String(StringConstraints::default())
             }
-            "dateTime" => PrimitiveType::String(StringConstraints::default()),
+            "base64Binary" => PrimitiveType::String(StringConstraints::default()),
             "hexBinary" => PrimitiveType::HexBytes(HexByteConstraints::default()),
+            "dateTime" => PrimitiveType::String(StringConstraints::default()),
             "byte" => NumericType::I8(NumericConstraint::default()).into(),
             "unsignedByte" => NumericType::U8(NumericConstraint::default()).into(),
             "short" => NumericType::I16(NumericConstraint::default()).into(),
