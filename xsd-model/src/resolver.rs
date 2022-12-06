@@ -133,6 +133,7 @@ impl Resolver {
             "short" => Some(NumericType::I16(NumericConstraint::default()).into()),
             "unsignedShort" => Some(NumericType::U16(NumericConstraint::default()).into()),
             "int" => Some(NumericType::I32(NumericConstraint::default()).into()),
+            "integer" => Some(PrimitiveType::String(StringConstraints::default()).into()),
             "unsignedInt" => Some(NumericType::U32(NumericConstraint::default()).into()),
             "long" => Some(NumericType::I64(NumericConstraint::default()).into()),
             "unsignedLong" => Some(NumericType::U64(NumericConstraint::default()).into()),

@@ -1,4 +1,5 @@
 pub mod clm5_iso42173a;
+pub mod ds;
 pub mod ei;
 pub mod emix;
 pub mod gml;
