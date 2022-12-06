@@ -3,9 +3,13 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct DsaKeyValueType {
+    pub p: String,
+    pub q: String,
     pub g: Option<String>,
     pub y: String,
     pub j: Option<String>,
+    pub seed: String,
+    pub pgen_counter: String,
 }
 
 impl DsaKeyValueType {
@@ -16,6 +20,8 @@ impl DsaKeyValueType {
     where
         W: std::io::Write,
     {
+        xsd_util::write_simple_element(writer, "P", self.p.as_str())?;
+        xsd_util::write_simple_element(writer, "Q", self.q.as_str())?;
         if let Some(elem) = &self.g {
             xsd_util::write_simple_element(writer, "G", elem.as_str())?;
         }
@@ -23,6 +29,8 @@ impl DsaKeyValueType {
         if let Some(elem) = &self.j {
             xsd_util::write_simple_element(writer, "J", elem.as_str())?;
         }
+        xsd_util::write_simple_element(writer, "Seed", self.seed.as_str())?;
+        xsd_util::write_simple_element(writer, "PgenCounter", self.pgen_counter.as_str())?;
         Ok(())
     }
 
@@ -78,9 +86,13 @@ impl DsaKeyValueType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
+        let mut p: xsd_util::SetOnce<String> = Default::default();
+        let mut q: xsd_util::SetOnce<String> = Default::default();
         let mut g: xsd_util::SetOnce<String> = Default::default();
         let mut y: xsd_util::SetOnce<String> = Default::default();
         let mut j: xsd_util::SetOnce<String> = Default::default();
+        let mut seed: xsd_util::SetOnce<String> = Default::default();
+        let mut pgen_counter: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -101,9 +113,15 @@ impl DsaKeyValueType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
+                        "P" => p.set(xsd_util::read_string(reader, "P")?)?,
+                        "Q" => q.set(xsd_util::read_string(reader, "Q")?)?,
                         "G" => g.set(xsd_util::read_string(reader, "G")?)?,
                         "Y" => y.set(xsd_util::read_string(reader, "Y")?)?,
                         "J" => j.set(xsd_util::read_string(reader, "J")?)?,
+                        "Seed" => seed.set(xsd_util::read_string(reader, "Seed")?)?,
+                        "PgenCounter" => {
+                            pgen_counter.set(xsd_util::read_string(reader, "PgenCounter")?)?
+                        }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -129,9 +147,13 @@ impl DsaKeyValueType {
 
         // construct the type from the cells
         Ok(DsaKeyValueType {
+            p: p.require()?,
+            q: q.require()?,
             g: g.get(),
             y: y.require()?,
             j: j.get(),
+            seed: seed.require()?,
+            pgen_counter: pgen_counter.require()?,
         })
     }
 

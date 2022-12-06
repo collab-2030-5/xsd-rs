@@ -34,7 +34,10 @@ fn elements_to_fields(sequence: &Node, parent_name: &str) -> Vec<StructField> {
                 fields.push(enum_to_field(en))
             }
             RsEntity::Struct(x) => {
-                tracing::warn!("ignoring inner struct: {}", x.name);
+                // sequence within a sequence, the fields just get flattened
+                for field in x.fields.into_inner() {
+                    fields.push(field);
+                }
             }
             _ => unreachable!("\nError: {:?}\n{:?}", n, parse_node(&n, sequence)),
         }
