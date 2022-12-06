@@ -2,22 +2,9 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PgpDataType {
-    pub pgp_data_type_choice: crate::ds::PgpDataTypeChoice,
-}
+pub struct PgpDataType {}
 
 impl PgpDataType {
-    fn write_elem<W>(
-        &self,
-        writer: &mut EventWriter<W>,
-    ) -> core::result::Result<(), xml::writer::Error>
-    where
-        W: std::io::Write,
-    {
-        self.pgp_data_type_choice.write(writer)?;
-        Ok(())
-    }
-
     pub(crate) fn write_with_name<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -39,7 +26,6 @@ impl PgpDataType {
             start
         };
         writer.write(start)?;
-        self.write_elem(writer)?;
         writer.write(events::XmlEvent::end_element())?;
         Ok(())
     }
@@ -70,8 +56,6 @@ impl PgpDataType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut pgp_data_type_choice: xsd_util::SetOnce<crate::ds::PgpDataTypeChoice> =
-            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -90,13 +74,9 @@ impl PgpDataType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "PGPDataTypeChoice" => {
-                            pgp_data_type_choice.set(crate::ds::PgpDataTypeChoice::read(reader)?)?
-                        }
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                    }
+                xml::reader::XmlEvent::StartElement { .. } => {
+                    // this struct has no elements
+                    return Err(xsd_api::ReadError::UnexpectedEvent);
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
@@ -119,9 +99,7 @@ impl PgpDataType {
         }
 
         // construct the type from the cells
-        Ok(PgpDataType {
-            pgp_data_type_choice: pgp_data_type_choice.require()?,
-        })
+        Ok(PgpDataType {})
     }
 
     fn read_top_level<R>(

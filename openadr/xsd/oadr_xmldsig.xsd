@@ -148,6 +148,7 @@
 	<!-- Begin PGPData -->
 	<element name="PGPData" type="ds:PGPDataType"/>
 	<complexType name="PGPDataType">
+		<!--
 		<choice>
 			<sequence>
 				<element name="PGPKeyID" type="xs:base64Binary"/>
@@ -159,6 +160,7 @@
 				<any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 			</sequence>
 		</choice>
+		-->
 	</complexType>
 	<!-- End PGPData -->
 	<!-- Begin SPKIData -->
