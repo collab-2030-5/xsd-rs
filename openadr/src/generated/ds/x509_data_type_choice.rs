@@ -2,11 +2,11 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum X509DataTypeChoice {
-    DsX509IssuerSerialType(crate::ds::X509IssuerSerialType),
-    XsBase64Binary(String),
-    XsString(String),
-    XsBase64Binary(String),
-    XsBase64Binary(String),
+    X509IssuerSerial(crate::ds::X509IssuerSerialType),
+    X509ski(String),
+    X509SubjectName(String),
+    X509Certificate(String),
+    X509crl(String),
 }
 
 impl X509DataTypeChoice {
@@ -18,20 +18,20 @@ impl X509DataTypeChoice {
         W: std::io::Write,
     {
         match self {
-            X509DataTypeChoice::DsX509IssuerSerialType(x) => {
-                x.write_with_name(writer, "ds:X509IssuerSerialType", false, false)?;
+            X509DataTypeChoice::X509IssuerSerial(x) => {
+                x.write_with_name(writer, "X509IssuerSerial", false, false)?;
             }
-            X509DataTypeChoice::XsBase64Binary(x) => {
-                xsd_util::write_simple_element(writer, "xs:base64Binary", x.as_str())?;
+            X509DataTypeChoice::X509ski(x) => {
+                xsd_util::write_simple_element(writer, "X509SKI", x.as_str())?;
             }
-            X509DataTypeChoice::XsString(x) => {
-                xsd_util::write_simple_element(writer, "xs:string", x.as_str())?;
+            X509DataTypeChoice::X509SubjectName(x) => {
+                xsd_util::write_simple_element(writer, "X509SubjectName", x.as_str())?;
             }
-            X509DataTypeChoice::XsBase64Binary(x) => {
-                xsd_util::write_simple_element(writer, "xs:base64Binary", x.as_str())?;
+            X509DataTypeChoice::X509Certificate(x) => {
+                xsd_util::write_simple_element(writer, "X509Certificate", x.as_str())?;
             }
-            X509DataTypeChoice::XsBase64Binary(x) => {
-                xsd_util::write_simple_element(writer, "xs:base64Binary", x.as_str())?;
+            X509DataTypeChoice::X509crl(x) => {
+                xsd_util::write_simple_element(writer, "X509CRL", x.as_str())?;
             }
         }
         Ok(())

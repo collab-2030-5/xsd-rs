@@ -2,7 +2,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TransformTypeChoice {
-    XsString(String),
+    XPath(String),
 }
 
 impl TransformTypeChoice {
@@ -14,8 +14,8 @@ impl TransformTypeChoice {
         W: std::io::Write,
     {
         match self {
-            TransformTypeChoice::XsString(x) => {
-                xsd_util::write_simple_element(writer, "xs:string", x.as_str())?;
+            TransformTypeChoice::XPath(x) => {
+                xsd_util::write_simple_element(writer, "XPath", x.as_str())?;
             }
         }
         Ok(())

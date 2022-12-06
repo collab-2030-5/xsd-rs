@@ -432,15 +432,18 @@ fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
 fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
     let mut variants: Vec<UnresolvedChoiceVariant> = Vec::new();
     for v in en.cases.iter() {
-        let name = v
+        let type_name = v
             .type_name
             .as_ref()
             .expect("choice case must include a type name");
-        variants.push(UnresolvedChoiceVariant {
+
+        let variant = UnresolvedChoiceVariant {
             comment: v.comment.clone(),
-            element_name: name.clone(),
-            type_id: TypeId::parse(name, settings.namespace),
-        });
+            element_name: v.name.clone(),
+            type_id: TypeId::parse(type_name, settings.namespace),
+        };
+
+        variants.push(variant);
     }
     UnresolvedChoice {
         type_id: TypeId::parse(&en.name, settings.namespace),
