@@ -1,4 +1,7 @@
 {
+  "schemas": [
+    "./xsd/oadr_gml_20b.xsd"
+  ],
   "base_types": {
     "whitelist" : {}
   },

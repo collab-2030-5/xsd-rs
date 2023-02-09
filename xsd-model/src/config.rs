@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::path::PathBuf;
 
 use crate::resolved::AnyType;
 use crate::{PrimitiveType, SimpleType, TypeId, WrapperType};
@@ -275,6 +276,7 @@ pub struct BaseTypeConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub schemas: Option<Vec<PathBuf>>,
     pub base_types: BaseTypeConfig,
     pub mappings: MappingConfig,
 }

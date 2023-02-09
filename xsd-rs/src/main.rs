@@ -42,10 +42,35 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
         config
     };
 
+
+
     let model = {
         let span = tracing::info_span!("merge");
         let _guard = span.enter();
         let mut model: UnresolvedModel = Default::default();
+
+        // process any schemas specified in the configuration first
+        if let Some(schemas) = &config.schemas {
+            let parent_dir = match options.config.parent() {
+                Some(x) => x,
+                None => {
+                    panic!("configuration file path {} has not parent dir", options.config.display());
+                }
+            };
+
+            for schema in schemas {
+                let xsd = parent_dir.join(schema);
+                tracing::info!("merging {}", xsd.display());
+                model.merge_xsd(&xsd);
+            }
+        }
+
+        for xsd in options.inputs.iter() {
+            tracing::info!("merging {}", xsd.display());
+            model.merge_xsd(xsd);
+        }
+
+        // process any manually specified schemas
         for xsd in options.inputs.iter() {
             tracing::info!("merging {}", xsd.display());
             model.merge_xsd(xsd);
