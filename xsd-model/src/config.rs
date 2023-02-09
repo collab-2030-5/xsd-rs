@@ -270,7 +270,7 @@ pub enum BaseTypeEntry {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct BaseTypeConfig {
-    pub(crate) whitelist: HashMap<String, BaseTypeEntry>,
+    //pub(crate) whitelist: HashMap<String, BaseTypeEntry>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -280,6 +280,7 @@ pub struct Config {
 }
 
 impl BaseTypeConfig {
+    /*
     pub(crate) fn generate_base_type(&self, base_name: &str, child_name: &str) -> bool {
         match self.whitelist.get(base_name) {
             None => {
@@ -291,6 +292,7 @@ impl BaseTypeConfig {
             },
         }
     }
+     */
 }
 
 /// resolved version of the configuration
