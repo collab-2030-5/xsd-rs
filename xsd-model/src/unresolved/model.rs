@@ -253,36 +253,36 @@ impl UnresolvedModel {
     pub fn resolve(self, config: Config) -> crate::resolved::Model {
         // unresolved types with extended metadata
         let mut unresolved = self.resolve_base_types(&config.base_types);
+        let mut remaining = BTreeMap::<TypeId, UnresolvedTypeEx>::default();
 
         // type used to resolve them
         let mut resolver = Resolver::new(config.mappings, self.simple_types, self.aliases);
 
         let mut count: usize = 0;
+        let mut unresolved_count: usize = 0;
 
         loop {
             let span = tracing::info_span!("resolve", i = count);
             let _entered = span.enter();
 
             if unresolved.is_empty() {
-                tracing::info!("success in {} iterations", count);
-                return resolver.model();
+                if !remaining.is_empty() {
+                    std::mem::swap(&mut unresolved, &mut remaining);
+                } else {
+                    tracing::info!("success in {} iterations", count);
+                    return resolver.model();
+                }
             }
 
-            if let Some((any_type, id)) = unresolved
-                .iter()
-                .find_map(|(id, v)| v.resolve(&resolver).map(|x| (x, id.clone())))
-            {
+            let (id, v) = unresolved.pop_first().unwrap();
+
+            if let Some(any_type) = v.resolve(&resolver).map(|x| x) {
                 tracing::info!("resolved type: {}", id);
-                unresolved.remove(&id).expect("cannot be empty");
-                resolver.insert(id, any_type);
+                resolver.insert(id.clone(), any_type);
             } else {
-                tracing::error!("Cannot resolve remaining {} types", unresolved.len());
-
-                for unresolved in unresolved.values() {
-                    unresolved.analyze(&resolver);
-                }
-
-                panic!("resolution failed");
+                unresolved_count += 1;
+                tracing::warn!("unresolved type: {} #{}", id, unresolved_count);
+                remaining.insert(id, v);
             }
 
             count += 1;
