@@ -403,7 +403,7 @@
 		<xs:annotation>
 			<xs:documentation>Identifies the resources associated with the logical VEN interface. For events, the values specified are the target for the event</xs:documentation>
 		</xs:annotation>
-	</xs:element>`
+	</xs:element>
 	<xs:complexType name="EiTargetType">
 		<xs:sequence>
 			<xs:element ref="power:aggregatedPnode" minOccurs="0" maxOccurs="unbounded"/>
