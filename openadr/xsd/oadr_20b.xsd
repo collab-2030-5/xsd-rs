@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- edited with XMLSpy v2010 rel. 3 (x64) (http://www.altova.com) by James Zuber (private) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dsig11="http://www.w3.org/2009/xmldsig11#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:oadr="http://openadr.org/oadr-2.0b/2012/07" xmlns:clm5ISO42173A="urn:un:unece:uncefact:codelist:standard:5:ISO42173A:2010-04-07" xmlns:pyld="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:ei="http://docs.oasis-open.org/ns/energyinterop/201110" xmlns:scale="http://docs.oasis-open.org/ns/emix/2011/06/siscale" xmlns:emix="http://docs.oasis-open.org/ns/emix/2011/06" xmlns:strm="urn:ietf:params:xml:ns:icalendar-2.0:stream" xmlns:xcal="urn:ietf:params:xml:ns:icalendar-2.0" xmlns:power="http://docs.oasis-open.org/ns/emix/2011/06/power" xmlns:gb="http://naesb.org/espi" xmlns:atom="http://www.w3.org/2005/Atom" targetNamespace="http://openadr.org/oadr-2.0b/2012/07" elementFormDefault="qualified" attributeFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:oadr="http://openadr.org/oadr-2.0b/2012/07" xmlns:clm5ISO42173A="urn:un:unece:uncefact:codelist:standard:5:ISO42173A:2010-04-07" xmlns:pyld="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:ei="http://docs.oasis-open.org/ns/energyinterop/201110" xmlns:scale="http://docs.oasis-open.org/ns/emix/2011/06/siscale" xmlns:emix="http://docs.oasis-open.org/ns/emix/2011/06" xmlns:strm="urn:ietf:params:xml:ns:icalendar-2.0:stream" xmlns:xcal="urn:ietf:params:xml:ns:icalendar-2.0" xmlns:power="http://docs.oasis-open.org/ns/emix/2011/06/power" xmlns:gb="http://naesb.org/espi" xmlns:atom="http://www.w3.org/2005/Atom" targetNamespace="http://openadr.org/oadr-2.0b/2012/07" elementFormDefault="qualified" attributeFormDefault="qualified">
 	<xs:import namespace="urn:ietf:params:xml:ns:icalendar-2.0:stream" schemaLocation="oadr_strm_20b.xsd"/>
 	<xs:import namespace="http://docs.oasis-open.org/ns/energyinterop/201110" schemaLocation="oadr_ei_20b.xsd"/>
 	<xs:import namespace="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" schemaLocation="oadr_pyld_20b.xsd"/>
@@ -8,14 +8,11 @@
 	<xs:import namespace="http://docs.oasis-open.org/ns/emix/2011/06/siscale" schemaLocation="oadr_siscale_20b.xsd"/>
 	<xs:import namespace="urn:ietf:params:xml:ns:icalendar-2.0" schemaLocation="oadr_xcal_20b.xsd"/>
 	<xs:import namespace="urn:un:unece:uncefact:codelist:standard:5:ISO42173A:2010-04-07" schemaLocation="oadr_ISO_ISO3AlphaCurrencyCode_20100407.xsd"/>
-	<xs:import namespace="http://www.w3.org/2009/xmldsig11#" schemaLocation="oadr_xmldsig11.xsd"/>
-	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="oadr_xmldsig.xsd"/>
 	<!--  ******* oadrPayload  ******** -->
 	<!--   Root element for all payloads  -->
 	<xs:element name="oadrPayload">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="ds:Signature" minOccurs="0"/>
 				<xs:element ref="oadr:oadrSignedObject"/>
 			</xs:sequence>
 		</xs:complexType>
