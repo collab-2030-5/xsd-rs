@@ -103,9 +103,11 @@ impl HexByteConstraints {
     }
 }
 
-#[derive(Default, Copy, Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct StringConstraints {
     pub max_length: Option<usize>,
+    pub values: std::collections::HashSet<String>,
+    pub pattern: Option<String>,
 }
 
 impl StringConstraints {
@@ -116,12 +118,12 @@ impl StringConstraints {
                 self.set_max_length(max);
                 self
             }
-            FacetType::Enumeration(_) => {
-                tracing::warn!("ignoring {:?} for string type", facet_type);
+            FacetType::Enumeration(value) => {
+                self.values.insert(value.to_owned());
                 self
             }
-            FacetType::Pattern(_) => {
-                tracing::warn!("ignoring {:?} for string type", facet_type);
+            FacetType::Pattern(pattern) => {
+                self.pattern = Some(pattern.to_owned());
                 self
             }
             _ => panic!("unsupported facet for string type: {:?}", facet_type),
