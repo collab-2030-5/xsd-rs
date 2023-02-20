@@ -53,6 +53,20 @@ impl TypeId {
             },
         }
     }
+
+    pub fn parse_choice(type_name: &str, fallback_ns: &str) -> Self {
+        if !type_name.ends_with("Choice") {
+            tracing::warn!("Appending Choic to type {}", type_name);
+            Self::parse(&format!("{}Choice", type_name), fallback_ns)
+        } else {
+            Self::parse(type_name, fallback_ns)
+        }
+    }
+
+    pub fn parse_enum(type_name: &str, fallback_ns: &str) -> Self {
+        tracing::warn!("enum type {}", type_name);
+        Self::parse(&format!("{}", type_name), fallback_ns)
+    }
 }
 
 #[derive(Clone, Debug)]

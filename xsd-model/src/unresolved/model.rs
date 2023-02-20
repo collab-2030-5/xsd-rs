@@ -194,7 +194,7 @@ impl UnresolvedModel {
     fn merge_alias(&mut self, x: &Alias, settings: &Settings) {
         let target = TypeId::parse(&x.original, settings.namespace);
         let alias = TypeId::parse(&x.name, settings.namespace);
-        tracing::debug!("{} is an alias for {}", alias, target);
+        tracing::info!("{} is an alias for {}", alias, target);
         self.aliases.insert(alias, target);
     }
 
@@ -261,12 +261,22 @@ impl UnresolvedModel {
         let mut count: usize = 0;
         let mut unresolved_count: usize = 0;
 
+        let mut resolved_count = 0;
         loop {
             let span = tracing::info_span!("resolve", i = count);
             let _entered = span.enter();
 
             if unresolved.is_empty() {
                 if !remaining.is_empty() {
+                    if resolved_count == 0 {
+                        for (type_id, _item) in remaining.iter() {
+                            tracing::error!("{}", type_id.name);
+                        }
+
+                        panic!("Failed to resolve! {}", remaining.len());
+                    }
+
+                    resolved_count = 0;
                     std::mem::swap(&mut unresolved, &mut remaining);
                 } else {
                     tracing::info!("success in {} iterations", count);
@@ -279,6 +289,8 @@ impl UnresolvedModel {
             if let Some(any_type) = v.resolve(&resolver).map(|x| x) {
                 tracing::info!("resolved type: {}", id);
                 resolver.insert(id.clone(), any_type);
+
+                resolved_count += 1;
             } else {
                 unresolved_count += 1;
                 tracing::warn!("unresolved type: {} #{}", id, unresolved_count);
@@ -423,7 +435,7 @@ fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
     }
 
     Enumeration {
-        type_id: TypeId::parse(&en.name, settings.namespace),
+        type_id: TypeId::parse_enum(&en.name, settings.namespace),
         comment: en.comment.clone(),
         variants,
     }
@@ -446,7 +458,7 @@ fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
         variants.push(variant);
     }
     UnresolvedChoice {
-        type_id: TypeId::parse(&en.name, settings.namespace),
+        type_id: TypeId::parse_choice(&en.name, settings.namespace),
         comment: en.comment.clone(),
         variants,
     }
