@@ -114,6 +114,11 @@ impl UnresolvedStruct {
         for field in self.fields.iter() {
             match field.resolve(&self.type_id, resolver) {
                 None => {
+                    tracing::warn!(
+                        "Struct missing field - failed to resolve {} {}",
+                        self.type_id.name,
+                        field.name
+                    );
                     // can't resolve field yet
                     return None;
                 }
