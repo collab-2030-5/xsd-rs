@@ -38,7 +38,10 @@ where
 
     pub fn insert(&mut self, key: K, value: V) {
         if let Some(x) = self.inner.get(&key) {
-            tracing::warn!("  ***Replacing (key == {})", key);
+            panic!(
+                "  ******* Replacing (key == {}) {:#?} with {:#?}",
+                key, x, value
+            );
         }
         self.inner.insert(key, value);
     }
