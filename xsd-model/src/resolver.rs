@@ -47,6 +47,8 @@ pub(crate) struct Resolver {
     config: ResolvedConfig,
     /// running map of resolved types
     resolved: Map<TypeId, AnyType>,
+    /// store simple types separate to avoid name collisions
+    simple: Map<TypeId, AnyType>,
     /// map of aliases we use to lookup types
     aliases: AliasMap,
 }
@@ -54,23 +56,25 @@ pub(crate) struct Resolver {
 impl Resolver {
     pub(crate) fn new(
         config: MappingConfig,
-        simple: Map<TypeId, SimpleType>,
+        simple_types: Map<TypeId, SimpleType>,
         aliases: Map<TypeId, TypeId>,
     ) -> Self {
         // make sure the config is valid (panics)
         let config = config.resolve();
 
         let mut resolved: Map<TypeId, AnyType> = Default::default();
+        let mut simple: Map<TypeId, AnyType> = Default::default();
 
         // add the simple types
-        for (id, t) in simple.into_iter() {
+        for (id, t) in simple_types.into_iter() {
             tracing::debug!("{} -> {:?}", id, t);
-            resolved.insert(id, t.into());
+            simple.insert(id, t.into());
         }
 
         Self {
             config,
             resolved,
+            simple,
             aliases: AliasMap::new(aliases),
         }
     }
@@ -88,6 +92,10 @@ impl Resolver {
         // then resolve "xs" types
         if let Some(t) = Self::resolve_xs_type(target) {
             return Some(t.into());
+        }
+
+        if self.resolved.get(target).is_none() {
+            return self.simple.get(target).cloned();
         }
 
         // finally look at all the types that have already been fully resolved
@@ -112,6 +120,7 @@ impl Resolver {
     pub(crate) fn model(self) -> Model {
         Model {
             types: self.resolved.to_inner(),
+            simple_types: self.simple.to_inner(),
         }
     }
 

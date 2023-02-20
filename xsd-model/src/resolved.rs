@@ -91,6 +91,7 @@ impl From<SimpleType> for AnyType {
 #[derive(Debug)]
 pub struct Model {
     pub types: BTreeMap<TypeId, AnyType>,
+    pub simple_types: BTreeMap<TypeId, AnyType>,
 }
 
 #[derive(Debug, Copy, Clone)]

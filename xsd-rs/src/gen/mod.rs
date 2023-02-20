@@ -114,6 +114,20 @@ fn write_ns_mod_file(dir: &Path, ns: &str, types: &[GeneratedType]) -> Result<()
 
 fn split_into_namespaces(model: Model) -> HashMap<String, Vec<GeneratedType>> {
     let mut namespaces: HashMap<String, Vec<GeneratedType>> = Default::default();
+
+    for (id, any) in model.simple_types.iter() {
+        if let Some(gen_type) = GeneratedType::from(any) {
+            match namespaces.get_mut(&id.ns) {
+                None => {
+                    namespaces.insert(id.ns.clone(), vec![gen_type]);
+                }
+                Some(existing) => {
+                    existing.push(gen_type);
+                }
+            }
+        }
+    }
+
     for (id, any) in model.types.iter() {
         if let Some(gen_type) = GeneratedType::from(any) {
             match namespaces.get_mut(&id.ns) {
@@ -126,11 +140,16 @@ fn split_into_namespaces(model: Model) -> HashMap<String, Vec<GeneratedType>> {
             }
         }
     }
+
     namespaces
 }
 
 fn create(path: &Path) -> Result<impl std::io::Write, FatalError> {
-    let output = std::fs::File::create(path)?;
+    // let output = std::fs::File::open_(path)?;
+    let output = std::fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(path)?;
     tracing::info!("create: {}", path.display());
     Ok(LineWriter::new(output))
 }
