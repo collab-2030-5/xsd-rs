@@ -1,120 +1,166 @@
+use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum OadrSignedObject {
-    OadrOadrDistributeEvent(crate::oadr::OadrDistributeEventType),
-    OadrOadrCreatedEvent(crate::oadr::OadrCreatedEventType),
-    OadrOadrRequestEvent(crate::oadr::OadrRequestEventType),
-    OadrOadrResponse(crate::oadr::OadrResponseType),
-    OadrOadrCancelOpt(crate::oadr::OadrCancelOptType),
-    OadrOadrCanceledOpt(crate::oadr::OadrCanceledOptType),
-    OadrOadrCreateOpt(crate::oadr::OadrCreateOptType),
-    OadrOadrCreatedOpt(crate::oadr::OadrCreatedOptType),
-    OadrOadrCancelReport(crate::oadr::OadrCancelReportType),
-    OadrOadrCanceledReport(crate::oadr::OadrCanceledReportType),
-    OadrOadrCreateReport(crate::oadr::OadrCreateReportType),
-    OadrOadrCreatedReport(crate::oadr::OadrCreatedReportType),
-    OadrOadrRegisterReport(crate::oadr::OadrRegisterReportType),
-    OadrOadrRegisteredReport(crate::oadr::OadrRegisteredReportType),
-    OadrOadrUpdateReport(crate::oadr::OadrUpdateReportType),
-    OadrOadrUpdatedReport(crate::oadr::OadrUpdatedReportType),
-    OadrOadrCancelPartyRegistration(crate::oadr::OadrCancelPartyRegistrationType),
-    OadrOadrCanceledPartyRegistration(crate::oadr::OadrCanceledPartyRegistrationType),
-    OadrOadrCreatePartyRegistration(crate::oadr::OadrCreatePartyRegistrationType),
-    OadrOadrCreatedPartyRegistration(crate::oadr::OadrCreatedPartyRegistrationType),
-    OadrOadrRequestReregistration(crate::oadr::OadrRequestReregistrationType),
-    OadrOadrQueryRegistration(crate::oadr::OadrQueryRegistrationType),
-    OadrOadrPoll(crate::oadr::OadrPollType),
+pub struct OadrSignedObject {
+    pub id: Option<String>,
+    pub oadr_signed_object_choice: crate::oadr::OadrSignedObjectChoice,
 }
 
 impl OadrSignedObject {
-    pub(crate) fn write<W>(
+    fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
     ) -> core::result::Result<(), xml::writer::Error>
     where
         W: std::io::Write,
     {
-        match self {
-            OadrSignedObject::OadrOadrDistributeEvent(x) => {
-                x.write_with_name(writer, "oadr:oadrDistributeEvent", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreatedEvent(x) => {
-                x.write_with_name(writer, "oadr:oadrCreatedEvent", false, false)?;
-            }
-            OadrSignedObject::OadrOadrRequestEvent(x) => {
-                x.write_with_name(writer, "oadr:oadrRequestEvent", false, false)?;
-            }
-            OadrSignedObject::OadrOadrResponse(x) => {
-                x.write_with_name(writer, "oadr:oadrResponse", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCancelOpt(x) => {
-                x.write_with_name(writer, "oadr:oadrCancelOpt", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCanceledOpt(x) => {
-                x.write_with_name(writer, "oadr:oadrCanceledOpt", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreateOpt(x) => {
-                x.write_with_name(writer, "oadr:oadrCreateOpt", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreatedOpt(x) => {
-                x.write_with_name(writer, "oadr:oadrCreatedOpt", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCancelReport(x) => {
-                x.write_with_name(writer, "oadr:oadrCancelReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCanceledReport(x) => {
-                x.write_with_name(writer, "oadr:oadrCanceledReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreateReport(x) => {
-                x.write_with_name(writer, "oadr:oadrCreateReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreatedReport(x) => {
-                x.write_with_name(writer, "oadr:oadrCreatedReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrRegisterReport(x) => {
-                x.write_with_name(writer, "oadr:oadrRegisterReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrRegisteredReport(x) => {
-                x.write_with_name(writer, "oadr:oadrRegisteredReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrUpdateReport(x) => {
-                x.write_with_name(writer, "oadr:oadrUpdateReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrUpdatedReport(x) => {
-                x.write_with_name(writer, "oadr:oadrUpdatedReport", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCancelPartyRegistration(x) => {
-                x.write_with_name(writer, "oadr:oadrCancelPartyRegistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCanceledPartyRegistration(x) => {
-                x.write_with_name(writer, "oadr:oadrCanceledPartyRegistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreatePartyRegistration(x) => {
-                x.write_with_name(writer, "oadr:oadrCreatePartyRegistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrCreatedPartyRegistration(x) => {
-                x.write_with_name(writer, "oadr:oadrCreatedPartyRegistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrRequestReregistration(x) => {
-                x.write_with_name(writer, "oadr:oadrRequestReregistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrQueryRegistration(x) => {
-                x.write_with_name(writer, "oadr:oadrQueryRegistration", false, false)?;
-            }
-            OadrSignedObject::OadrOadrPoll(x) => {
-                x.write_with_name(writer, "oadr:oadrPoll", false, false)?;
-            }
-        }
+        self.oadr_signed_object_choice.write(writer)?;
         Ok(())
     }
 
+    pub(crate) fn write_with_name<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+        name: &str,
+        top_level: bool,
+        write_type: bool,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        let start = if top_level {
+            super::add_schema_attr(events::XmlEvent::start_element(name))
+        } else {
+            events::XmlEvent::start_element(name)
+        };
+        // ---- start attributes ----
+        let start = match &self.id {
+            Some(attr) => start.attr("Id", attr.as_str()),
+            None => start,
+        };
+        // ---- end attributes ----
+        let start = if write_type {
+            start.attr("xsi:type", "oadr:oadrSignedObject")
+        } else {
+            start
+        };
+        writer.write(start)?;
+        self.write_elem(writer)?;
+        writer.write(events::XmlEvent::end_element())?;
+        Ok(())
+    }
+}
+
+impl xsd_api::WriteXml for OadrSignedObject {
+    fn write<W>(
+        &self,
+        config: xsd_api::WriteConfig,
+        writer: &mut W,
+    ) -> core::result::Result<(), xsd_api::WriteError>
+    where
+        W: std::io::Write,
+    {
+        let mut writer = config.build_xml_rs().create_writer(writer);
+        self.write_with_name(&mut writer, "oadr:oadrSignedObject", true, false)?;
+        Ok(())
+    }
+}
+
+impl OadrSignedObject {
     pub(crate) fn read<R>(
-        _reader: &mut xml::reader::EventReader<R>,
+        reader: &mut xml::reader::EventReader<R>,
+        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        parent_tag: &str,
     ) -> core::result::Result<Self, xsd_api::ReadError>
     where
         R: std::io::Read,
     {
-        unimplemented!()
+        // one variable for each attribute and element
+        let mut id: xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_signed_object_choice: xsd_util::SetOnce<crate::oadr::OadrSignedObjectChoice> =
+            Default::default();
+
+        for attr in attrs.iter() {
+            match attr.name.local_name.as_str() {
+                "Id" => id.set(attr.value.clone())?,
+                _ => {} // ignore unknown attributes
+            };
+        }
+
+        loop {
+            match reader.next()? {
+                xml::reader::XmlEvent::EndElement { name } => {
+                    if name.local_name.as_str() == parent_tag {
+                        // try to construct struct
+                        break;
+                    } else {
+                        // TODO - make this more specific
+                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                    }
+                }
+                xml::reader::XmlEvent::StartElement { name, .. } => {
+                    match name.local_name.as_str() {
+                        "oadrSignedObjectChoice" => oadr_signed_object_choice
+                            .set(crate::oadr::OadrSignedObjectChoice::read(reader)?)?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    }
+                }
+                // treat these events as errors
+                xml::reader::XmlEvent::StartDocument { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::EndDocument => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::Characters(_) => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                xml::reader::XmlEvent::ProcessingInstruction { .. } => {
+                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                }
+                // ignore these events
+                xml::reader::XmlEvent::CData(_) => {}
+                xml::reader::XmlEvent::Comment(_) => {}
+                xml::reader::XmlEvent::Whitespace(_) => {}
+            }
+        }
+
+        // construct the type from the cells
+        Ok(OadrSignedObject {
+            id: id.get(),
+            oadr_signed_object_choice: oadr_signed_object_choice.require()?,
+        })
+    }
+
+    fn read_top_level<R>(
+        reader: &mut xml::reader::EventReader<R>,
+    ) -> core::result::Result<Self, xsd_api::ReadError>
+    where
+        R: std::io::Read,
+    {
+        let attr = xsd_util::read_start_tag(reader, "oadrSignedObject")?;
+        OadrSignedObject::read(reader, &attr, "oadr:oadrSignedObject")
+    }
+}
+
+impl xsd_api::ReadXml for OadrSignedObject {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+    where
+        R: std::io::Read,
+    {
+        let mut reader = xml::reader::EventReader::new(r);
+
+        match OadrSignedObject::read_top_level(&mut reader) {
+            Ok(x) => Ok(x),
+            Err(err) => {
+                let pos = reader.position();
+                Err(xsd_api::ErrorWithLocation {
+                    err,
+                    line: pos.row,
+                    col: pos.column,
+                })
+            }
+        }
     }
 }

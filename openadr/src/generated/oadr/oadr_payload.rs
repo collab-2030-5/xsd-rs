@@ -14,7 +14,12 @@ impl OadrPayload {
     where
         W: std::io::Write,
     {
-        self.oadr_oadr_signed_object.write(writer)?;
+        self.oadr_oadr_signed_object.write_with_name(
+            writer,
+            "oadr:oadrSignedObject",
+            false,
+            false,
+        )?;
         Ok(())
     }
 
@@ -90,13 +95,18 @@ impl OadrPayload {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "oadr:oadrSignedObject" => oadr_oadr_signed_object
-                            .set(crate::oadr::OadrSignedObject::read(reader)?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "oadr:oadrSignedObject" => {
+                        oadr_oadr_signed_object.set(crate::oadr::OadrSignedObject::read(
+                            reader,
+                            &attributes,
+                            "oadr:oadrSignedObject",
+                        )?)?
                     }
-                }
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)

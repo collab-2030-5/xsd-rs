@@ -1,12 +1,36 @@
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum OadrTransportType {
+    /// xml value == 'simpleHttp'
+    SimpleHttp,
+    /// xml value == 'xmpp'
+    Xmpp,
+}
+
+impl xsd_util::StringEnumeration for OadrTransportType {
+    fn find(s: &str) -> Option<Self> {
+        match s {
+            "simpleHttp" => Some(Self::SimpleHttp),
+            "xmpp" => Some(Self::Xmpp),
+            _ => None,
+        }
+    }
+
+    fn to_str(self) -> &'static str {
+        match self {
+            Self::SimpleHttp => "simpleHttp",
+            Self::Xmpp => "xmpp",
+        }
+    }
+}
 use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrTransportType {
+pub struct OadrTransport {
     pub oadr_oadr_transport_name: crate::oadr::OadrTransportType,
 }
 
-impl OadrTransportType {
+impl OadrTransport {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -49,7 +73,7 @@ impl OadrTransportType {
     }
 }
 
-impl xsd_api::WriteXml for OadrTransportType {
+impl xsd_api::WriteXml for OadrTransport {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -64,7 +88,7 @@ impl xsd_api::WriteXml for OadrTransportType {
     }
 }
 
-impl OadrTransportType {
+impl OadrTransport {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -123,7 +147,7 @@ impl OadrTransportType {
         }
 
         // construct the type from the cells
-        Ok(OadrTransportType {
+        Ok(OadrTransport {
             oadr_oadr_transport_name: oadr_oadr_transport_name.require()?,
         })
     }
@@ -135,18 +159,18 @@ impl OadrTransportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrTransportType")?;
-        OadrTransportType::read(reader, &attr, "oadr:oadrTransportType")
+        OadrTransport::read(reader, &attr, "oadr:oadrTransportType")
     }
 }
 
-impl xsd_api::ReadXml for OadrTransportType {
+impl xsd_api::ReadXml for OadrTransport {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrTransportType::read_top_level(&mut reader) {
+        match OadrTransport::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
