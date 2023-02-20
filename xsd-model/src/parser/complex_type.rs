@@ -28,6 +28,8 @@ pub fn parse_complex_type(node: &Node, parent: &Node) -> RsEntity {
         get_parent_name(node)
     };
 
+    tracing::info!("Parsing complex type {}", name);
+
     let mut fields = attributes_to_fields(node);
 
     let content = node
@@ -79,5 +81,7 @@ pub fn parse_complex_type(node: &Node, parent: &Node) -> RsEntity {
         }
         _ => (),
     };
+
+    tracing::info!("Created entity {}", res.name());
     res
 }
