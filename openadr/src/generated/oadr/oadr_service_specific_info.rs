@@ -36,7 +36,7 @@ impl OadrServiceSpecificInfo {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrServiceSpecificInfo")
+            start.attr("xsi:type", "oadrServiceSpecificInfo")
         } else {
             start
         };
@@ -132,7 +132,7 @@ impl OadrServiceSpecificInfo {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrServiceSpecificInfo")?;
-        OadrServiceSpecificInfo::read(reader, &attr, "oadr:oadrServiceSpecificInfo")
+        OadrServiceSpecificInfo::read(reader, &attr, "oadrServiceSpecificInfo")
     }
 }
 

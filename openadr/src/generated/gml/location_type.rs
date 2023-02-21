@@ -35,7 +35,7 @@ impl LocationType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:locationType")
+            start.attr("xsi:type", "locationType")
         } else {
             start
         };
@@ -133,7 +133,7 @@ impl LocationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "locationType")?;
-        LocationType::read(reader, &attr, "gml:locationType")
+        LocationType::read(reader, &attr, "locationType")
     }
 }
 

@@ -84,7 +84,7 @@ impl EiTargetType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:EiTargetType")
+            start.attr("xsi:type", "EiTargetType")
         } else {
             start
         };
@@ -156,69 +156,63 @@ impl EiTargetType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "power:aggregatedPnode" => {
+                    "aggregatedPnode" => {
                         power_aggregated_pnode.push(crate::power::AggregatedPnodeType::read(
                             reader,
                             &attributes,
-                            "power:aggregatedPnode",
+                            "aggregatedPnode",
                         )?)
                     }
-                    "power:endDeviceAsset" => {
+                    "endDeviceAsset" => {
                         power_end_device_asset.push(crate::power::EndDeviceAssetType::read(
                             reader,
                             &attributes,
-                            "power:endDeviceAsset",
+                            "endDeviceAsset",
                         )?)
                     }
-                    "power:meterAsset" => {
-                        power_meter_asset.push(crate::power::MeterAssetType::read(
-                            reader,
-                            &attributes,
-                            "power:meterAsset",
-                        )?)
-                    }
-                    "power:pnode" => power_pnode.push(crate::power::PnodeType::read(
+                    "meterAsset" => power_meter_asset.push(crate::power::MeterAssetType::read(
                         reader,
                         &attributes,
-                        "power:pnode",
+                        "meterAsset",
                     )?),
-                    "emix:serviceArea" => {
-                        emix_service_area.push(crate::emix::ServiceAreaType::read(
-                            reader,
-                            &attributes,
-                            "emix:serviceArea",
-                        )?)
-                    }
-                    "power:serviceDeliveryPoint" => power_service_delivery_point.push(
+                    "pnode" => power_pnode.push(crate::power::PnodeType::read(
+                        reader,
+                        &attributes,
+                        "pnode",
+                    )?),
+                    "serviceArea" => emix_service_area.push(crate::emix::ServiceAreaType::read(
+                        reader,
+                        &attributes,
+                        "serviceArea",
+                    )?),
+                    "serviceDeliveryPoint" => power_service_delivery_point.push(
                         crate::power::ServiceDeliveryPointType::read(
                             reader,
                             &attributes,
-                            "power:serviceDeliveryPoint",
+                            "serviceDeliveryPoint",
                         )?,
                     ),
-                    "power:serviceLocation" => {
+                    "serviceLocation" => {
                         power_service_location.push(crate::power::ServiceLocationType::read(
                             reader,
                             &attributes,
-                            "power:serviceLocation",
+                            "serviceLocation",
                         )?)
                     }
-                    "power:transportInterface" => {
+                    "transportInterface" => {
                         power_transport_interface.push(crate::power::TransportInterfaceType::read(
                             reader,
                             &attributes,
-                            "power:transportInterface",
+                            "transportInterface",
                         )?)
                     }
-                    "ei:groupID" => ei_group_id.push(xsd_util::read_string(reader, "ei:groupID")?),
-                    "ei:groupName" => {
-                        ei_group_name.push(xsd_util::read_string(reader, "ei:groupName")?)
+                    "groupID" => ei_group_id.push(xsd_util::read_string(reader, "groupID")?),
+                    "groupName" => ei_group_name.push(xsd_util::read_string(reader, "groupName")?),
+                    "resourceID" => {
+                        ei_resource_id.push(xsd_util::read_string(reader, "resourceID")?)
                     }
-                    "ei:resourceID" => {
-                        ei_resource_id.push(xsd_util::read_string(reader, "ei:resourceID")?)
-                    }
-                    "ei:venID" => ei_ven_id.push(xsd_util::read_string(reader, "ei:venID")?),
-                    "ei:partyID" => ei_party_id.push(xsd_util::read_string(reader, "ei:partyID")?),
+                    "venID" => ei_ven_id.push(xsd_util::read_string(reader, "venID")?),
+                    "partyID" => ei_party_id.push(xsd_util::read_string(reader, "partyID")?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -266,7 +260,7 @@ impl EiTargetType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "EiTargetType")?;
-        EiTargetType::read(reader, &attr, "ei:EiTargetType")
+        EiTargetType::read(reader, &attr, "EiTargetType")
     }
 }
 

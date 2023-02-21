@@ -41,7 +41,7 @@ impl OadrSignedObject {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrSignedObject")
+            start.attr("xsi:type", "oadrSignedObject")
         } else {
             start
         };
@@ -101,8 +101,24 @@ impl OadrSignedObject {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "oadrSignedObjectChoice" => oadr_signed_object_choice
-                            .set(crate::oadr::OadrSignedObjectChoice::read(reader)?)?,
+                        "oadrCreatePartyRegistration" => oadr_signed_object_choice.set(
+                            crate::oadr::OadrSignedObjectChoice::OadrOadrCreatePartyRegistration(
+                                crate::oadr::OadrCreatePartyRegistrationType::read(
+                                    reader,
+                                    attrs,
+                                    "oadrCreatePartyRegistration",
+                                )?,
+                            ),
+                        )?,
+                        "oadrDistributeEvent" => oadr_signed_object_choice.set(
+                            crate::oadr::OadrSignedObjectChoice::OadrOadrDistributeEvent(
+                                crate::oadr::OadrDistributeEventType::read(
+                                    reader,
+                                    attrs,
+                                    "oadrDistributeEvent",
+                                )?,
+                            ),
+                        )?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -140,7 +156,7 @@ impl OadrSignedObject {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrSignedObject")?;
-        OadrSignedObject::read(reader, &attr, "oadr:oadrSignedObject")
+        OadrSignedObject::read(reader, &attr, "oadrSignedObject")
     }
 }
 

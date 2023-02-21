@@ -43,7 +43,7 @@ impl PulseCountType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:pulseCountType")
+            start.attr("xsi:type", "pulseCountType")
         } else {
             start
         };
@@ -107,8 +107,8 @@ impl PulseCountType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "oadr:pulseFactor" => oadr_pulse_factor
-                            .set(xsd_util::read_type_from_string(reader, "oadr:pulseFactor")?)?,
+                        "pulseFactor" => oadr_pulse_factor
+                            .set(xsd_util::read_type_from_string(reader, "pulseFactor")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -147,7 +147,7 @@ impl PulseCountType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "pulseCountType")?;
-        PulseCountType::read(reader, &attr, "oadr:pulseCountType")
+        PulseCountType::read(reader, &attr, "pulseCountType")
     }
 }
 

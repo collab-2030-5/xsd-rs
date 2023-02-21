@@ -57,7 +57,7 @@ impl EiEventSignalType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiEventSignalType")
+            start.attr("xsi:type", "eiEventSignalType")
         } else {
             start
         };
@@ -122,34 +122,36 @@ impl EiEventSignalType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
-                        reader,
-                        &attributes,
-                        "strm:intervals",
-                    )?)?,
-                    "ei:eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
-                        reader,
-                        &attributes,
-                        "ei:eiTarget",
-                    )?)?,
-                    "ei:signalName" => {
-                        ei_signal_name.set(xsd_util::read_string(reader, "ei:signalName")?)?
+                } => {
+                    match name.local_name.as_str() {
+                        "intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                            reader,
+                            &attributes,
+                            "intervals",
+                        )?)?,
+                        "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                            reader,
+                            &attributes,
+                            "eiTarget",
+                        )?)?,
+                        "signalName" => {
+                            ei_signal_name.set(xsd_util::read_string(reader, "signalName")?)?
+                        }
+                        "signalType" => {
+                            ei_signal_type.set(xsd_util::read_string_enum(reader, "signalType")?)?
+                        }
+                        "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
+                        "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
+                            reader,
+                            &attributes,
+                            "itemBase",
+                        )?)?,
+                        "currentValue" => ei_current_value.set(
+                            crate::ei::CurrentValueType::read(reader, &attributes, "currentValue")?,
+                        )?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    "ei:signalType" => {
-                        ei_signal_type.set(xsd_util::read_string_enum(reader, "ei:signalType")?)?
-                    }
-                    "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
-                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
-                        reader,
-                        &attributes,
-                        "emix:itemBase",
-                    )?)?,
-                    "ei:currentValue" => ei_current_value.set(
-                        crate::ei::CurrentValueType::read(reader, &attributes, "ei:currentValue")?,
-                    )?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -189,7 +191,7 @@ impl EiEventSignalType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiEventSignalType")?;
-        EiEventSignalType::read(reader, &attr, "ei:eiEventSignalType")
+        EiEventSignalType::read(reader, &attr, "eiEventSignalType")
     }
 }
 

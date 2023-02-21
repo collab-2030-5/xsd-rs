@@ -37,7 +37,7 @@ impl ArrayofResponses {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:ArrayofResponses")
+            start.attr("xsi:type", "ArrayofResponses")
         } else {
             start
         };
@@ -133,7 +133,7 @@ impl ArrayofResponses {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ArrayofResponses")?;
-        ArrayofResponses::read(reader, &attr, "ei:ArrayofResponses")
+        ArrayofResponses::read(reader, &attr, "ArrayofResponses")
     }
 }
 

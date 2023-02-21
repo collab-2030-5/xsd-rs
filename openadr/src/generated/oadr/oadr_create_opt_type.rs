@@ -74,7 +74,7 @@ impl OadrCreateOptType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreateOptType")
+            start.attr("xsi:type", "oadrCreateOptType")
         } else {
             start
         };
@@ -147,42 +147,37 @@ impl OadrCreateOptType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:optID" => ei_opt_id.set(xsd_util::read_string(reader, "ei:optID")?)?,
-                    "ei:optType" => {
-                        ei_opt_type.set(xsd_util::read_string_enum(reader, "ei:optType")?)?
+                    "optID" => ei_opt_id.set(xsd_util::read_string(reader, "optID")?)?,
+                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
+                    "optReason" => {
+                        ei_opt_reason.set(xsd_util::read_string(reader, "optReason")?)?
                     }
-                    "ei:optReason" => {
-                        ei_opt_reason.set(xsd_util::read_string(reader, "ei:optReason")?)?
+                    "marketContext" => {
+                        emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
                     }
-                    "emix:marketContext" => emix_market_context
-                        .set(xsd_util::read_string(reader, "emix:marketContext")?)?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    "xcal:vavailability" => {
-                        xcal_vavailability.set(crate::xcal::VavailabilityType::read(
-                            reader,
-                            &attributes,
-                            "xcal:vavailability",
-                        )?)?
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "vavailability" => xcal_vavailability.set(
+                        crate::xcal::VavailabilityType::read(reader, &attributes, "vavailability")?,
+                    )?,
+                    "createdDateTime" => ei_created_date_time
+                        .set(xsd_util::read_string(reader, "createdDateTime")?)?,
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "ei:createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "ei:createdDateTime")?)?,
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
-                    }
-                    "ei:qualifiedEventID" => {
+                    "qualifiedEventID" => {
                         ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
                             reader,
                             &attributes,
-                            "ei:qualifiedEventID",
+                            "qualifiedEventID",
                         )?)?
                     }
-                    "ei:eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                    "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
                         reader,
                         &attributes,
-                        "ei:eiTarget",
+                        "eiTarget",
                     )?)?,
-                    "oadr:oadrDeviceClass" => oadr_oadr_device_class.set(
-                        crate::ei::EiTargetType::read(reader, &attributes, "oadr:oadrDeviceClass")?,
+                    "oadrDeviceClass" => oadr_oadr_device_class.set(
+                        crate::ei::EiTargetType::read(reader, &attributes, "oadrDeviceClass")?,
                     )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -230,7 +225,7 @@ impl OadrCreateOptType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreateOptType")?;
-        OadrCreateOptType::read(reader, &attr, "oadr:oadrCreateOptType")
+        OadrCreateOptType::read(reader, &attr, "oadrCreateOptType")
     }
 }
 

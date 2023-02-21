@@ -62,7 +62,7 @@ impl OadrTransport {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrTransportType")
+            start.attr("xsi:type", "oadrTransportType")
         } else {
             start
         };
@@ -120,9 +120,8 @@ impl OadrTransport {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "oadr:oadrTransportName" => oadr_oadr_transport_name.set(
-                            xsd_util::read_string_enum(reader, "oadr:oadrTransportName")?,
-                        )?,
+                        "oadrTransportName" => oadr_oadr_transport_name
+                            .set(xsd_util::read_string_enum(reader, "oadrTransportName")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -159,7 +158,7 @@ impl OadrTransport {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrTransportType")?;
-        OadrTransport::read(reader, &attr, "oadr:oadrTransportType")
+        OadrTransport::read(reader, &attr, "oadrTransportType")
     }
 }
 

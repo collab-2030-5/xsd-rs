@@ -42,7 +42,7 @@ impl FeatureCollection {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "gml:FeatureCollection")
+            start.attr("xsi:type", "FeatureCollection")
         } else {
             start
         };
@@ -143,7 +143,7 @@ impl FeatureCollection {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "FeatureCollection")?;
-        FeatureCollection::read(reader, &attr, "gml:FeatureCollection")
+        FeatureCollection::read(reader, &attr, "FeatureCollection")
     }
 }
 

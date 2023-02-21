@@ -35,7 +35,7 @@ impl MeterAssetType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:MeterAssetType")
+            start.attr("xsi:type", "MeterAssetType")
         } else {
             start
         };
@@ -92,9 +92,7 @@ impl MeterAssetType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:mrid" => {
-                            power_mrid.set(xsd_util::read_string(reader, "power:mrid")?)?
-                        }
+                        "mrid" => power_mrid.set(xsd_util::read_string(reader, "mrid")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -131,7 +129,7 @@ impl MeterAssetType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "MeterAssetType")?;
-        MeterAssetType::read(reader, &attr, "power:MeterAssetType")
+        MeterAssetType::read(reader, &attr, "MeterAssetType")
     }
 }
 

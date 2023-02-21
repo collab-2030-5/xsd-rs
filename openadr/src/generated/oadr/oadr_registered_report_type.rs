@@ -50,7 +50,7 @@ impl OadrRegisteredReportType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrRegisteredReportType")
+            start.attr("xsi:type", "oadrRegisteredReportType")
         } else {
             start
         };
@@ -113,19 +113,19 @@ impl OadrRegisteredReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                         reader,
                         &attributes,
-                        "ei:eiResponse",
+                        "eiResponse",
                     )?)?,
-                    "oadr:oadrReportRequest" => {
+                    "oadrReportRequest" => {
                         oadr_oadr_report_request.push(crate::oadr::OadrReportRequestType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrReportRequest",
+                            "oadrReportRequest",
                         )?)
                     }
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -164,7 +164,7 @@ impl OadrRegisteredReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrRegisteredReportType")?;
-        OadrRegisteredReportType::read(reader, &attr, "oadr:oadrRegisteredReportType")
+        OadrRegisteredReportType::read(reader, &attr, "oadrRegisteredReportType")
     }
 }
 

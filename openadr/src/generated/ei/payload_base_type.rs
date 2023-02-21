@@ -22,7 +22,7 @@ impl PayloadBaseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:PayloadBaseType")
+            start.attr("xsi:type", "PayloadBaseType")
         } else {
             start
         };
@@ -110,7 +110,7 @@ impl PayloadBaseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PayloadBaseType")?;
-        PayloadBaseType::read(reader, &attr, "ei:PayloadBaseType")
+        PayloadBaseType::read(reader, &attr, "PayloadBaseType")
     }
 }
 

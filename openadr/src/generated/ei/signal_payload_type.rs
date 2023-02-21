@@ -21,7 +21,7 @@ impl SignalPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:signalPayloadType")
+            start.attr("xsi:type", "signalPayloadType")
         } else {
             start
         };
@@ -109,7 +109,7 @@ impl SignalPayloadType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "signalPayloadType")?;
-        SignalPayloadType::read(reader, &attr, "ei:signalPayloadType")
+        SignalPayloadType::read(reader, &attr, "signalPayloadType")
     }
 }
 

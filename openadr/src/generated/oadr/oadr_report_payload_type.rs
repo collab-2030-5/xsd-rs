@@ -53,7 +53,7 @@ impl OadrReportPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrReportPayloadType")
+            start.attr("xsi:type", "oadrReportPayloadType")
         } else {
             start
         };
@@ -115,19 +115,20 @@ impl OadrReportPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "ei:confidence" => ei_confidence
-                        .set(xsd_util::read_type_from_string(reader, "ei:confidence")?)?,
-                    "ei:accuracy" => {
-                        ei_accuracy.set(xsd_util::read_type_from_string(reader, "ei:accuracy")?)?
+                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "confidence" => {
+                        ei_confidence.set(xsd_util::read_type_from_string(reader, "confidence")?)?
                     }
-                    "ei:payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
+                    "accuracy" => {
+                        ei_accuracy.set(xsd_util::read_type_from_string(reader, "accuracy")?)?
+                    }
+                    "payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
                         reader,
                         &attributes,
-                        "ei:payloadBase",
+                        "payloadBase",
                     )?)?,
-                    "oadr:oadrDataQuality" => oadr_oadr_data_quality
-                        .set(xsd_util::read_string(reader, "oadr:oadrDataQuality")?)?,
+                    "oadrDataQuality" => oadr_oadr_data_quality
+                        .set(xsd_util::read_string(reader, "oadrDataQuality")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -167,7 +168,7 @@ impl OadrReportPayloadType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrReportPayloadType")?;
-        OadrReportPayloadType::read(reader, &attr, "oadr:oadrReportPayloadType")
+        OadrReportPayloadType::read(reader, &attr, "oadrReportPayloadType")
     }
 }
 

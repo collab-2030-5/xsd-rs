@@ -45,7 +45,7 @@ impl EventResponseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eventResponseType")
+            start.attr("xsi:type", "eventResponseType")
         } else {
             start
         };
@@ -108,24 +108,22 @@ impl EventResponseType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:responseCode" => {
-                        ei_response_code.set(xsd_util::read_string(reader, "ei:responseCode")?)?
+                    "responseCode" => {
+                        ei_response_code.set(xsd_util::read_string(reader, "responseCode")?)?
                     }
-                    "ei:responseDescription" => ei_response_description
-                        .set(xsd_util::read_string(reader, "ei:responseDescription")?)?,
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                    "responseDescription" => ei_response_description
+                        .set(xsd_util::read_string(reader, "responseDescription")?)?,
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "ei:qualifiedEventID" => {
+                    "qualifiedEventID" => {
                         ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
                             reader,
                             &attributes,
-                            "ei:qualifiedEventID",
+                            "qualifiedEventID",
                         )?)?
                     }
-                    "ei:optType" => {
-                        ei_opt_type.set(xsd_util::read_string_enum(reader, "ei:optType")?)?
-                    }
+                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -165,7 +163,7 @@ impl EventResponseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eventResponseType")?;
-        EventResponseType::read(reader, &attr, "ei:eventResponseType")
+        EventResponseType::read(reader, &attr, "eventResponseType")
     }
 }
 

@@ -52,7 +52,7 @@ impl OadrDistributeEventType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrDistributeEventType")
+            start.attr("xsi:type", "oadrDistributeEventType")
         } else {
             start
         };
@@ -115,15 +115,15 @@ impl OadrDistributeEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                         reader,
                         &attributes,
-                        "ei:eiResponse",
+                        "eiResponse",
                     )?)?,
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "ei:vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "ei:vtnID")?)?,
+                    "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
                     "oadrEvent" => oadr_event.push(crate::oadr::OadrEventType::read(
                         reader,
                         &attributes,
@@ -168,7 +168,7 @@ impl OadrDistributeEventType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrDistributeEventType")?;
-        OadrDistributeEventType::read(reader, &attr, "oadr:oadrDistributeEventType")
+        OadrDistributeEventType::read(reader, &attr, "oadrDistributeEventType")
     }
 }
 

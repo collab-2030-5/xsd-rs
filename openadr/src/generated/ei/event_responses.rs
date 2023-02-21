@@ -36,7 +36,7 @@ impl EventResponses {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eventResponses")
+            start.attr("xsi:type", "eventResponses")
         } else {
             start
         };
@@ -132,7 +132,7 @@ impl EventResponses {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eventResponses")?;
-        EventResponses::read(reader, &attr, "ei:eventResponses")
+        EventResponses::read(reader, &attr, "eventResponses")
     }
 }
 

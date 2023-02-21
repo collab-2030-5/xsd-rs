@@ -42,7 +42,7 @@ impl OadrExtensionType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrExtensionType")
+            start.attr("xsi:type", "oadrExtensionType")
         } else {
             start
         };
@@ -103,10 +103,10 @@ impl OadrExtensionType {
                 } => match name.local_name.as_str() {
                     "oadrExtensionName" => oadr_extension_name
                         .set(xsd_util::read_string(reader, "oadrExtensionName")?)?,
-                    "oadr:oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
+                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
                         reader,
                         &attributes,
-                        "oadr:oadrInfo",
+                        "oadrInfo",
                     )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -144,7 +144,7 @@ impl OadrExtensionType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrExtensionType")?;
-        OadrExtensionType::read(reader, &attr, "oadr:oadrExtensionType")
+        OadrExtensionType::read(reader, &attr, "oadrExtensionType")
     }
 }
 

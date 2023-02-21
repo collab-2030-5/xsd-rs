@@ -41,7 +41,7 @@ impl EiCreatedEvent {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "pyld:eiCreatedEvent")
+            start.attr("xsi:type", "eiCreatedEvent")
         } else {
             start
         };
@@ -101,18 +101,20 @@ impl EiCreatedEvent {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "ei:eiResponse",
-                    )?)?,
-                    "ei:eventResponses" => ei_event_responses.set(
-                        crate::ei::EventResponses::read(reader, &attributes, "ei:eventResponses")?,
-                    )?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                } => {
+                    match name.local_name.as_str() {
+                        "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?,
+                        "eventResponses" => ei_event_responses.set(
+                            crate::ei::EventResponses::read(reader, &attributes, "eventResponses")?,
+                        )?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    }
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -148,7 +150,7 @@ impl EiCreatedEvent {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiCreatedEvent")?;
-        EiCreatedEvent::read(reader, &attr, "pyld:eiCreatedEvent")
+        EiCreatedEvent::read(reader, &attr, "eiCreatedEvent")
     }
 }
 

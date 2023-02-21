@@ -22,7 +22,7 @@ impl ItemBaseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "emix:ItemBaseType")
+            start.attr("xsi:type", "ItemBaseType")
         } else {
             start
         };
@@ -110,7 +110,7 @@ impl ItemBaseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ItemBaseType")?;
-        ItemBaseType::read(reader, &attr, "emix:ItemBaseType")
+        ItemBaseType::read(reader, &attr, "ItemBaseType")
     }
 }
 

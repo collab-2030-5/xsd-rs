@@ -36,7 +36,7 @@ impl OadrPendingReportsType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrPendingReportsType")
+            start.attr("xsi:type", "oadrPendingReportsType")
         } else {
             start
         };
@@ -93,8 +93,8 @@ impl OadrPendingReportsType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "ei:reportRequestID" => ei_report_request_id
-                            .push(xsd_util::read_string(reader, "ei:reportRequestID")?),
+                        "reportRequestID" => ei_report_request_id
+                            .push(xsd_util::read_string(reader, "reportRequestID")?),
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -131,7 +131,7 @@ impl OadrPendingReportsType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrPendingReportsType")?;
-        OadrPendingReportsType::read(reader, &attr, "oadr:oadrPendingReportsType")
+        OadrPendingReportsType::read(reader, &attr, "oadrPendingReportsType")
     }
 }
 

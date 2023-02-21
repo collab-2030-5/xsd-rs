@@ -22,7 +22,7 @@ impl RegistrationId {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:registrationID")
+            start.attr("xsi:type", "registrationID")
         } else {
             start
         };
@@ -110,7 +110,7 @@ impl RegistrationId {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "registrationID")?;
-        RegistrationId::read(reader, &attr, "ei:registrationID")
+        RegistrationId::read(reader, &attr, "registrationID")
     }
 }
 

@@ -53,7 +53,7 @@ impl OadrRegisterReportType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrRegisterReportType")
+            start.attr("xsi:type", "oadrRegisterReportType")
         } else {
             start
         };
@@ -116,17 +116,17 @@ impl OadrRegisterReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "oadr:oadrReport" => oadr_oadr_report.push(crate::oadr::OadrReportType::read(
+                    "oadrReport" => oadr_oadr_report.push(crate::oadr::OadrReportType::read(
                         reader,
                         &attributes,
-                        "oadr:oadrReport",
+                        "oadrReport",
                     )?),
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    "ei:reportRequestID" => ei_report_request_id
-                        .set(xsd_util::read_string(reader, "ei:reportRequestID")?)?,
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "reportRequestID" => ei_report_request_id
+                        .set(xsd_util::read_string(reader, "reportRequestID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -166,7 +166,7 @@ impl OadrRegisterReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrRegisterReportType")?;
-        OadrRegisterReportType::read(reader, &attr, "oadr:oadrRegisterReportType")
+        OadrRegisterReportType::read(reader, &attr, "oadrRegisterReportType")
     }
 }
 

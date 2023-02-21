@@ -34,7 +34,7 @@ impl CurrentValueType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:currentValueType")
+            start.attr("xsi:type", "currentValueType")
         } else {
             start
         };
@@ -130,7 +130,7 @@ impl CurrentValueType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "currentValueType")?;
-        CurrentValueType::read(reader, &attr, "ei:currentValueType")
+        CurrentValueType::read(reader, &attr, "currentValueType")
     }
 }
 

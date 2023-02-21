@@ -46,7 +46,7 @@ impl OadrPayloadResourceStatusType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrPayloadResourceStatusType")
+            start.attr("xsi:type", "oadrPayloadResourceStatusType")
         } else {
             start
         };
@@ -119,11 +119,11 @@ impl OadrPayloadResourceStatusType {
                     "oadrManualOverride" => oadr_manual_override.set(
                         xsd_util::read_type_from_string(reader, "oadrManualOverride")?,
                     )?,
-                    "oadr:oadrLoadControlState" => oadr_oadr_load_control_state.set(
+                    "oadrLoadControlState" => oadr_oadr_load_control_state.set(
                         crate::oadr::OadrLoadControlStateType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrLoadControlState",
+                            "oadrLoadControlState",
                         )?,
                     )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -163,7 +163,7 @@ impl OadrPayloadResourceStatusType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrPayloadResourceStatusType")?;
-        OadrPayloadResourceStatusType::read(reader, &attr, "oadr:oadrPayloadResourceStatusType")
+        OadrPayloadResourceStatusType::read(reader, &attr, "oadrPayloadResourceStatusType")
     }
 }
 

@@ -46,7 +46,7 @@ impl OadrLoadControlStateTypeType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrLoadControlStateTypeType")
+            start.attr("xsi:type", "oadrLoadControlStateTypeType")
         } else {
             start
         };
@@ -160,7 +160,7 @@ impl OadrLoadControlStateTypeType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrLoadControlStateTypeType")?;
-        OadrLoadControlStateTypeType::read(reader, &attr, "oadr:oadrLoadControlStateTypeType")
+        OadrLoadControlStateTypeType::read(reader, &attr, "oadrLoadControlStateTypeType")
     }
 }
 

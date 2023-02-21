@@ -45,7 +45,7 @@ impl PowerRealType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:PowerRealType")
+            start.attr("xsi:type", "PowerRealType")
         } else {
             start
         };
@@ -112,13 +112,13 @@ impl PowerRealType {
                         item_description.set(xsd_util::read_string(reader, "itemDescription")?)?
                     }
                     "itemUnits" => item_units.set(xsd_util::read_string(reader, "itemUnits")?)?,
-                    "scale:siScaleCode" => scale_si_scale_code
-                        .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
-                    "power:powerAttributes" => {
+                    "siScaleCode" => scale_si_scale_code
+                        .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
+                    "powerAttributes" => {
                         power_power_attributes.set(crate::power::PowerAttributesType::read(
                             reader,
                             &attributes,
-                            "power:powerAttributes",
+                            "powerAttributes",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -159,7 +159,7 @@ impl PowerRealType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PowerRealType")?;
-        PowerRealType::read(reader, &attr, "power:PowerRealType")
+        PowerRealType::read(reader, &attr, "PowerRealType")
     }
 }
 

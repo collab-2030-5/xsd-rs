@@ -42,7 +42,7 @@ impl OadrRequestEventType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrRequestEventType")
+            start.attr("xsi:type", "oadrRequestEventType")
         } else {
             start
         };
@@ -103,13 +103,9 @@ impl OadrRequestEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "pyld:eiRequestEvent" => {
-                        pyld_ei_request_event.set(crate::pyld::EiRequestEvent::read(
-                            reader,
-                            &attributes,
-                            "pyld:eiRequestEvent",
-                        )?)?
-                    }
+                    "eiRequestEvent" => pyld_ei_request_event.set(
+                        crate::pyld::EiRequestEvent::read(reader, &attributes, "eiRequestEvent")?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -146,7 +142,7 @@ impl OadrRequestEventType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrRequestEventType")?;
-        OadrRequestEventType::read(reader, &attr, "oadr:oadrRequestEventType")
+        OadrRequestEventType::read(reader, &attr, "oadrRequestEventType")
     }
 }
 

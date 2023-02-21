@@ -70,7 +70,7 @@ impl OadrCreatedPartyRegistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreatedPartyRegistrationType")
+            start.attr("xsi:type", "oadrCreatedPartyRegistrationType")
         } else {
             start
         };
@@ -148,43 +148,45 @@ impl OadrCreatedPartyRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "ei:eiResponse",
-                    )?)?,
-                    "ei:registrationID" => ei_registration_id.set(
-                        crate::ei::RegistrationId::read(reader, &attributes, "ei:registrationID")?,
-                    )?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    "ei:vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "ei:vtnID")?)?,
-                    "oadr:oadrProfiles" => oadr_oadr_profiles.set(
-                        crate::oadr::OadrProfiles::read(reader, &attributes, "oadr:oadrProfiles")?,
-                    )?,
-                    "oadr:oadrRequestedOadrPollFreq" => oadr_oadr_requested_oadr_poll_freq.set(
-                        crate::xcal::DurationPropType::read(
+                } => {
+                    match name.local_name.as_str() {
+                        "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrRequestedOadrPollFreq",
+                            "eiResponse",
+                        )?)?,
+                        "registrationID" => ei_registration_id.set(
+                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
                         )?,
-                    )?,
-                    "oadr:oadrServiceSpecificInfo" => oadr_oadr_service_specific_info.set(
-                        crate::oadr::OadrServiceSpecificInfo::read(
-                            reader,
-                            &attributes,
-                            "oadr:oadrServiceSpecificInfo",
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
+                        "oadrProfiles" => oadr_oadr_profiles.set(
+                            crate::oadr::OadrProfiles::read(reader, &attributes, "oadrProfiles")?,
                         )?,
-                    )?,
-                    "oadrExtensions" => {
-                        oadr_extensions.set(crate::oadr::OadrExtensionsType::read(
-                            reader,
-                            &attributes,
-                            "oadrExtensions",
-                        )?)?
+                        "oadrRequestedOadrPollFreq" => oadr_oadr_requested_oadr_poll_freq.set(
+                            crate::xcal::DurationPropType::read(
+                                reader,
+                                &attributes,
+                                "oadrRequestedOadrPollFreq",
+                            )?,
+                        )?,
+                        "oadrServiceSpecificInfo" => oadr_oadr_service_specific_info.set(
+                            crate::oadr::OadrServiceSpecificInfo::read(
+                                reader,
+                                &attributes,
+                                "oadrServiceSpecificInfo",
+                            )?,
+                        )?,
+                        "oadrExtensions" => {
+                            oadr_extensions.set(crate::oadr::OadrExtensionsType::read(
+                                reader,
+                                &attributes,
+                                "oadrExtensions",
+                            )?)?
+                        }
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -226,11 +228,7 @@ impl OadrCreatedPartyRegistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreatedPartyRegistrationType")?;
-        OadrCreatedPartyRegistrationType::read(
-            reader,
-            &attr,
-            "oadr:oadrCreatedPartyRegistrationType",
-        )
+        OadrCreatedPartyRegistrationType::read(reader, &attr, "oadrCreatedPartyRegistrationType")
     }
 }
 

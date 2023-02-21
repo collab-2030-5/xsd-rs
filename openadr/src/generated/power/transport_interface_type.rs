@@ -37,7 +37,7 @@ impl TransportInterfaceType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:TransportInterfaceType")
+            start.attr("xsi:type", "TransportInterfaceType")
         } else {
             start
         };
@@ -136,7 +136,7 @@ impl TransportInterfaceType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "TransportInterfaceType")?;
-        TransportInterfaceType::read(reader, &attr, "power:TransportInterfaceType")
+        TransportInterfaceType::read(reader, &attr, "TransportInterfaceType")
     }
 }
 

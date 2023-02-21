@@ -42,7 +42,7 @@ impl SpecifierPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:SpecifierPayloadType")
+            start.attr("xsi:type", "SpecifierPayloadType")
         } else {
             start
         };
@@ -102,14 +102,14 @@ impl SpecifierPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
+                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
-                        "emix:itemBase",
+                        "itemBase",
                     )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
+                    "readingType" => {
+                        ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -148,7 +148,7 @@ impl SpecifierPayloadType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "ei:SpecifierPayloadType")
+        SpecifierPayloadType::read(reader, &attr, "SpecifierPayloadType")
     }
 }
 

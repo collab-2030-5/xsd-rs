@@ -56,7 +56,7 @@ impl EiEventBaselineType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiEventBaselineType")
+            start.attr("xsi:type", "eiEventBaselineType")
         } else {
             start
         };
@@ -121,34 +121,34 @@ impl EiEventBaselineType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "xcal:dtstart",
+                        "dtstart",
                     )?)?,
-                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "xcal:duration",
+                        "duration",
                     )?)?,
-                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
                         reader,
                         &attributes,
-                        "strm:intervals",
+                        "intervals",
                     )?)?,
                     "baselineID" => {
                         baseline_id.set(xsd_util::read_string(reader, "baselineID")?)?
                     }
-                    "ei:resourceID" => {
-                        ei_resource_id.push(xsd_util::read_string(reader, "ei:resourceID")?)
+                    "resourceID" => {
+                        ei_resource_id.push(xsd_util::read_string(reader, "resourceID")?)
                     }
                     "baselineName" => {
                         baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
                     }
-                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
+                    "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
-                        "emix:itemBase",
+                        "itemBase",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -191,7 +191,7 @@ impl EiEventBaselineType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiEventBaselineType")?;
-        EiEventBaselineType::read(reader, &attr, "ei:eiEventBaselineType")
+        EiEventBaselineType::read(reader, &attr, "eiEventBaselineType")
     }
 }
 

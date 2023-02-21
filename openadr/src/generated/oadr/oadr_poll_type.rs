@@ -41,7 +41,7 @@ impl OadrPollType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrPollType")
+            start.attr("xsi:type", "oadrPollType")
         } else {
             start
         };
@@ -100,7 +100,7 @@ impl OadrPollType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -138,7 +138,7 @@ impl OadrPollType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrPollType")?;
-        OadrPollType::read(reader, &attr, "oadr:oadrPollType")
+        OadrPollType::read(reader, &attr, "oadrPollType")
     }
 }
 

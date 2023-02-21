@@ -42,7 +42,7 @@ impl OadrCreatedEventType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreatedEventType")
+            start.attr("xsi:type", "oadrCreatedEventType")
         } else {
             start
         };
@@ -103,13 +103,9 @@ impl OadrCreatedEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "pyld:eiCreatedEvent" => {
-                        pyld_ei_created_event.set(crate::pyld::EiCreatedEvent::read(
-                            reader,
-                            &attributes,
-                            "pyld:eiCreatedEvent",
-                        )?)?
-                    }
+                    "eiCreatedEvent" => pyld_ei_created_event.set(
+                        crate::pyld::EiCreatedEvent::read(reader, &attributes, "eiCreatedEvent")?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -146,7 +142,7 @@ impl OadrCreatedEventType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreatedEventType")?;
-        OadrCreatedEventType::read(reader, &attr, "oadr:oadrCreatedEventType")
+        OadrCreatedEventType::read(reader, &attr, "oadrCreatedEventType")
     }
 }
 

@@ -41,7 +41,7 @@ impl QualifiedEventIdType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:QualifiedEventIDType")
+            start.attr("xsi:type", "QualifiedEventIDType")
         } else {
             start
         };
@@ -99,11 +99,9 @@ impl QualifiedEventIdType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "ei:eventID" => {
-                            ei_event_id.set(xsd_util::read_string(reader, "ei:eventID")?)?
-                        }
-                        "ei:modificationNumber" => ei_modification_number.set(
-                            xsd_util::read_type_from_string(reader, "ei:modificationNumber")?,
+                        "eventID" => ei_event_id.set(xsd_util::read_string(reader, "eventID")?)?,
+                        "modificationNumber" => ei_modification_number.set(
+                            xsd_util::read_type_from_string(reader, "modificationNumber")?,
                         )?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -142,7 +140,7 @@ impl QualifiedEventIdType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "QualifiedEventIDType")?;
-        QualifiedEventIdType::read(reader, &attr, "ei:QualifiedEventIDType")
+        QualifiedEventIdType::read(reader, &attr, "QualifiedEventIDType")
     }
 }
 

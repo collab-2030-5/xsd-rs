@@ -34,7 +34,7 @@ impl Dtstart {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:dtstart")
+            start.attr("xsi:type", "dtstart")
         } else {
             start
         };
@@ -91,8 +91,8 @@ impl Dtstart {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "xcal:date-time" => {
-                            xcal_date_time.set(xsd_util::read_string(reader, "xcal:date-time")?)?
+                        "date-time" => {
+                            xcal_date_time.set(xsd_util::read_string(reader, "date-time")?)?
                         }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -130,7 +130,7 @@ impl Dtstart {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "dtstart")?;
-        Dtstart::read(reader, &attr, "xcal:dtstart")
+        Dtstart::read(reader, &attr, "dtstart")
     }
 }
 

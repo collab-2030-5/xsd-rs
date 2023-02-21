@@ -38,7 +38,7 @@ impl PowerAttributesType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:PowerAttributesType")
+            start.attr("xsi:type", "PowerAttributesType")
         } else {
             start
         };
@@ -140,7 +140,7 @@ impl PowerAttributesType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PowerAttributesType")?;
-        PowerAttributesType::read(reader, &attr, "power:PowerAttributesType")
+        PowerAttributesType::read(reader, &attr, "PowerAttributesType")
     }
 }
 

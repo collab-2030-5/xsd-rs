@@ -42,7 +42,7 @@ impl OadrServiceType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrServiceType")
+            start.attr("xsi:type", "oadrServiceType")
         } else {
             start
         };
@@ -102,12 +102,12 @@ impl OadrServiceType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadr:oadrServiceName" => oadr_oadr_service_name
-                        .set(xsd_util::read_string_enum(reader, "oadr:oadrServiceName")?)?,
-                    "oadr:oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
+                    "oadrServiceName" => oadr_oadr_service_name
+                        .set(xsd_util::read_string_enum(reader, "oadrServiceName")?)?,
+                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
                         reader,
                         &attributes,
-                        "oadr:oadrInfo",
+                        "oadrInfo",
                     )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -145,7 +145,7 @@ impl OadrServiceType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrServiceType")?;
-        OadrServiceType::read(reader, &attr, "oadr:oadrServiceType")
+        OadrServiceType::read(reader, &attr, "oadrServiceType")
     }
 }
 

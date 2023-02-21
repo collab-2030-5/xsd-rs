@@ -44,7 +44,7 @@ impl EiEventType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiEventType")
+            start.attr("xsi:type", "eiEventType")
         } else {
             start
         };
@@ -108,31 +108,23 @@ impl EiEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eventDescriptor" => {
+                    "eventDescriptor" => {
                         ei_event_descriptor.set(crate::ei::EventDescriptorType::read(
                             reader,
                             &attributes,
-                            "ei:eventDescriptor",
+                            "eventDescriptor",
                         )?)?
                     }
-                    "ei:eiActivePeriod" => {
-                        ei_ei_active_period.set(crate::ei::EiActivePeriodType::read(
-                            reader,
-                            &attributes,
-                            "ei:eiActivePeriod",
-                        )?)?
-                    }
-                    "ei:eiEventSignals" => {
-                        ei_ei_event_signals.set(crate::ei::EiEventSignalsType::read(
-                            reader,
-                            &attributes,
-                            "ei:eiEventSignals",
-                        )?)?
-                    }
-                    "ei:eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                    "eiActivePeriod" => ei_ei_active_period.set(
+                        crate::ei::EiActivePeriodType::read(reader, &attributes, "eiActivePeriod")?,
+                    )?,
+                    "eiEventSignals" => ei_ei_event_signals.set(
+                        crate::ei::EiEventSignalsType::read(reader, &attributes, "eiEventSignals")?,
+                    )?,
+                    "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
                         reader,
                         &attributes,
-                        "ei:eiTarget",
+                        "eiTarget",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -172,7 +164,7 @@ impl EiEventType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiEventType")?;
-        EiEventType::read(reader, &attr, "ei:eiEventType")
+        EiEventType::read(reader, &attr, "eiEventType")
     }
 }
 

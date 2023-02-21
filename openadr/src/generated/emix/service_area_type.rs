@@ -40,7 +40,7 @@ impl ServiceAreaType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "emix:ServiceAreaType")
+            start.attr("xsi:type", "ServiceAreaType")
         } else {
             start
         };
@@ -99,11 +99,11 @@ impl ServiceAreaType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "gml:FeatureCollection" => {
+                    "FeatureCollection" => {
                         gml_feature_collection.set(crate::gml::FeatureCollection::read(
                             reader,
                             &attributes,
-                            "gml:FeatureCollection",
+                            "FeatureCollection",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -141,7 +141,7 @@ impl ServiceAreaType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ServiceAreaType")?;
-        ServiceAreaType::read(reader, &attr, "emix:ServiceAreaType")
+        ServiceAreaType::read(reader, &attr, "ServiceAreaType")
     }
 }
 

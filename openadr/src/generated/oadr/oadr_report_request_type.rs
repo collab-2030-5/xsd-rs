@@ -42,7 +42,7 @@ impl OadrReportRequestType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrReportRequestType")
+            start.attr("xsi:type", "oadrReportRequestType")
         } else {
             start
         };
@@ -102,13 +102,13 @@ impl OadrReportRequestType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:reportRequestID" => ei_report_request_id
-                        .set(xsd_util::read_string(reader, "ei:reportRequestID")?)?,
-                    "ei:reportSpecifier" => {
+                    "reportRequestID" => ei_report_request_id
+                        .set(xsd_util::read_string(reader, "reportRequestID")?)?,
+                    "reportSpecifier" => {
                         ei_report_specifier.set(crate::ei::ReportSpecifierType::read(
                             reader,
                             &attributes,
-                            "ei:reportSpecifier",
+                            "reportSpecifier",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -147,7 +147,7 @@ impl OadrReportRequestType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrReportRequestType")?;
-        OadrReportRequestType::read(reader, &attr, "oadr:oadrReportRequestType")
+        OadrReportRequestType::read(reader, &attr, "oadrReportRequestType")
     }
 }
 

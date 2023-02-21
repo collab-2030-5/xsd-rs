@@ -44,7 +44,7 @@ impl OadrCreatedOptType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreatedOptType")
+            start.attr("xsi:type", "oadrCreatedOptType")
         } else {
             start
         };
@@ -105,12 +105,12 @@ impl OadrCreatedOptType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                         reader,
                         &attributes,
-                        "ei:eiResponse",
+                        "eiResponse",
                     )?)?,
-                    "ei:optID" => ei_opt_id.set(xsd_util::read_string(reader, "ei:optID")?)?,
+                    "optID" => ei_opt_id.set(xsd_util::read_string(reader, "optID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -148,7 +148,7 @@ impl OadrCreatedOptType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreatedOptType")?;
-        OadrCreatedOptType::read(reader, &attr, "oadr:oadrCreatedOptType")
+        OadrCreatedOptType::read(reader, &attr, "oadrCreatedOptType")
     }
 }
 

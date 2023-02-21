@@ -36,7 +36,7 @@ impl Intervals {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "strm:intervals")
+            start.attr("xsi:type", "intervals")
         } else {
             start
         };
@@ -94,10 +94,10 @@ impl Intervals {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:interval" => ei_interval.push(crate::ei::IntervalType::read(
+                    "interval" => ei_interval.push(crate::ei::IntervalType::read(
                         reader,
                         &attributes,
-                        "ei:interval",
+                        "interval",
                     )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -132,7 +132,7 @@ impl Intervals {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "intervals")?;
-        Intervals::read(reader, &attr, "strm:intervals")
+        Intervals::read(reader, &attr, "intervals")
     }
 }
 

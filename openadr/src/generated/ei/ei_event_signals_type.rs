@@ -42,7 +42,7 @@ impl EiEventSignalsType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiEventSignalsType")
+            start.attr("xsi:type", "eiEventSignalsType")
         } else {
             start
         };
@@ -102,18 +102,16 @@ impl EiEventSignalsType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiEventSignal" => {
-                        ei_ei_event_signal.push(crate::ei::EiEventSignalType::read(
-                            reader,
-                            &attributes,
-                            "ei:eiEventSignal",
-                        )?)
-                    }
-                    "ei:eiEventBaseline" => {
+                    "eiEventSignal" => ei_ei_event_signal.push(crate::ei::EiEventSignalType::read(
+                        reader,
+                        &attributes,
+                        "eiEventSignal",
+                    )?),
+                    "eiEventBaseline" => {
                         ei_ei_event_baseline.set(crate::ei::EiEventBaselineType::read(
                             reader,
                             &attributes,
-                            "ei:eiEventBaseline",
+                            "eiEventBaseline",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -152,7 +150,7 @@ impl EiEventSignalsType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiEventSignalsType")?;
-        EiEventSignalsType::read(reader, &attr, "ei:eiEventSignalsType")
+        EiEventSignalsType::read(reader, &attr, "eiEventSignalsType")
     }
 }
 

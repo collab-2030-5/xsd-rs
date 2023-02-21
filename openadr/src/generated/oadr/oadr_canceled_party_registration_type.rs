@@ -50,7 +50,7 @@ impl OadrCanceledPartyRegistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCanceledPartyRegistrationType")
+            start.attr("xsi:type", "oadrCanceledPartyRegistrationType")
         } else {
             start
         };
@@ -117,18 +117,20 @@ impl OadrCanceledPartyRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "ei:eiResponse",
-                    )?)?,
-                    "ei:registrationID" => ei_registration_id.set(
-                        crate::ei::RegistrationId::read(reader, &attributes, "ei:registrationID")?,
-                    )?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                } => {
+                    match name.local_name.as_str() {
+                        "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?,
+                        "registrationID" => ei_registration_id.set(
+                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
+                        )?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    }
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -165,11 +167,7 @@ impl OadrCanceledPartyRegistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCanceledPartyRegistrationType")?;
-        OadrCanceledPartyRegistrationType::read(
-            reader,
-            &attr,
-            "oadr:oadrCanceledPartyRegistrationType",
-        )
+        OadrCanceledPartyRegistrationType::read(reader, &attr, "oadrCanceledPartyRegistrationType")
     }
 }
 

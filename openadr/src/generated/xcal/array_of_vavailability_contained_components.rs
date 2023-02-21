@@ -36,7 +36,7 @@ impl ArrayOfVavailabilityContainedComponents {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:ArrayOfVavailabilityContainedComponents")
+            start.attr("xsi:type", "ArrayOfVavailabilityContainedComponents")
         } else {
             start
         };
@@ -99,10 +99,10 @@ impl ArrayOfVavailabilityContainedComponents {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:available" => xcal_available.push(crate::xcal::AvailableType::read(
+                    "available" => xcal_available.push(crate::xcal::AvailableType::read(
                         reader,
                         &attributes,
-                        "xcal:available",
+                        "available",
                     )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -140,7 +140,7 @@ impl ArrayOfVavailabilityContainedComponents {
         ArrayOfVavailabilityContainedComponents::read(
             reader,
             &attr,
-            "xcal:ArrayOfVavailabilityContainedComponents",
+            "ArrayOfVavailabilityContainedComponents",
         )
     }
 }

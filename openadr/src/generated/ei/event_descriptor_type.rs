@@ -77,7 +77,7 @@ impl EventDescriptorType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eventDescriptorType")
+            start.attr("xsi:type", "eventDescriptorType")
         } else {
             start
         };
@@ -146,11 +146,9 @@ impl EventDescriptorType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eventID" => {
-                        ei_event_id.set(xsd_util::read_string(reader, "ei:eventID")?)?
-                    }
-                    "ei:modificationNumber" => ei_modification_number.set(
-                        xsd_util::read_type_from_string(reader, "ei:modificationNumber")?,
+                    "eventID" => ei_event_id.set(xsd_util::read_string(reader, "eventID")?)?,
+                    "modificationNumber" => ei_modification_number.set(
+                        xsd_util::read_type_from_string(reader, "modificationNumber")?,
                     )?,
                     "modificationDateTime" => modification_date_time
                         .set(xsd_util::read_string(reader, "modificationDateTime")?)?,
@@ -166,10 +164,11 @@ impl EventDescriptorType {
                             "eiMarketContext",
                         )?)?
                     }
-                    "ei:createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "ei:createdDateTime")?)?,
-                    "ei:eventStatus" => ei_event_status
-                        .set(xsd_util::read_string_enum(reader, "ei:eventStatus")?)?,
+                    "createdDateTime" => ei_created_date_time
+                        .set(xsd_util::read_string(reader, "createdDateTime")?)?,
+                    "eventStatus" => {
+                        ei_event_status.set(xsd_util::read_string_enum(reader, "eventStatus")?)?
+                    }
                     "testEvent" => test_event.set(xsd_util::read_string(reader, "testEvent")?)?,
                     "vtnComment" => {
                         vtn_comment.set(xsd_util::read_string(reader, "vtnComment")?)?
@@ -218,7 +217,7 @@ impl EventDescriptorType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eventDescriptorType")?;
-        EventDescriptorType::read(reader, &attr, "ei:eventDescriptorType")
+        EventDescriptorType::read(reader, &attr, "eventDescriptorType")
     }
 }
 

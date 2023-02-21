@@ -91,7 +91,7 @@ impl OadrCreatePartyRegistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreatePartyRegistrationType")
+            start.attr("xsi:type", "oadrCreatePartyRegistrationType")
         } else {
             start
         };
@@ -166,34 +166,34 @@ impl OadrCreatePartyRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                } => {
+                    match name.local_name.as_str() {
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
+                        }
+                        "registrationID" => ei_registration_id.set(
+                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
+                        )?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        "oadrProfileName" => oadr_oadr_profile_name
+                            .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
+                        "oadrTransportName" => oadr_oadr_transport_name
+                            .set(xsd_util::read_string_enum(reader, "oadrTransportName")?)?,
+                        "oadrTransportAddress" => oadr_oadr_transport_address
+                            .set(xsd_util::read_string(reader, "oadrTransportAddress")?)?,
+                        "oadrReportOnly" => oadr_oadr_report_only
+                            .set(xsd_util::read_type_from_string(reader, "oadrReportOnly")?)?,
+                        "oadrXmlSignature" => oadr_oadr_xml_signature
+                            .set(xsd_util::read_type_from_string(reader, "oadrXmlSignature")?)?,
+                        "oadrVenName" => {
+                            oadr_oadr_ven_name.set(xsd_util::read_string(reader, "oadrVenName")?)?
+                        }
+                        "oadrHttpPullModel" => oadr_oadr_http_pull_model.set(
+                            xsd_util::read_type_from_string(reader, "oadrHttpPullModel")?,
+                        )?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    "ei:registrationID" => ei_registration_id.set(
-                        crate::ei::RegistrationId::read(reader, &attributes, "ei:registrationID")?,
-                    )?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    "oadr:oadrProfileName" => oadr_oadr_profile_name
-                        .set(xsd_util::read_string(reader, "oadr:oadrProfileName")?)?,
-                    "oadr:oadrTransportName" => oadr_oadr_transport_name.set(
-                        xsd_util::read_string_enum(reader, "oadr:oadrTransportName")?,
-                    )?,
-                    "oadr:oadrTransportAddress" => oadr_oadr_transport_address
-                        .set(xsd_util::read_string(reader, "oadr:oadrTransportAddress")?)?,
-                    "oadr:oadrReportOnly" => oadr_oadr_report_only.set(
-                        xsd_util::read_type_from_string(reader, "oadr:oadrReportOnly")?,
-                    )?,
-                    "oadr:oadrXmlSignature" => oadr_oadr_xml_signature.set(
-                        xsd_util::read_type_from_string(reader, "oadr:oadrXmlSignature")?,
-                    )?,
-                    "oadr:oadrVenName" => oadr_oadr_ven_name
-                        .set(xsd_util::read_string(reader, "oadr:oadrVenName")?)?,
-                    "oadr:oadrHttpPullModel" => oadr_oadr_http_pull_model.set(
-                        xsd_util::read_type_from_string(reader, "oadr:oadrHttpPullModel")?,
-                    )?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -237,7 +237,7 @@ impl OadrCreatePartyRegistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreatePartyRegistrationType")?;
-        OadrCreatePartyRegistrationType::read(reader, &attr, "oadr:oadrCreatePartyRegistrationType")
+        OadrCreatePartyRegistrationType::read(reader, &attr, "oadrCreatePartyRegistrationType")
     }
 }
 

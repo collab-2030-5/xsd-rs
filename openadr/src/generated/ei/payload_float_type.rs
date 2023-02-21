@@ -34,7 +34,7 @@ impl PayloadFloatType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:PayloadFloatType")
+            start.attr("xsi:type", "PayloadFloatType")
         } else {
             start
         };
@@ -128,7 +128,7 @@ impl PayloadFloatType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PayloadFloatType")?;
-        PayloadFloatType::read(reader, &attr, "ei:PayloadFloatType")
+        PayloadFloatType::read(reader, &attr, "PayloadFloatType")
     }
 }
 

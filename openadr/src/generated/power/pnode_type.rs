@@ -35,7 +35,7 @@ impl PnodeType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:PnodeType")
+            start.attr("xsi:type", "PnodeType")
         } else {
             start
         };
@@ -92,9 +92,7 @@ impl PnodeType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:node" => {
-                            power_node.set(xsd_util::read_string(reader, "power:node")?)?
-                        }
+                        "node" => power_node.set(xsd_util::read_string(reader, "node")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -131,7 +129,7 @@ impl PnodeType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PnodeType")?;
-        PnodeType::read(reader, &attr, "power:PnodeType")
+        PnodeType::read(reader, &attr, "PnodeType")
     }
 }
 

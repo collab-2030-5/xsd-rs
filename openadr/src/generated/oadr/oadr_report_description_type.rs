@@ -60,7 +60,7 @@ impl OadrReportDescriptionType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrReportDescriptionType")
+            start.attr("xsi:type", "oadrReportDescriptionType")
         } else {
             start
         };
@@ -127,33 +127,34 @@ impl OadrReportDescriptionType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "ei:reportSubject" => ei_report_subject.set(crate::ei::EiTargetType::read(
+                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "reportSubject" => ei_report_subject.set(crate::ei::EiTargetType::read(
                         reader,
                         &attributes,
-                        "ei:reportSubject",
+                        "reportSubject",
                     )?)?,
-                    "ei:reportDataSource" => ei_report_data_source.set(
-                        crate::ei::EiTargetType::read(reader, &attributes, "ei:reportDataSource")?,
+                    "reportDataSource" => ei_report_data_source.set(
+                        crate::ei::EiTargetType::read(reader, &attributes, "reportDataSource")?,
                     )?,
-                    "ei:reportType" => {
-                        ei_report_type.set(xsd_util::read_string(reader, "ei:reportType")?)?
+                    "reportType" => {
+                        ei_report_type.set(xsd_util::read_string(reader, "reportType")?)?
                     }
-                    "emix:itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
+                    "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
                         reader,
                         &attributes,
-                        "emix:itemBase",
+                        "itemBase",
                     )?)?,
-                    "ei:readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "ei:readingType")?)?
+                    "readingType" => {
+                        ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
                     }
-                    "emix:marketContext" => emix_market_context
-                        .set(xsd_util::read_string(reader, "emix:marketContext")?)?,
-                    "oadr:oadrSamplingRate" => {
+                    "marketContext" => {
+                        emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
+                    }
+                    "oadrSamplingRate" => {
                         oadr_oadr_sampling_rate.set(crate::oadr::OadrSamplingRateType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrSamplingRate",
+                            "oadrSamplingRate",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -198,7 +199,7 @@ impl OadrReportDescriptionType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrReportDescriptionType")?;
-        OadrReportDescriptionType::read(reader, &attr, "oadr:oadrReportDescriptionType")
+        OadrReportDescriptionType::read(reader, &attr, "oadrReportDescriptionType")
     }
 }
 

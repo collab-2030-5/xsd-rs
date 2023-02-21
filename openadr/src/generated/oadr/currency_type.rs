@@ -39,7 +39,7 @@ impl CurrencyType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:currencyType")
+            start.attr("xsi:type", "currencyType")
         } else {
             start
         };
@@ -107,8 +107,8 @@ impl CurrencyType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string_enum(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => scale_si_scale_code
-                            .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
+                        "siScaleCode" => scale_si_scale_code
+                            .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -147,7 +147,7 @@ impl CurrencyType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "currencyType")?;
-        CurrencyType::read(reader, &attr, "oadr:currencyType")
+        CurrencyType::read(reader, &attr, "currencyType")
     }
 }
 

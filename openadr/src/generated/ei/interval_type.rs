@@ -48,7 +48,7 @@ impl IntervalType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:IntervalType")
+            start.attr("xsi:type", "IntervalType")
         } else {
             start
         };
@@ -111,24 +111,22 @@ impl IntervalType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "xcal:dtstart",
+                        "dtstart",
                     )?)?,
-                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "xcal:duration",
+                        "duration",
                     )?)?,
-                    "xcal:uid" => {
-                        xcal_uid.set(crate::xcal::Uid::read(reader, &attributes, "xcal:uid")?)?
-                    }
-                    "strm:streamPayloadBase" => {
+                    "uid" => xcal_uid.set(crate::xcal::Uid::read(reader, &attributes, "uid")?)?,
+                    "streamPayloadBase" => {
                         strm_stream_payload_base.push(crate::strm::StreamPayloadBaseType::read(
                             reader,
                             &attributes,
-                            "strm:streamPayloadBase",
+                            "streamPayloadBase",
                         )?)
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -169,7 +167,7 @@ impl IntervalType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "IntervalType")?;
-        IntervalType::read(reader, &attr, "ei:IntervalType")
+        IntervalType::read(reader, &attr, "IntervalType")
     }
 }
 

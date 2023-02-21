@@ -35,7 +35,7 @@ impl ToleranceType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:toleranceType")
+            start.attr("xsi:type", "toleranceType")
         } else {
             start
         };
@@ -133,7 +133,7 @@ impl ToleranceType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "toleranceType")?;
-        ToleranceType::read(reader, &attr, "xcal:toleranceType")
+        ToleranceType::read(reader, &attr, "toleranceType")
     }
 }
 

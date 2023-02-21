@@ -38,7 +38,7 @@ impl WsCalendarIntervalType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:WsCalendarIntervalType")
+            start.attr("xsi:type", "WsCalendarIntervalType")
         } else {
             start
         };
@@ -96,10 +96,10 @@ impl WsCalendarIntervalType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:properties" => xcal_properties.set(crate::xcal::Properties::read(
+                    "properties" => xcal_properties.set(crate::xcal::Properties::read(
                         reader,
                         &attributes,
-                        "xcal:properties",
+                        "properties",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -136,7 +136,7 @@ impl WsCalendarIntervalType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "WsCalendarIntervalType")?;
-        WsCalendarIntervalType::read(reader, &attr, "xcal:WsCalendarIntervalType")
+        WsCalendarIntervalType::read(reader, &attr, "WsCalendarIntervalType")
     }
 }
 

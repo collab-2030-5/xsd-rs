@@ -35,7 +35,7 @@ impl AvailableType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:AvailableType")
+            start.attr("xsi:type", "AvailableType")
         } else {
             start
         };
@@ -93,10 +93,10 @@ impl AvailableType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:properties" => xcal_properties.set(crate::xcal::Properties::read(
+                    "properties" => xcal_properties.set(crate::xcal::Properties::read(
                         reader,
                         &attributes,
-                        "xcal:properties",
+                        "properties",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -133,7 +133,7 @@ impl AvailableType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "AvailableType")?;
-        AvailableType::read(reader, &attr, "xcal:AvailableType")
+        AvailableType::read(reader, &attr, "AvailableType")
     }
 }
 

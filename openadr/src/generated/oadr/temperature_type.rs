@@ -39,7 +39,7 @@ impl TemperatureType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:temperatureType")
+            start.attr("xsi:type", "temperatureType")
         } else {
             start
         };
@@ -105,8 +105,8 @@ impl TemperatureType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string_enum(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => scale_si_scale_code
-                            .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
+                        "siScaleCode" => scale_si_scale_code
+                            .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -145,7 +145,7 @@ impl TemperatureType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "temperatureType")?;
-        TemperatureType::read(reader, &attr, "oadr:temperatureType")
+        TemperatureType::read(reader, &attr, "temperatureType")
     }
 }
 

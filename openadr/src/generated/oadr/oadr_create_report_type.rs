@@ -50,7 +50,7 @@ impl OadrCreateReportType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCreateReportType")
+            start.attr("xsi:type", "oadrCreateReportType")
         } else {
             start
         };
@@ -113,17 +113,17 @@ impl OadrCreateReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "oadr:oadrReportRequest" => {
+                    "oadrReportRequest" => {
                         oadr_oadr_report_request.push(crate::oadr::OadrReportRequestType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrReportRequest",
+                            "oadrReportRequest",
                         )?)
                     }
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -162,7 +162,7 @@ impl OadrCreateReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCreateReportType")?;
-        OadrCreateReportType::read(reader, &attr, "oadr:oadrCreateReportType")
+        OadrCreateReportType::read(reader, &attr, "oadrCreateReportType")
     }
 }
 

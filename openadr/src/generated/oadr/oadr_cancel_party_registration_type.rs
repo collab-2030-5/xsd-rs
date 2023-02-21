@@ -48,7 +48,7 @@ impl OadrCancelPartyRegistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCancelPartyRegistrationType")
+            start.attr("xsi:type", "oadrCancelPartyRegistrationType")
         } else {
             start
         };
@@ -115,16 +115,18 @@ impl OadrCancelPartyRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "pyld:requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                } => {
+                    match name.local_name.as_str() {
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
+                        }
+                        "registrationID" => ei_registration_id.set(
+                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
+                        )?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    "ei:registrationID" => ei_registration_id.set(
-                        crate::ei::RegistrationId::read(reader, &attributes, "ei:registrationID")?,
-                    )?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -161,7 +163,7 @@ impl OadrCancelPartyRegistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCancelPartyRegistrationType")?;
-        OadrCancelPartyRegistrationType::read(reader, &attr, "oadr:oadrCancelPartyRegistrationType")
+        OadrCancelPartyRegistrationType::read(reader, &attr, "oadrCancelPartyRegistrationType")
     }
 }
 

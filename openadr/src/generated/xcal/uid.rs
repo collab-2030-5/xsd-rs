@@ -34,7 +34,7 @@ impl Uid {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:uid")
+            start.attr("xsi:type", "uid")
         } else {
             start
         };
@@ -91,9 +91,7 @@ impl Uid {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "xcal:text" => {
-                            xcal_text.set(xsd_util::read_string(reader, "xcal:text")?)?
-                        }
+                        "text" => xcal_text.set(xsd_util::read_string(reader, "text")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -130,7 +128,7 @@ impl Uid {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "uid")?;
-        Uid::read(reader, &attr, "xcal:uid")
+        Uid::read(reader, &attr, "uid")
     }
 }
 

@@ -34,7 +34,7 @@ impl Dtend {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:dtend")
+            start.attr("xsi:type", "dtend")
         } else {
             start
         };
@@ -91,8 +91,8 @@ impl Dtend {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "xcal:date-time" => {
-                            xcal_date_time.set(xsd_util::read_string(reader, "xcal:date-time")?)?
+                        "date-time" => {
+                            xcal_date_time.set(xsd_util::read_string(reader, "date-time")?)?
                         }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -130,7 +130,7 @@ impl Dtend {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "dtend")?;
-        Dtend::read(reader, &attr, "xcal:dtend")
+        Dtend::read(reader, &attr, "dtend")
     }
 }
 

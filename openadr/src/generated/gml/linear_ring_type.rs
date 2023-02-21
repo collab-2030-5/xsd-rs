@@ -34,7 +34,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "gml:LinearRingType")
+            start.attr("xsi:type", "LinearRingType")
         } else {
             start
         };
@@ -91,8 +91,9 @@ impl LinearRingType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "gml:posList" => gml_pos_list
-                            .set(xsd_util::read_type_from_string(reader, "gml:posList")?)?,
+                        "posList" => {
+                            gml_pos_list.set(xsd_util::read_type_from_string(reader, "posList")?)?
+                        }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -129,7 +130,7 @@ impl LinearRingType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "gml:LinearRingType")
+        LinearRingType::read(reader, &attr, "LinearRingType")
     }
 }
 

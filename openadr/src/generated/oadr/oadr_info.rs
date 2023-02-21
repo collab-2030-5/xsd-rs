@@ -36,7 +36,7 @@ impl OadrInfo {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrInfo")
+            start.attr("xsi:type", "oadrInfo")
         } else {
             start
         };
@@ -135,7 +135,7 @@ impl OadrInfo {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrInfo")?;
-        OadrInfo::read(reader, &attr, "oadr:oadrInfo")
+        OadrInfo::read(reader, &attr, "oadrInfo")
     }
 }
 

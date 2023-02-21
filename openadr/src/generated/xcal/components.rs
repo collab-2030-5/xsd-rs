@@ -21,7 +21,7 @@ impl Components {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:components")
+            start.attr("xsi:type", "components")
         } else {
             start
         };
@@ -109,7 +109,7 @@ impl Components {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "components")?;
-        Components::read(reader, &attr, "xcal:components")
+        Components::read(reader, &attr, "components")
     }
 }
 

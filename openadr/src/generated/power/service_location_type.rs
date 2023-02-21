@@ -40,7 +40,7 @@ impl ServiceLocationType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:ServiceLocationType")
+            start.attr("xsi:type", "ServiceLocationType")
         } else {
             start
         };
@@ -99,11 +99,11 @@ impl ServiceLocationType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "gml:FeatureCollection" => {
+                    "FeatureCollection" => {
                         gml_feature_collection.set(crate::gml::FeatureCollection::read(
                             reader,
                             &attributes,
-                            "gml:FeatureCollection",
+                            "FeatureCollection",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -141,7 +141,7 @@ impl ServiceLocationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ServiceLocationType")?;
-        ServiceLocationType::read(reader, &attr, "power:ServiceLocationType")
+        ServiceLocationType::read(reader, &attr, "ServiceLocationType")
     }
 }
 

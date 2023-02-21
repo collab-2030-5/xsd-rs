@@ -36,7 +36,7 @@ impl OadrTransports {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrTransports")
+            start.attr("xsi:type", "oadrTransports")
         } else {
             start
         };
@@ -132,7 +132,7 @@ impl OadrTransports {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrTransports")?;
-        OadrTransports::read(reader, &attr, "oadr:oadrTransports")
+        OadrTransports::read(reader, &attr, "oadrTransports")
     }
 }
 

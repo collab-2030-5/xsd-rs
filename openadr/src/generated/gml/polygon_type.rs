@@ -42,7 +42,7 @@ impl PolygonType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "gml:PolygonType")
+            start.attr("xsi:type", "PolygonType")
         } else {
             start
         };
@@ -143,7 +143,7 @@ impl PolygonType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "PolygonType")?;
-        PolygonType::read(reader, &attr, "gml:PolygonType")
+        PolygonType::read(reader, &attr, "PolygonType")
     }
 }
 

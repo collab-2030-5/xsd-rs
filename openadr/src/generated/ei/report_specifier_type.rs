@@ -56,7 +56,7 @@ impl ReportSpecifierType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:ReportSpecifierType")
+            start.attr("xsi:type", "ReportSpecifierType")
         } else {
             start
         };
@@ -121,15 +121,13 @@ impl ReportSpecifierType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:reportSpecifierID" => ei_report_specifier_id
-                        .set(xsd_util::read_string(reader, "ei:reportSpecifierID")?)?,
-                    "xcal:granularity" => {
-                        xcal_granularity.set(crate::xcal::DurationPropType::read(
-                            reader,
-                            &attributes,
-                            "xcal:granularity",
-                        )?)?
-                    }
+                    "reportSpecifierID" => ei_report_specifier_id
+                        .set(xsd_util::read_string(reader, "reportSpecifierID")?)?,
+                    "granularity" => xcal_granularity.set(crate::xcal::DurationPropType::read(
+                        reader,
+                        &attributes,
+                        "granularity",
+                    )?)?,
                     "reportBackDuration" => {
                         report_back_duration.set(crate::xcal::DurationPropType::read(
                             reader,
@@ -144,11 +142,11 @@ impl ReportSpecifierType {
                             "reportInterval",
                         )?)?
                     }
-                    "ei:specifierPayload" => {
+                    "specifierPayload" => {
                         ei_specifier_payload.push(crate::ei::SpecifierPayloadType::read(
                             reader,
                             &attributes,
-                            "ei:specifierPayload",
+                            "specifierPayload",
                         )?)
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -190,7 +188,7 @@ impl ReportSpecifierType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ReportSpecifierType")?;
-        ReportSpecifierType::read(reader, &attr, "ei:ReportSpecifierType")
+        ReportSpecifierType::read(reader, &attr, "ReportSpecifierType")
     }
 }
 

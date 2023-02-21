@@ -38,7 +38,7 @@ impl EiActivePeriodType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiActivePeriodType")
+            start.attr("xsi:type", "eiActivePeriodType")
         } else {
             start
         };
@@ -97,15 +97,15 @@ impl EiActivePeriodType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:properties" => xcal_properties.set(crate::xcal::Properties::read(
+                    "properties" => xcal_properties.set(crate::xcal::Properties::read(
                         reader,
                         &attributes,
-                        "xcal:properties",
+                        "properties",
                     )?)?,
-                    "xcal:components" => xcal_components.set(crate::xcal::Components::read(
+                    "components" => xcal_components.set(crate::xcal::Components::read(
                         reader,
                         &attributes,
-                        "xcal:components",
+                        "components",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -143,7 +143,7 @@ impl EiActivePeriodType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiActivePeriodType")?;
-        EiActivePeriodType::read(reader, &attr, "ei:eiActivePeriodType")
+        EiActivePeriodType::read(reader, &attr, "eiActivePeriodType")
     }
 }
 

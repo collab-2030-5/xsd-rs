@@ -48,7 +48,7 @@ impl ReportPayloadType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:ReportPayloadType")
+            start.attr("xsi:type", "ReportPayloadType")
         } else {
             start
         };
@@ -109,16 +109,17 @@ impl ReportPayloadType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:rID" => ei_r_id.set(xsd_util::read_string(reader, "ei:rID")?)?,
-                    "ei:confidence" => ei_confidence
-                        .set(xsd_util::read_type_from_string(reader, "ei:confidence")?)?,
-                    "ei:accuracy" => {
-                        ei_accuracy.set(xsd_util::read_type_from_string(reader, "ei:accuracy")?)?
+                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "confidence" => {
+                        ei_confidence.set(xsd_util::read_type_from_string(reader, "confidence")?)?
                     }
-                    "ei:payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
+                    "accuracy" => {
+                        ei_accuracy.set(xsd_util::read_type_from_string(reader, "accuracy")?)?
+                    }
+                    "payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
                         reader,
                         &attributes,
-                        "ei:payloadBase",
+                        "payloadBase",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -158,7 +159,7 @@ impl ReportPayloadType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "ReportPayloadType")?;
-        ReportPayloadType::read(reader, &attr, "ei:ReportPayloadType")
+        ReportPayloadType::read(reader, &attr, "ReportPayloadType")
     }
 }
 

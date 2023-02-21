@@ -34,7 +34,7 @@ impl DurationPropType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:DurationPropType")
+            start.attr("xsi:type", "DurationPropType")
         } else {
             start
         };
@@ -128,7 +128,7 @@ impl DurationPropType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "DurationPropType")?;
-        DurationPropType::read(reader, &attr, "xcal:DurationPropType")
+        DurationPropType::read(reader, &attr, "DurationPropType")
     }
 }
 

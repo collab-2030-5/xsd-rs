@@ -35,7 +35,7 @@ impl AggregatedPnodeType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:AggregatedPnodeType")
+            start.attr("xsi:type", "AggregatedPnodeType")
         } else {
             start
         };
@@ -92,9 +92,7 @@ impl AggregatedPnodeType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "power:node" => {
-                            power_node.set(xsd_util::read_string(reader, "power:node")?)?
-                        }
+                        "node" => power_node.set(xsd_util::read_string(reader, "node")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -131,7 +129,7 @@ impl AggregatedPnodeType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "AggregatedPnodeType")?;
-        AggregatedPnodeType::read(reader, &attr, "power:AggregatedPnodeType")
+        AggregatedPnodeType::read(reader, &attr, "AggregatedPnodeType")
     }
 }
 

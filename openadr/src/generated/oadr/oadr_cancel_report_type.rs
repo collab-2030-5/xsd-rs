@@ -55,7 +55,7 @@ impl OadrCancelReportType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCancelReportType")
+            start.attr("xsi:type", "oadrCancelReportType")
         } else {
             start
         };
@@ -117,15 +117,14 @@ impl OadrCancelReportType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "pyld:requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
-                        "ei:reportRequestID" => ei_report_request_id
-                            .push(xsd_util::read_string(reader, "ei:reportRequestID")?),
-                        "pyld:reportToFollow" => pyld_report_to_follow.set(
-                            xsd_util::read_type_from_string(reader, "pyld:reportToFollow")?,
-                        )?,
-                        "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                        "reportRequestID" => ei_report_request_id
+                            .push(xsd_util::read_string(reader, "reportRequestID")?),
+                        "reportToFollow" => pyld_report_to_follow
+                            .set(xsd_util::read_type_from_string(reader, "reportToFollow")?)?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -166,7 +165,7 @@ impl OadrCancelReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCancelReportType")?;
-        OadrCancelReportType::read(reader, &attr, "oadr:oadrCancelReportType")
+        OadrCancelReportType::read(reader, &attr, "oadrCancelReportType")
     }
 }
 

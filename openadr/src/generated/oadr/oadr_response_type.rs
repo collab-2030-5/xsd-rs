@@ -46,7 +46,7 @@ impl OadrResponseType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrResponseType")
+            start.attr("xsi:type", "oadrResponseType")
         } else {
             start
         };
@@ -107,12 +107,12 @@ impl OadrResponseType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                         reader,
                         &attributes,
-                        "ei:eiResponse",
+                        "eiResponse",
                     )?)?,
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -150,7 +150,7 @@ impl OadrResponseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrResponseType")?;
-        OadrResponseType::read(reader, &attr, "oadr:oadrResponseType")
+        OadrResponseType::read(reader, &attr, "oadrResponseType")
     }
 }
 

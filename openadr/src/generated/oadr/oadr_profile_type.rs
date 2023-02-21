@@ -41,7 +41,7 @@ impl OadrProfileType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrProfileType")
+            start.attr("xsi:type", "oadrProfileType")
         } else {
             start
         };
@@ -101,15 +101,11 @@ impl OadrProfileType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadr:oadrProfileName" => oadr_oadr_profile_name
-                        .set(xsd_util::read_string(reader, "oadr:oadrProfileName")?)?,
-                    "oadr:oadrTransports" => {
-                        oadr_oadr_transports.set(crate::oadr::OadrTransports::read(
-                            reader,
-                            &attributes,
-                            "oadr:oadrTransports",
-                        )?)?
-                    }
+                    "oadrProfileName" => oadr_oadr_profile_name
+                        .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
+                    "oadrTransports" => oadr_oadr_transports.set(
+                        crate::oadr::OadrTransports::read(reader, &attributes, "oadrTransports")?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -146,7 +142,7 @@ impl OadrProfileType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrProfileType")?;
-        OadrProfileType::read(reader, &attr, "oadr:oadrProfileType")
+        OadrProfileType::read(reader, &attr, "oadrProfileType")
     }
 }
 

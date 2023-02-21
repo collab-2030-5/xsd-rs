@@ -38,7 +38,7 @@ impl EiMarketContextType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:eiMarketContextType")
+            start.attr("xsi:type", "eiMarketContextType")
         } else {
             start
         };
@@ -95,8 +95,8 @@ impl EiMarketContextType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "emix:marketContext" => emix_market_context
-                            .set(xsd_util::read_string(reader, "emix:marketContext")?)?,
+                        "marketContext" => emix_market_context
+                            .set(xsd_util::read_string(reader, "marketContext")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -133,7 +133,7 @@ impl EiMarketContextType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiMarketContextType")?;
-        EiMarketContextType::read(reader, &attr, "ei:eiMarketContextType")
+        EiMarketContextType::read(reader, &attr, "eiMarketContextType")
     }
 }
 

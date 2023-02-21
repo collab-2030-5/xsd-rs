@@ -36,7 +36,7 @@ impl OadrExtensionsType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrExtensionsType")
+            start.attr("xsi:type", "oadrExtensionsType")
         } else {
             start
         };
@@ -132,7 +132,7 @@ impl OadrExtensionsType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrExtensionsType")?;
-        OadrExtensionsType::read(reader, &attr, "oadr:oadrExtensionsType")
+        OadrExtensionsType::read(reader, &attr, "oadrExtensionsType")
     }
 }
 

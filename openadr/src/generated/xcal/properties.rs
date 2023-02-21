@@ -55,7 +55,7 @@ impl Properties {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:properties")
+            start.attr("xsi:type", "properties")
         } else {
             start
         };
@@ -122,40 +122,38 @@ impl Properties {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "xcal:dtstart",
+                        "dtstart",
                     )?)?,
-                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "xcal:duration",
+                        "duration",
                     )?)?,
                     "tolerance" => tolerance.set(crate::xcal::ToleranceType::read(
                         reader,
                         &attributes,
                         "tolerance",
                     )?)?,
-                    "ei:x-eiNotification" => {
+                    "x-eiNotification" => {
                         ei_x_ei_notification.set(crate::xcal::DurationPropType::read(
                             reader,
                             &attributes,
-                            "ei:x-eiNotification",
+                            "x-eiNotification",
                         )?)?
                     }
-                    "ei:x-eiRampUp" => ei_x_ei_ramp_up.set(crate::xcal::DurationPropType::read(
+                    "x-eiRampUp" => ei_x_ei_ramp_up.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "ei:x-eiRampUp",
+                        "x-eiRampUp",
                     )?)?,
-                    "ei:x-eiRecovery" => {
-                        ei_x_ei_recovery.set(crate::xcal::DurationPropType::read(
-                            reader,
-                            &attributes,
-                            "ei:x-eiRecovery",
-                        )?)?
-                    }
+                    "x-eiRecovery" => ei_x_ei_recovery.set(crate::xcal::DurationPropType::read(
+                        reader,
+                        &attributes,
+                        "x-eiRecovery",
+                    )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -196,7 +194,7 @@ impl Properties {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "properties")?;
-        Properties::read(reader, &attr, "xcal:properties")
+        Properties::read(reader, &attr, "properties")
     }
 }
 

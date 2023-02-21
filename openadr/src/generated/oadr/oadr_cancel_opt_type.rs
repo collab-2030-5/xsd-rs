@@ -45,7 +45,7 @@ impl OadrCancelOptType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrCancelOptType")
+            start.attr("xsi:type", "oadrCancelOptType")
         } else {
             start
         };
@@ -106,11 +106,11 @@ impl OadrCancelOptType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "pyld:requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
-                        "ei:optID" => ei_opt_id.set(xsd_util::read_string(reader, "ei:optID")?)?,
-                        "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                        "optID" => ei_opt_id.set(xsd_util::read_string(reader, "optID")?)?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -150,7 +150,7 @@ impl OadrCancelOptType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrCancelOptType")?;
-        OadrCancelOptType::read(reader, &attr, "oadr:oadrCancelOptType")
+        OadrCancelOptType::read(reader, &attr, "oadrCancelOptType")
     }
 }
 

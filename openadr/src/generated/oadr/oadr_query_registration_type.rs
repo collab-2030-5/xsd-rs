@@ -41,7 +41,7 @@ impl OadrQueryRegistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrQueryRegistrationType")
+            start.attr("xsi:type", "oadrQueryRegistrationType")
         } else {
             start
         };
@@ -100,8 +100,8 @@ impl OadrQueryRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "pyld:requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -140,7 +140,7 @@ impl OadrQueryRegistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrQueryRegistrationType")?;
-        OadrQueryRegistrationType::read(reader, &attr, "oadr:oadrQueryRegistrationType")
+        OadrQueryRegistrationType::read(reader, &attr, "oadrQueryRegistrationType")
     }
 }
 

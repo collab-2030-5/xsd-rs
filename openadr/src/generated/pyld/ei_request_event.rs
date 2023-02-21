@@ -41,7 +41,7 @@ impl EiRequestEvent {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "pyld:eiRequestEvent")
+            start.attr("xsi:type", "eiRequestEvent")
         } else {
             start
         };
@@ -100,12 +100,12 @@ impl EiRequestEvent {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "pyld:requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
-                        "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
-                        "pyld:replyLimit" => pyld_reply_limit
-                            .set(xsd_util::read_type_from_string(reader, "pyld:replyLimit")?)?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                        "replyLimit" => pyld_reply_limit
+                            .set(xsd_util::read_type_from_string(reader, "replyLimit")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -144,7 +144,7 @@ impl EiRequestEvent {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "eiRequestEvent")?;
-        EiRequestEvent::read(reader, &attr, "pyld:eiRequestEvent")
+        EiRequestEvent::read(reader, &attr, "eiRequestEvent")
     }
 }
 

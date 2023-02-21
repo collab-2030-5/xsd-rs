@@ -35,7 +35,7 @@ impl VavailabilityType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "xcal:VavailabilityType")
+            start.attr("xsi:type", "VavailabilityType")
         } else {
             start
         };
@@ -137,7 +137,7 @@ impl VavailabilityType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "VavailabilityType")?;
-        VavailabilityType::read(reader, &attr, "xcal:VavailabilityType")
+        VavailabilityType::read(reader, &attr, "VavailabilityType")
     }
 }
 

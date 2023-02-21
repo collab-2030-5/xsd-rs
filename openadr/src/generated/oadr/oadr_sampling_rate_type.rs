@@ -41,7 +41,7 @@ impl OadrSamplingRateType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrSamplingRateType")
+            start.attr("xsi:type", "oadrSamplingRateType")
         } else {
             start
         };
@@ -146,7 +146,7 @@ impl OadrSamplingRateType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrSamplingRateType")?;
-        OadrSamplingRateType::read(reader, &attr, "oadr:oadrSamplingRateType")
+        OadrSamplingRateType::read(reader, &attr, "oadrSamplingRateType")
     }
 }
 

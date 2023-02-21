@@ -38,7 +38,7 @@ impl VoltageType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:VoltageType")
+            start.attr("xsi:type", "VoltageType")
         } else {
             start
         };
@@ -103,8 +103,8 @@ impl VoltageType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => scale_si_scale_code
-                            .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
+                        "siScaleCode" => scale_si_scale_code
+                            .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -143,7 +143,7 @@ impl VoltageType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "VoltageType")?;
-        VoltageType::read(reader, &attr, "power:VoltageType")
+        VoltageType::read(reader, &attr, "VoltageType")
     }
 }
 

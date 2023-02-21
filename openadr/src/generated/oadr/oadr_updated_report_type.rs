@@ -50,7 +50,7 @@ impl OadrUpdatedReportType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrUpdatedReportType")
+            start.attr("xsi:type", "oadrUpdatedReportType")
         } else {
             start
         };
@@ -113,19 +113,19 @@ impl OadrUpdatedReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "ei:eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
                         reader,
                         &attributes,
-                        "ei:eiResponse",
+                        "eiResponse",
                     )?)?,
-                    "oadr:oadrCancelReport" => {
+                    "oadrCancelReport" => {
                         oadr_oadr_cancel_report.set(crate::oadr::OadrCancelReportType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrCancelReport",
+                            "oadrCancelReport",
                         )?)?
                     }
-                    "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -164,7 +164,7 @@ impl OadrUpdatedReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrUpdatedReportType")?;
-        OadrUpdatedReportType::read(reader, &attr, "oadr:oadrUpdatedReportType")
+        OadrUpdatedReportType::read(reader, &attr, "oadrUpdatedReportType")
     }
 }
 

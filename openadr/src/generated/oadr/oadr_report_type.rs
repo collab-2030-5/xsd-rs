@@ -79,7 +79,7 @@ impl OadrReportType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrReportType")
+            start.attr("xsi:type", "oadrReportType")
         } else {
             start
         };
@@ -147,40 +147,40 @@ impl OadrReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "xcal:dtstart",
+                        "dtstart",
                     )?)?,
-                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "xcal:duration",
+                        "duration",
                     )?)?,
-                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
                         reader,
                         &attributes,
-                        "strm:intervals",
+                        "intervals",
                     )?)?,
-                    "ei:eiReportID" => {
-                        ei_ei_report_id.set(xsd_util::read_string(reader, "ei:eiReportID")?)?
+                    "eiReportID" => {
+                        ei_ei_report_id.set(xsd_util::read_string(reader, "eiReportID")?)?
                     }
-                    "oadr:oadrReportDescription" => oadr_oadr_report_description.push(
+                    "oadrReportDescription" => oadr_oadr_report_description.push(
                         crate::oadr::OadrReportDescriptionType::read(
                             reader,
                             &attributes,
-                            "oadr:oadrReportDescription",
+                            "oadrReportDescription",
                         )?,
                     ),
-                    "ei:reportRequestID" => ei_report_request_id
-                        .set(xsd_util::read_string(reader, "ei:reportRequestID")?)?,
-                    "ei:reportSpecifierID" => ei_report_specifier_id
-                        .set(xsd_util::read_string(reader, "ei:reportSpecifierID")?)?,
-                    "ei:reportName" => {
-                        ei_report_name.set(xsd_util::read_string(reader, "ei:reportName")?)?
+                    "reportRequestID" => ei_report_request_id
+                        .set(xsd_util::read_string(reader, "reportRequestID")?)?,
+                    "reportSpecifierID" => ei_report_specifier_id
+                        .set(xsd_util::read_string(reader, "reportSpecifierID")?)?,
+                    "reportName" => {
+                        ei_report_name.set(xsd_util::read_string(reader, "reportName")?)?
                     }
-                    "ei:createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "ei:createdDateTime")?)?,
+                    "createdDateTime" => ei_created_date_time
+                        .set(xsd_util::read_string(reader, "createdDateTime")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -224,7 +224,7 @@ impl OadrReportType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrReportType")?;
-        OadrReportType::read(reader, &attr, "oadr:oadrReportType")
+        OadrReportType::read(reader, &attr, "oadrReportType")
     }
 }
 

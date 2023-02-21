@@ -41,7 +41,7 @@ impl OadrRequestReregistrationType {
         };
         // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrRequestReregistrationType")
+            start.attr("xsi:type", "oadrRequestReregistrationType")
         } else {
             start
         };
@@ -105,7 +105,7 @@ impl OadrRequestReregistrationType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "ei:venID" => ei_ven_id.set(xsd_util::read_string(reader, "ei:venID")?)?,
+                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -143,7 +143,7 @@ impl OadrRequestReregistrationType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrRequestReregistrationType")?;
-        OadrRequestReregistrationType::read(reader, &attr, "oadr:oadrRequestReregistrationType")
+        OadrRequestReregistrationType::read(reader, &attr, "oadrRequestReregistrationType")
     }
 }
 

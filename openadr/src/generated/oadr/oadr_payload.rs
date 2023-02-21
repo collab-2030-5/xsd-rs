@@ -39,10 +39,28 @@ impl OadrPayload {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrPayload")
+            start.attr("xsi:type", "oadrPayload")
         } else {
             start
         };
+
+        let start = start.ns("oadr", "http://openadr.org/oadr-2.0b/2012/07");
+        let start = start.ns("ei", "http://docs.oasis-open.org/ns/energyinterop/201110");
+        let start = start.ns(
+            "pyld",
+            "http://docs.oasis-open.org/ns/energyinterop/201110/payloads",
+        );
+        let start = start.ns("xcal", "urn:ietf:params:xml:ns:icalendar-2.0");
+        let start = start.ns("emix", "http://docs.oasis-open.org/ns/emix/2011/06");
+        let start = start.ns("strm", "urn:ietf:params:xml:ns:icalendar-2.0:stream");
+        let start = start.ns("power", "http://docs.oasis-open.org/ns/emix/2011/06/power");
+        let start = start.ns("gml", "http://www.opengis.net/gml/3.2");
+        let start = start.ns(
+            "scale",
+            "http://docs.oasis-open.org/ns/emix/2011/06/siscale",
+        );
+        let start = start.ns("power", "http://docs.oasis-open.org/ns/emix/2011/06/power");
+
         writer.write(start)?;
         self.write_elem(writer)?;
         writer.write(events::XmlEvent::end_element())?;
@@ -98,11 +116,11 @@ impl OadrPayload {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadr:oadrSignedObject" => {
+                    "oadrSignedObject" => {
                         oadr_oadr_signed_object.set(crate::oadr::OadrSignedObject::read(
                             reader,
                             &attributes,
-                            "oadr:oadrSignedObject",
+                            "oadrSignedObject",
                         )?)?
                     }
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
@@ -140,7 +158,7 @@ impl OadrPayload {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrPayload")?;
-        OadrPayload::read(reader, &attr, "oadr:oadrPayload")
+        OadrPayload::read(reader, &attr, "oadrPayload")
     }
 }
 

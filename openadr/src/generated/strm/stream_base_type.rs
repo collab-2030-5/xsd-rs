@@ -45,7 +45,7 @@ impl StreamBaseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "strm:StreamBaseType")
+            start.attr("xsi:type", "StreamBaseType")
         } else {
             start
         };
@@ -106,20 +106,20 @@ impl StreamBaseType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "xcal:dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
                         reader,
                         &attributes,
-                        "xcal:dtstart",
+                        "dtstart",
                     )?)?,
-                    "xcal:duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
                         reader,
                         &attributes,
-                        "xcal:duration",
+                        "duration",
                     )?)?,
-                    "strm:intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
                         reader,
                         &attributes,
-                        "strm:intervals",
+                        "intervals",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -158,7 +158,7 @@ impl StreamBaseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "StreamBaseType")?;
-        StreamBaseType::read(reader, &attr, "strm:StreamBaseType")
+        StreamBaseType::read(reader, &attr, "StreamBaseType")
     }
 }
 

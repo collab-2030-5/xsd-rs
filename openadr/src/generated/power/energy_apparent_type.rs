@@ -38,7 +38,7 @@ impl EnergyApparentType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "power:EnergyApparentType")
+            start.attr("xsi:type", "EnergyApparentType")
         } else {
             start
         };
@@ -103,8 +103,8 @@ impl EnergyApparentType {
                         "itemUnits" => {
                             item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "scale:siScaleCode" => scale_si_scale_code
-                            .set(xsd_util::read_string_enum(reader, "scale:siScaleCode")?)?,
+                        "siScaleCode" => scale_si_scale_code
+                            .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }
@@ -143,7 +143,7 @@ impl EnergyApparentType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "EnergyApparentType")?;
-        EnergyApparentType::read(reader, &attr, "power:EnergyApparentType")
+        EnergyApparentType::read(reader, &attr, "EnergyApparentType")
     }
 }
 

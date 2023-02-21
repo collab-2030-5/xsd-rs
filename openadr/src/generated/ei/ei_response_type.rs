@@ -40,7 +40,7 @@ impl EiResponseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "ei:EiResponseType")
+            start.attr("xsi:type", "EiResponseType")
         } else {
             start
         };
@@ -99,12 +99,13 @@ impl EiResponseType {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "ei:responseCode" => ei_response_code
-                            .set(xsd_util::read_string(reader, "ei:responseCode")?)?,
-                        "ei:responseDescription" => ei_response_description
-                            .set(xsd_util::read_string(reader, "ei:responseDescription")?)?,
-                        "pyld:requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "pyld:requestID")?)?
+                        "responseCode" => {
+                            ei_response_code.set(xsd_util::read_string(reader, "responseCode")?)?
+                        }
+                        "responseDescription" => ei_response_description
+                            .set(xsd_util::read_string(reader, "responseDescription")?)?,
+                        "requestID" => {
+                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
@@ -144,7 +145,7 @@ impl EiResponseType {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "EiResponseType")?;
-        EiResponseType::read(reader, &attr, "ei:EiResponseType")
+        EiResponseType::read(reader, &attr, "EiResponseType")
     }
 }
 

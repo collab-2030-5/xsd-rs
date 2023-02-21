@@ -36,7 +36,7 @@ impl OadrProfiles {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadr:oadrProfiles")
+            start.attr("xsi:type", "oadrProfiles")
         } else {
             start
         };
@@ -130,7 +130,7 @@ impl OadrProfiles {
         R: std::io::Read,
     {
         let attr = xsd_util::read_start_tag(reader, "oadrProfiles")?;
-        OadrProfiles::read(reader, &attr, "oadr:oadrProfiles")
+        OadrProfiles::read(reader, &attr, "oadrProfiles")
     }
 }
 
