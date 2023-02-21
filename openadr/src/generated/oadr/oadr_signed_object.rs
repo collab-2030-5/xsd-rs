@@ -110,6 +110,15 @@ impl OadrSignedObject {
                                 )?,
                             ),
                         )?,
+                        "oadrCreatedPartyRegistration" => oadr_signed_object_choice.set(
+                            crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedPartyRegistration(
+                                crate::oadr::OadrCreatedPartyRegistrationType::read(
+                                    reader,
+                                    attrs,
+                                    "oadrCreatedPartyRegistration",
+                                )?,
+                            ),
+                        )?,
                         "oadrDistributeEvent" => oadr_signed_object_choice.set(
                             crate::oadr::OadrSignedObjectChoice::OadrOadrDistributeEvent(
                                 crate::oadr::OadrDistributeEventType::read(

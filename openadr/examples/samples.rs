@@ -26,4 +26,5 @@ fn handle_file<T: ReadXml + WriteXml + PartialEq + Debug>(name: &str) {
 
 fn main() {
     handle_file::<OadrPayload>("create_party_registration.xml");
+    handle_file::<OadrPayload>("created_party_registration.xml");
 }
