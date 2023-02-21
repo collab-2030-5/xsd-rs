@@ -67,7 +67,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 
             writeln!(w, "let start = if write_type {{")?;
             indent(w, |w| {
-                writeln!(w, "start.attr(\"xsi:type\", \"{}\")", st.id)
+                writeln!(w, "start.attr(\"xsi:type\", \"{}\")", st.id.name)
             })?;
             writeln!(w, "}} else {{")?;
             indent(w, |w| writeln!(w, "start"))?;
@@ -180,7 +180,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
                 w,
                 "{}::read(reader, &attr, \"{}\")",
                 st.id.name.to_upper_camel_case(),
-                &st.id
+                &st.id.name
             )
         })?;
         writeln!(w, "}}")?;
@@ -279,7 +279,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     writeln!(w, "match name.local_name.as_str() {{")?;
                     indent(w, |w| {
                         for elem in elems {
-                            writeln!(w, "\"{}\" => {{", &elem.name)?;
+                            writeln!(w, "\"{}\" => {{", &elem.bare_name())?;
                             indent(w, |w| write_element_handler(w, elem))?;
                             writeln!(w, "}}")?;
                         }
@@ -311,7 +311,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
 }
 
 fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<()> {
-    let tx = elem.field_type.read_transform(&elem.name);
+    let tx = elem.field_type.read_transform(&elem.bare_name());
 
     match &elem.multiplicity {
         ElemMultiplicity::Single | ElemMultiplicity::Optional => {
@@ -568,4 +568,13 @@ struct Element {
     name: String,
     field_type: AnyType,
     multiplicity: ElemMultiplicity,
+}
+
+impl Element {
+    pub fn bare_name(&self) -> String {
+        match self.name.split_once(':') {
+            None => self.name.to_owned(),
+            Some((_ns, name)) => name.to_owned(),
+        }
+    }
 }

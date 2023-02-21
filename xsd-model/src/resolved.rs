@@ -29,6 +29,15 @@ pub struct Field {
     pub field_type: FieldType,
 }
 
+impl Field {
+    pub fn bare_name(&self) -> String {
+        match self.name.split_once(':') {
+            None => self.name.to_owned(),
+            Some((_ns, name)) => name.to_owned(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Struct {
     pub comment: Option<String>,
