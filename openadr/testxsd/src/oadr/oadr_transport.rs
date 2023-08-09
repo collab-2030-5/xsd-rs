@@ -2,23 +2,21 @@ use xml::writer::*;
 use xml::common::Position;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrTransports {
-    pub oadr_transport: Vec<crate::oadr::OadrTransport>,
+pub struct OadrTransport {
+    pub oadr_oadr_transport_name: crate::oadr::OadrTransportType,
 
 }
 
-impl OadrTransports {
+impl OadrTransport {
     fn write_elem<W>(&self, writer: &mut EventWriter<W>) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
-        for item in &self.oadr_transport {
-            item.write_with_name(writer, "oadrTransport", false, false)?;
-        }
+        xsd_util::write_string_enumeration(writer, "oadr:oadrTransportName", self.oadr_oadr_transport_name)?;
         Ok(())
     }
 
     pub(crate) fn write_with_name<W>(&self, writer: &mut EventWriter<W>, name: &str, top_level: bool, write_type: bool) -> core::result::Result<(), xml::writer::Error> where W: std::io::Write {
         let start = if top_level { super::add_schema_attr(events::XmlEvent::start_element(name)) } else { events::XmlEvent::start_element(name) };
         let start = if write_type {
-            start.attr("xsi:type", "oadrTransports")
+            start.attr("xsi:type", "oadrTransport")
         } else {
             start
         };
@@ -29,18 +27,18 @@ impl OadrTransports {
     }
 }
 
-impl xsd_api::WriteXml for OadrTransports {
+impl xsd_api::WriteXml for OadrTransport {
     fn write<W>(&self, config: xsd_api::WriteConfig, writer: &mut W) -> core::result::Result<(), xsd_api::WriteError> where W: std::io::Write {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrTransports", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrTransport", true, false)?;
         Ok(())
     }
 }
 
-impl OadrTransports {
+impl OadrTransport {
     pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
         // one variable for each attribute and element
-        let mut oadr_transport : Vec<crate::oadr::OadrTransport> = Default::default();
+        let mut oadr_oadr_transport_name : xsd_util::SetOnce<crate::oadr::OadrTransportType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -59,10 +57,10 @@ impl OadrTransports {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, attributes, .. } => {
+                xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "oadrTransport" => {
-                            oadr_transport.push(crate::oadr::OadrTransport::read(reader, &attributes, "oadrTransport")?)
+                        "oadrTransportName" => {
+                            oadr_oadr_transport_name.set(xsd_util::read_string_enum(reader, "oadrTransportName")?)?
                         }
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent)
                     }
@@ -80,22 +78,22 @@ impl OadrTransports {
         }
 
         // construct the type from the cells
-        Ok(OadrTransports {
-            oadr_transport,
+        Ok(OadrTransport {
+            oadr_oadr_transport_name : oadr_oadr_transport_name.require()?,
         })
     }
 
     fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {
-        let attr = xsd_util::read_start_tag(reader, "oadrTransports")?;
-        OadrTransports::read(reader, &attr, "oadrTransports")
+        let attr = xsd_util::read_start_tag(reader, "oadrTransport")?;
+        OadrTransport::read(reader, &attr, "oadrTransport")
     }
 }
 
-impl xsd_api::ReadXml for OadrTransports {
+impl xsd_api::ReadXml for OadrTransport {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation> where R: std::io::Read {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrTransports::read_top_level(&mut reader) {
+        match OadrTransport::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

@@ -2,11 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrPayload {
-    pub oadr_oadr_signed_object: crate::oadr::OadrSignedObject,
+pub struct OadrEvent {
+    pub ei_ei_event: crate::ei::EiEventType,
+    pub oadr_oadr_response_required: crate::oadr::ResponseRequiredType,
 }
 
-impl OadrPayload {
+impl OadrEvent {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,11 +15,12 @@ impl OadrPayload {
     where
         W: std::io::Write,
     {
-        self.oadr_oadr_signed_object.write_with_name(
+        self.ei_ei_event
+            .write_with_name(writer, "ei:eiEvent", false, false)?;
+        xsd_util::write_string_enumeration(
             writer,
-            "oadr:oadrSignedObject",
-            false,
-            false,
+            "oadr:oadrResponseRequired",
+            self.oadr_oadr_response_required,
         )?;
         Ok(())
     }
@@ -39,7 +41,7 @@ impl OadrPayload {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadrPayload")
+            start.attr("xsi:type", "oadrEvent")
         } else {
             start
         };
@@ -50,7 +52,7 @@ impl OadrPayload {
     }
 }
 
-impl xsd_api::WriteXml for OadrPayload {
+impl xsd_api::WriteXml for OadrEvent {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -60,12 +62,12 @@ impl xsd_api::WriteXml for OadrPayload {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrPayload", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrEvent", true, false)?;
         Ok(())
     }
 }
 
-impl OadrPayload {
+impl OadrEvent {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -75,7 +77,8 @@ impl OadrPayload {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_signed_object: xsd_util::SetOnce<crate::oadr::OadrSignedObject> =
+        let mut ei_ei_event: xsd_util::SetOnce<crate::ei::EiEventType> = Default::default();
+        let mut oadr_oadr_response_required: xsd_util::SetOnce<crate::oadr::ResponseRequiredType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -98,13 +101,13 @@ impl OadrPayload {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrSignedObject" => {
-                        oadr_oadr_signed_object.set(crate::oadr::OadrSignedObject::read(
-                            reader,
-                            &attributes,
-                            "oadrSignedObject",
-                        )?)?
-                    }
+                    "eiEvent" => ei_ei_event.set(crate::ei::EiEventType::read(
+                        reader,
+                        &attributes,
+                        "eiEvent",
+                    )?)?,
+                    "oadrResponseRequired" => oadr_oadr_response_required
+                        .set(xsd_util::read_string_enum(reader, "oadrResponseRequired")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -128,8 +131,9 @@ impl OadrPayload {
         }
 
         // construct the type from the cells
-        Ok(OadrPayload {
-            oadr_oadr_signed_object: oadr_oadr_signed_object.require()?,
+        Ok(OadrEvent {
+            ei_ei_event: ei_ei_event.require()?,
+            oadr_oadr_response_required: oadr_oadr_response_required.require()?,
         })
     }
 
@@ -139,19 +143,19 @@ impl OadrPayload {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrPayload")?;
-        OadrPayload::read(reader, &attr, "oadrPayload")
+        let attr = xsd_util::read_start_tag(reader, "oadrEvent")?;
+        OadrEvent::read(reader, &attr, "oadrEvent")
     }
 }
 
-impl xsd_api::ReadXml for OadrPayload {
+impl xsd_api::ReadXml for OadrEvent {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrPayload::read_top_level(&mut reader) {
+        match OadrEvent::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

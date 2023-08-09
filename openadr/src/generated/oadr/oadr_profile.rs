@@ -2,12 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrServiceType {
-    pub oadr_oadr_service_name: crate::oadr::OadrServiceNameType,
-    pub oadr_oadr_info: Vec<crate::oadr::OadrInfo>,
+pub struct OadrProfile {
+    pub oadr_oadr_profile_name: String,
+    pub oadr_oadr_transports: crate::oadr::OadrTransports,
 }
 
-impl OadrServiceType {
+impl OadrProfile {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -15,14 +15,13 @@ impl OadrServiceType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_string_enumeration(
+        xsd_util::write_simple_element(
             writer,
-            "oadr:oadrServiceName",
-            self.oadr_oadr_service_name,
+            "oadr:oadrProfileName",
+            self.oadr_oadr_profile_name.as_str(),
         )?;
-        for item in &self.oadr_oadr_info {
-            item.write_with_name(writer, "oadr:oadrInfo", false, false)?;
-        }
+        self.oadr_oadr_transports
+            .write_with_name(writer, "oadr:oadrTransports", false, false)?;
         Ok(())
     }
 
@@ -42,7 +41,7 @@ impl OadrServiceType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadrServiceType")
+            start.attr("xsi:type", "oadrProfile")
         } else {
             start
         };
@@ -53,7 +52,7 @@ impl OadrServiceType {
     }
 }
 
-impl xsd_api::WriteXml for OadrServiceType {
+impl xsd_api::WriteXml for OadrProfile {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +62,12 @@ impl xsd_api::WriteXml for OadrServiceType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrServiceType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrProfile", true, false)?;
         Ok(())
     }
 }
 
-impl OadrServiceType {
+impl OadrProfile {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,9 +77,9 @@ impl OadrServiceType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_service_name: xsd_util::SetOnce<crate::oadr::OadrServiceNameType> =
+        let mut oadr_oadr_profile_name: xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_transports: xsd_util::SetOnce<crate::oadr::OadrTransports> =
             Default::default();
-        let mut oadr_oadr_info: Vec<crate::oadr::OadrInfo> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -102,13 +101,11 @@ impl OadrServiceType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrServiceName" => oadr_oadr_service_name
-                        .set(xsd_util::read_string_enum(reader, "oadrServiceName")?)?,
-                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
-                        reader,
-                        &attributes,
-                        "oadrInfo",
-                    )?),
+                    "oadrProfileName" => oadr_oadr_profile_name
+                        .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
+                    "oadrTransports" => oadr_oadr_transports.set(
+                        crate::oadr::OadrTransports::read(reader, &attributes, "oadrTransports")?,
+                    )?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -132,9 +129,9 @@ impl OadrServiceType {
         }
 
         // construct the type from the cells
-        Ok(OadrServiceType {
-            oadr_oadr_service_name: oadr_oadr_service_name.require()?,
-            oadr_oadr_info,
+        Ok(OadrProfile {
+            oadr_oadr_profile_name: oadr_oadr_profile_name.require()?,
+            oadr_oadr_transports: oadr_oadr_transports.require()?,
         })
     }
 
@@ -144,19 +141,19 @@ impl OadrServiceType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrServiceType")?;
-        OadrServiceType::read(reader, &attr, "oadrServiceType")
+        let attr = xsd_util::read_start_tag(reader, "oadrProfile")?;
+        OadrProfile::read(reader, &attr, "oadrProfile")
     }
 }
 
-impl xsd_api::ReadXml for OadrServiceType {
+impl xsd_api::ReadXml for OadrProfile {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrServiceType::read_top_level(&mut reader) {
+        match OadrProfile::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

@@ -2,12 +2,15 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrProfileType {
-    pub oadr_oadr_profile_name: String,
-    pub oadr_oadr_transports: crate::oadr::OadrTransports,
+pub struct EventResponse {
+    pub ei_response_code: String,
+    pub ei_response_description: Option<String>,
+    pub pyld_request_id: String,
+    pub ei_qualified_event_id: crate::ei::QualifiedEventIdType,
+    pub ei_opt_type: crate::ei::OptTypeType,
 }
 
-impl OadrProfileType {
+impl EventResponse {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -15,13 +18,14 @@ impl OadrProfileType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(
-            writer,
-            "oadr:oadrProfileName",
-            self.oadr_oadr_profile_name.as_str(),
-        )?;
-        self.oadr_oadr_transports
-            .write_with_name(writer, "oadr:oadrTransports", false, false)?;
+        xsd_util::write_simple_element(writer, "ei:responseCode", self.ei_response_code.as_str())?;
+        if let Some(elem) = &self.ei_response_description {
+            xsd_util::write_simple_element(writer, "ei:responseDescription", elem.as_str())?;
+        }
+        xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
+        self.ei_qualified_event_id
+            .write_with_name(writer, "ei:qualifiedEventID", false, false)?;
+        xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
         Ok(())
     }
 
@@ -41,7 +45,7 @@ impl OadrProfileType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadrProfileType")
+            start.attr("xsi:type", "eventResponse")
         } else {
             start
         };
@@ -52,7 +56,7 @@ impl OadrProfileType {
     }
 }
 
-impl xsd_api::WriteXml for OadrProfileType {
+impl xsd_api::WriteXml for EventResponse {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -62,12 +66,12 @@ impl xsd_api::WriteXml for OadrProfileType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrProfileType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eventResponse", true, false)?;
         Ok(())
     }
 }
 
-impl OadrProfileType {
+impl EventResponse {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -77,9 +81,12 @@ impl OadrProfileType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_profile_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_transports: xsd_util::SetOnce<crate::oadr::OadrTransports> =
+        let mut ei_response_code: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_response_description: xsd_util::SetOnce<String> = Default::default();
+        let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::ei::QualifiedEventIdType> =
             Default::default();
+        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -101,11 +108,22 @@ impl OadrProfileType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrProfileName" => oadr_oadr_profile_name
-                        .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
-                    "oadrTransports" => oadr_oadr_transports.set(
-                        crate::oadr::OadrTransports::read(reader, &attributes, "oadrTransports")?,
-                    )?,
+                    "responseCode" => {
+                        ei_response_code.set(xsd_util::read_string(reader, "responseCode")?)?
+                    }
+                    "responseDescription" => ei_response_description
+                        .set(xsd_util::read_string(reader, "responseDescription")?)?,
+                    "requestID" => {
+                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
+                    }
+                    "qualifiedEventID" => {
+                        ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
+                            reader,
+                            &attributes,
+                            "qualifiedEventID",
+                        )?)?
+                    }
+                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -129,9 +147,12 @@ impl OadrProfileType {
         }
 
         // construct the type from the cells
-        Ok(OadrProfileType {
-            oadr_oadr_profile_name: oadr_oadr_profile_name.require()?,
-            oadr_oadr_transports: oadr_oadr_transports.require()?,
+        Ok(EventResponse {
+            ei_response_code: ei_response_code.require()?,
+            ei_response_description: ei_response_description.get(),
+            pyld_request_id: pyld_request_id.require()?,
+            ei_qualified_event_id: ei_qualified_event_id.require()?,
+            ei_opt_type: ei_opt_type.require()?,
         })
     }
 
@@ -141,19 +162,19 @@ impl OadrProfileType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrProfileType")?;
-        OadrProfileType::read(reader, &attr, "oadrProfileType")
+        let attr = xsd_util::read_start_tag(reader, "eventResponse")?;
+        EventResponse::read(reader, &attr, "eventResponse")
     }
 }
 
-impl xsd_api::ReadXml for OadrProfileType {
+impl xsd_api::ReadXml for EventResponse {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrProfileType::read_top_level(&mut reader) {
+        match EventResponse::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

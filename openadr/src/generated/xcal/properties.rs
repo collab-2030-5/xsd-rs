@@ -6,7 +6,7 @@ pub struct Properties {
     pub xcal_dtstart: crate::xcal::Dtstart,
     pub xcal_duration: crate::xcal::DurationPropType,
     /// Set randomization period for start of event
-    pub tolerance: Option<crate::xcal::ToleranceType>,
+    pub tolerance: Option<crate::xcal::Tolerance>,
     pub ei_x_ei_notification: Option<crate::xcal::DurationPropType>,
     pub ei_x_ei_ramp_up: Option<crate::xcal::DurationPropType>,
     pub ei_x_ei_recovery: Option<crate::xcal::DurationPropType>,
@@ -94,7 +94,7 @@ impl Properties {
         let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
         let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
             Default::default();
-        let mut tolerance: xsd_util::SetOnce<crate::xcal::ToleranceType> = Default::default();
+        let mut tolerance: xsd_util::SetOnce<crate::xcal::Tolerance> = Default::default();
         let mut ei_x_ei_notification: xsd_util::SetOnce<crate::xcal::DurationPropType> =
             Default::default();
         let mut ei_x_ei_ramp_up: xsd_util::SetOnce<crate::xcal::DurationPropType> =
@@ -132,7 +132,7 @@ impl Properties {
                         &attributes,
                         "duration",
                     )?)?,
-                    "tolerance" => tolerance.set(crate::xcal::ToleranceType::read(
+                    "tolerance" => tolerance.set(crate::xcal::Tolerance::read(
                         reader,
                         &attributes,
                         "tolerance",

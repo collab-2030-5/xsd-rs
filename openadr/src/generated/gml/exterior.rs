@@ -2,11 +2,11 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearRingType {
-    pub gml_pos_list: f64,
+pub struct Exterior {
+    pub linear_ring: crate::gml::LinearRing,
 }
 
-impl LinearRingType {
+impl Exterior {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,7 +14,8 @@ impl LinearRingType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_element_using_to_string(writer, "gml:posList", self.gml_pos_list)?;
+        self.linear_ring
+            .write_with_name(writer, "LinearRing", false, false)?;
         Ok(())
     }
 
@@ -34,7 +35,7 @@ impl LinearRingType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "LinearRingType")
+            start.attr("xsi:type", "exterior")
         } else {
             start
         };
@@ -45,7 +46,7 @@ impl LinearRingType {
     }
 }
 
-impl xsd_api::WriteXml for LinearRingType {
+impl xsd_api::WriteXml for Exterior {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -55,12 +56,12 @@ impl xsd_api::WriteXml for LinearRingType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:LinearRingType", true, false)?;
+        self.write_with_name(&mut writer, "gml:exterior", true, false)?;
         Ok(())
     }
 }
 
-impl LinearRingType {
+impl Exterior {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -70,7 +71,7 @@ impl LinearRingType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_pos_list: xsd_util::SetOnce<f64> = Default::default();
+        let mut linear_ring: xsd_util::SetOnce<crate::gml::LinearRing> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -89,14 +90,16 @@ impl LinearRingType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "posList" => {
-                            gml_pos_list.set(xsd_util::read_type_from_string(reader, "posList")?)?
-                        }
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                    }
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "LinearRing" => linear_ring.set(crate::gml::LinearRing::read(
+                        reader,
+                        &attributes,
+                        "LinearRing",
+                    )?)?,
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -118,8 +121,8 @@ impl LinearRingType {
         }
 
         // construct the type from the cells
-        Ok(LinearRingType {
-            gml_pos_list: gml_pos_list.require()?,
+        Ok(Exterior {
+            linear_ring: linear_ring.require()?,
         })
     }
 
@@ -129,19 +132,19 @@ impl LinearRingType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "LinearRingType")?;
-        LinearRingType::read(reader, &attr, "LinearRingType")
+        let attr = xsd_util::read_start_tag(reader, "exterior")?;
+        Exterior::read(reader, &attr, "exterior")
     }
 }
 
-impl xsd_api::ReadXml for LinearRingType {
+impl xsd_api::ReadXml for Exterior {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LinearRingType::read_top_level(&mut reader) {
+        match Exterior::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

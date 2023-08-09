@@ -2,11 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ToleranceType {
-    pub tolerate: crate::xcal::TolerateType,
+pub struct OadrExtension {
+    pub oadr_extension_name: String,
+    pub oadr_oadr_info: Vec<crate::oadr::OadrInfo>,
 }
 
-impl ToleranceType {
+impl OadrExtension {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,8 +15,14 @@ impl ToleranceType {
     where
         W: std::io::Write,
     {
-        self.tolerate
-            .write_with_name(writer, "tolerate", false, false)?;
+        xsd_util::write_simple_element(
+            writer,
+            "oadrExtensionName",
+            self.oadr_extension_name.as_str(),
+        )?;
+        for item in &self.oadr_oadr_info {
+            item.write_with_name(writer, "oadr:oadrInfo", false, false)?;
+        }
         Ok(())
     }
 
@@ -35,7 +42,7 @@ impl ToleranceType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "toleranceType")
+            start.attr("xsi:type", "oadrExtension")
         } else {
             start
         };
@@ -46,7 +53,7 @@ impl ToleranceType {
     }
 }
 
-impl xsd_api::WriteXml for ToleranceType {
+impl xsd_api::WriteXml for OadrExtension {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -56,12 +63,12 @@ impl xsd_api::WriteXml for ToleranceType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "xcal:toleranceType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrExtension", true, false)?;
         Ok(())
     }
 }
 
-impl ToleranceType {
+impl OadrExtension {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -71,7 +78,8 @@ impl ToleranceType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut tolerate: xsd_util::SetOnce<crate::xcal::TolerateType> = Default::default();
+        let mut oadr_extension_name: xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_info: Vec<crate::oadr::OadrInfo> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,11 +101,13 @@ impl ToleranceType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "tolerate" => tolerate.set(crate::xcal::TolerateType::read(
+                    "oadrExtensionName" => oadr_extension_name
+                        .set(xsd_util::read_string(reader, "oadrExtensionName")?)?,
+                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
                         reader,
                         &attributes,
-                        "tolerate",
-                    )?)?,
+                        "oadrInfo",
+                    )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -121,8 +131,9 @@ impl ToleranceType {
         }
 
         // construct the type from the cells
-        Ok(ToleranceType {
-            tolerate: tolerate.require()?,
+        Ok(OadrExtension {
+            oadr_extension_name: oadr_extension_name.require()?,
+            oadr_oadr_info,
         })
     }
 
@@ -132,19 +143,19 @@ impl ToleranceType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "toleranceType")?;
-        ToleranceType::read(reader, &attr, "toleranceType")
+        let attr = xsd_util::read_start_tag(reader, "oadrExtension")?;
+        OadrExtension::read(reader, &attr, "oadrExtension")
     }
 }
 
-impl xsd_api::ReadXml for ToleranceType {
+impl xsd_api::ReadXml for OadrExtension {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match ToleranceType::read_top_level(&mut reader) {
+        match OadrExtension::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

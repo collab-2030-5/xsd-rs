@@ -7,7 +7,7 @@ pub struct OadrDistributeEventType {
     pub pyld_request_id: String,
     pub ei_vtn_id: String,
     /// An object containing a demand response event
-    pub oadr_event: Vec<crate::oadr::OadrEventType>,
+    pub oadr_event: Vec<crate::oadr::OadrEvent>,
     pub ei_schema_version: Option<String>,
 }
 
@@ -91,7 +91,7 @@ impl OadrDistributeEventType {
         let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_vtn_id: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_event: Vec<crate::oadr::OadrEventType> = Default::default();
+        let mut oadr_event: Vec<crate::oadr::OadrEvent> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
@@ -124,7 +124,7 @@ impl OadrDistributeEventType {
                         pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
                     "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
-                    "oadrEvent" => oadr_event.push(crate::oadr::OadrEventType::read(
+                    "oadrEvent" => oadr_event.push(crate::oadr::OadrEvent::read(
                         reader,
                         &attributes,
                         "oadrEvent",

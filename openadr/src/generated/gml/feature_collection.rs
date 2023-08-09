@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FeatureCollection {
-    pub location: crate::gml::LocationType,
+    pub location: crate::gml::Location,
     pub gml_id: Option<String>,
 }
 
@@ -78,7 +78,7 @@ impl FeatureCollection {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut location: xsd_util::SetOnce<crate::gml::LocationType> = Default::default();
+        let mut location: xsd_util::SetOnce<crate::gml::Location> = Default::default();
         let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
@@ -102,7 +102,7 @@ impl FeatureCollection {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "location" => location.set(crate::gml::LocationType::read(
+                    "location" => location.set(crate::gml::Location::read(
                         reader,
                         &attributes,
                         "location",

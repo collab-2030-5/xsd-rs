@@ -2,11 +2,11 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LocationType {
-    pub polygon: crate::gml::PolygonType,
+pub struct OadrExtensions {
+    pub oadr_extension: Vec<crate::oadr::OadrExtension>,
 }
 
-impl LocationType {
+impl OadrExtensions {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,8 +14,9 @@ impl LocationType {
     where
         W: std::io::Write,
     {
-        self.polygon
-            .write_with_name(writer, "Polygon", false, false)?;
+        for item in &self.oadr_extension {
+            item.write_with_name(writer, "oadrExtension", false, false)?;
+        }
         Ok(())
     }
 
@@ -35,7 +36,7 @@ impl LocationType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "locationType")
+            start.attr("xsi:type", "oadrExtensions")
         } else {
             start
         };
@@ -46,7 +47,7 @@ impl LocationType {
     }
 }
 
-impl xsd_api::WriteXml for LocationType {
+impl xsd_api::WriteXml for OadrExtensions {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -56,12 +57,12 @@ impl xsd_api::WriteXml for LocationType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:locationType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrExtensions", true, false)?;
         Ok(())
     }
 }
 
-impl LocationType {
+impl OadrExtensions {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -71,7 +72,7 @@ impl LocationType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut polygon: xsd_util::SetOnce<crate::gml::PolygonType> = Default::default();
+        let mut oadr_extension: Vec<crate::oadr::OadrExtension> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,11 +94,11 @@ impl LocationType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "Polygon" => polygon.set(crate::gml::PolygonType::read(
+                    "oadrExtension" => oadr_extension.push(crate::oadr::OadrExtension::read(
                         reader,
                         &attributes,
-                        "Polygon",
-                    )?)?,
+                        "oadrExtension",
+                    )?),
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
                 // treat these events as errors
@@ -121,9 +122,7 @@ impl LocationType {
         }
 
         // construct the type from the cells
-        Ok(LocationType {
-            polygon: polygon.require()?,
-        })
+        Ok(OadrExtensions { oadr_extension })
     }
 
     fn read_top_level<R>(
@@ -132,19 +131,19 @@ impl LocationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "locationType")?;
-        LocationType::read(reader, &attr, "locationType")
+        let attr = xsd_util::read_start_tag(reader, "oadrExtensions")?;
+        OadrExtensions::read(reader, &attr, "oadrExtensions")
     }
 }
 
-impl xsd_api::ReadXml for LocationType {
+impl xsd_api::ReadXml for OadrExtensions {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match LocationType::read_top_level(&mut reader) {
+        match OadrExtensions::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

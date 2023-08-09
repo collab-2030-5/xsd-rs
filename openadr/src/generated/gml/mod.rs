@@ -1,16 +1,16 @@
-mod exterior_type;
+mod exterior;
 mod feature_collection;
-mod linear_ring_type;
-mod location_type;
-mod polygon_type;
+mod linear_ring;
+mod location;
+mod polygon;
 
 // re-export all the types in this namespace
 
-pub use exterior_type::*;
+pub use exterior::*;
 pub use feature_collection::*;
-pub use linear_ring_type::*;
-pub use location_type::*;
-pub use polygon_type::*;
+pub use linear_ring::*;
+pub use location::*;
+pub use polygon::*;
 
 // helpers specific to this namespace
 pub(crate) fn add_schema_attr(

@@ -2,12 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct OadrExtensionType {
-    pub oadr_extension_name: String,
+pub struct OadrService {
+    pub oadr_oadr_service_name: crate::oadr::OadrServiceNameType,
     pub oadr_oadr_info: Vec<crate::oadr::OadrInfo>,
 }
 
-impl OadrExtensionType {
+impl OadrService {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -15,10 +15,10 @@ impl OadrExtensionType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(
+        xsd_util::write_string_enumeration(
             writer,
-            "oadrExtensionName",
-            self.oadr_extension_name.as_str(),
+            "oadr:oadrServiceName",
+            self.oadr_oadr_service_name,
         )?;
         for item in &self.oadr_oadr_info {
             item.write_with_name(writer, "oadr:oadrInfo", false, false)?;
@@ -42,7 +42,7 @@ impl OadrExtensionType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "oadrExtensionType")
+            start.attr("xsi:type", "oadrService")
         } else {
             start
         };
@@ -53,7 +53,7 @@ impl OadrExtensionType {
     }
 }
 
-impl xsd_api::WriteXml for OadrExtensionType {
+impl xsd_api::WriteXml for OadrService {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -63,12 +63,12 @@ impl xsd_api::WriteXml for OadrExtensionType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrExtensionType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrService", true, false)?;
         Ok(())
     }
 }
 
-impl OadrExtensionType {
+impl OadrService {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -78,7 +78,8 @@ impl OadrExtensionType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_extension_name: xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_service_name: xsd_util::SetOnce<crate::oadr::OadrServiceNameType> =
+            Default::default();
         let mut oadr_oadr_info: Vec<crate::oadr::OadrInfo> = Default::default();
 
         for attr in attrs.iter() {
@@ -101,8 +102,8 @@ impl OadrExtensionType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrExtensionName" => oadr_extension_name
-                        .set(xsd_util::read_string(reader, "oadrExtensionName")?)?,
+                    "oadrServiceName" => oadr_oadr_service_name
+                        .set(xsd_util::read_string_enum(reader, "oadrServiceName")?)?,
                     "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
                         reader,
                         &attributes,
@@ -131,8 +132,8 @@ impl OadrExtensionType {
         }
 
         // construct the type from the cells
-        Ok(OadrExtensionType {
-            oadr_extension_name: oadr_extension_name.require()?,
+        Ok(OadrService {
+            oadr_oadr_service_name: oadr_oadr_service_name.require()?,
             oadr_oadr_info,
         })
     }
@@ -143,19 +144,19 @@ impl OadrExtensionType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrExtensionType")?;
-        OadrExtensionType::read(reader, &attr, "oadrExtensionType")
+        let attr = xsd_util::read_start_tag(reader, "oadrService")?;
+        OadrService::read(reader, &attr, "oadrService")
     }
 }
 
-impl xsd_api::ReadXml for OadrExtensionType {
+impl xsd_api::ReadXml for OadrService {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match OadrExtensionType::read_top_level(&mut reader) {
+        match OadrService::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

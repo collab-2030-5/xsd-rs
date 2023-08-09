@@ -2,15 +2,11 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EventResponseType {
-    pub ei_response_code: String,
-    pub ei_response_description: Option<String>,
-    pub pyld_request_id: String,
-    pub ei_qualified_event_id: crate::ei::QualifiedEventIdType,
-    pub ei_opt_type: crate::ei::OptTypeType,
+pub struct EiMarketContext {
+    pub emix_market_context: String,
 }
 
-impl EventResponseType {
+impl EiMarketContext {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -18,14 +14,11 @@ impl EventResponseType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:responseCode", self.ei_response_code.as_str())?;
-        if let Some(elem) = &self.ei_response_description {
-            xsd_util::write_simple_element(writer, "ei:responseDescription", elem.as_str())?;
-        }
-        xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
-        self.ei_qualified_event_id
-            .write_with_name(writer, "ei:qualifiedEventID", false, false)?;
-        xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
+        xsd_util::write_simple_element(
+            writer,
+            "emix:marketContext",
+            self.emix_market_context.as_str(),
+        )?;
         Ok(())
     }
 
@@ -45,7 +38,7 @@ impl EventResponseType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "eventResponseType")
+            start.attr("xsi:type", "eiMarketContext")
         } else {
             start
         };
@@ -56,7 +49,7 @@ impl EventResponseType {
     }
 }
 
-impl xsd_api::WriteXml for EventResponseType {
+impl xsd_api::WriteXml for EiMarketContext {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -66,12 +59,12 @@ impl xsd_api::WriteXml for EventResponseType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eventResponseType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiMarketContext", true, false)?;
         Ok(())
     }
 }
 
-impl EventResponseType {
+impl EiMarketContext {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -81,12 +74,7 @@ impl EventResponseType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_response_code: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_response_description: xsd_util::SetOnce<String> = Default::default();
-        let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::ei::QualifiedEventIdType> =
-            Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
+        let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -105,27 +93,13 @@ impl EventResponseType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "responseCode" => {
-                        ei_response_code.set(xsd_util::read_string(reader, "responseCode")?)?
+                xml::reader::XmlEvent::StartElement { name, .. } => {
+                    match name.local_name.as_str() {
+                        "marketContext" => emix_market_context
+                            .set(xsd_util::read_string(reader, "marketContext")?)?,
+                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
-                    "responseDescription" => ei_response_description
-                        .set(xsd_util::read_string(reader, "responseDescription")?)?,
-                    "requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
-                    }
-                    "qualifiedEventID" => {
-                        ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
-                            reader,
-                            &attributes,
-                            "qualifiedEventID",
-                        )?)?
-                    }
-                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -147,12 +121,8 @@ impl EventResponseType {
         }
 
         // construct the type from the cells
-        Ok(EventResponseType {
-            ei_response_code: ei_response_code.require()?,
-            ei_response_description: ei_response_description.get(),
-            pyld_request_id: pyld_request_id.require()?,
-            ei_qualified_event_id: ei_qualified_event_id.require()?,
-            ei_opt_type: ei_opt_type.require()?,
+        Ok(EiMarketContext {
+            emix_market_context: emix_market_context.require()?,
         })
     }
 
@@ -162,19 +132,19 @@ impl EventResponseType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eventResponseType")?;
-        EventResponseType::read(reader, &attr, "eventResponseType")
+        let attr = xsd_util::read_start_tag(reader, "eiMarketContext")?;
+        EiMarketContext::read(reader, &attr, "eiMarketContext")
     }
 }
 
-impl xsd_api::ReadXml for EventResponseType {
+impl xsd_api::ReadXml for EiMarketContext {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EventResponseType::read_top_level(&mut reader) {
+        match EiMarketContext::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

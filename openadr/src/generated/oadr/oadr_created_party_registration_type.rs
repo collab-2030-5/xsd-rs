@@ -13,7 +13,7 @@ pub struct OadrCreatedPartyRegistrationType {
     /// HTTP Pull Only - The VEN shall send an oadrPoll payload to the VTN at most once for each duration specified by this element
     pub oadr_oadr_requested_oadr_poll_freq: Option<crate::xcal::DurationPropType>,
     pub oadr_oadr_service_specific_info: Option<crate::oadr::OadrServiceSpecificInfo>,
-    pub oadr_extensions: Option<crate::oadr::OadrExtensionsType>,
+    pub oadr_extensions: Option<crate::oadr::OadrExtensions>,
     pub ei_schema_version: Option<String>,
 }
 
@@ -124,7 +124,7 @@ impl OadrCreatedPartyRegistrationType {
         let mut oadr_oadr_service_specific_info: xsd_util::SetOnce<
             crate::oadr::OadrServiceSpecificInfo,
         > = Default::default();
-        let mut oadr_extensions: xsd_util::SetOnce<crate::oadr::OadrExtensionsType> =
+        let mut oadr_extensions: xsd_util::SetOnce<crate::oadr::OadrExtensions> =
             Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -178,7 +178,7 @@ impl OadrCreatedPartyRegistrationType {
                             )?,
                         )?,
                         "oadrExtensions" => {
-                            oadr_extensions.set(crate::oadr::OadrExtensionsType::read(
+                            oadr_extensions.set(crate::oadr::OadrExtensions::read(
                                 reader,
                                 &attributes,
                                 "oadrExtensions",

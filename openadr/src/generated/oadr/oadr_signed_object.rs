@@ -101,33 +101,8 @@ impl OadrSignedObject {
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "oadrCreatePartyRegistration" => oadr_signed_object_choice.set(
-                            crate::oadr::OadrSignedObjectChoice::OadrOadrCreatePartyRegistration(
-                                crate::oadr::OadrCreatePartyRegistrationType::read(
-                                    reader,
-                                    attrs,
-                                    "oadrCreatePartyRegistration",
-                                )?,
-                            ),
-                        )?,
-                        "oadrCreatedPartyRegistration" => oadr_signed_object_choice.set(
-                            crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedPartyRegistration(
-                                crate::oadr::OadrCreatedPartyRegistrationType::read(
-                                    reader,
-                                    attrs,
-                                    "oadrCreatedPartyRegistration",
-                                )?,
-                            ),
-                        )?,
-                        "oadrDistributeEvent" => oadr_signed_object_choice.set(
-                            crate::oadr::OadrSignedObjectChoice::OadrOadrDistributeEvent(
-                                crate::oadr::OadrDistributeEventType::read(
-                                    reader,
-                                    attrs,
-                                    "oadrDistributeEvent",
-                                )?,
-                            ),
-                        )?,
+                        "oadrSignedObjectChoice" => oadr_signed_object_choice
+                            .set(crate::oadr::OadrSignedObjectChoice::read(reader)?)?,
                         _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                     }
                 }

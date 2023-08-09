@@ -2,11 +2,11 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EiMarketContextType {
-    pub emix_market_context: String,
+pub struct Location {
+    pub polygon: crate::gml::Polygon,
 }
 
-impl EiMarketContextType {
+impl Location {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,11 +14,8 @@ impl EiMarketContextType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(
-            writer,
-            "emix:marketContext",
-            self.emix_market_context.as_str(),
-        )?;
+        self.polygon
+            .write_with_name(writer, "Polygon", false, false)?;
         Ok(())
     }
 
@@ -38,7 +35,7 @@ impl EiMarketContextType {
             events::XmlEvent::start_element(name)
         };
         let start = if write_type {
-            start.attr("xsi:type", "eiMarketContextType")
+            start.attr("xsi:type", "location")
         } else {
             start
         };
@@ -49,7 +46,7 @@ impl EiMarketContextType {
     }
 }
 
-impl xsd_api::WriteXml for EiMarketContextType {
+impl xsd_api::WriteXml for Location {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -59,12 +56,12 @@ impl xsd_api::WriteXml for EiMarketContextType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eiMarketContextType", true, false)?;
+        self.write_with_name(&mut writer, "gml:location", true, false)?;
         Ok(())
     }
 }
 
-impl EiMarketContextType {
+impl Location {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -74,7 +71,7 @@ impl EiMarketContextType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
+        let mut polygon: xsd_util::SetOnce<crate::gml::Polygon> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,13 +90,14 @@ impl EiMarketContextType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "marketContext" => emix_market_context
-                            .set(xsd_util::read_string(reader, "marketContext")?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "Polygon" => {
+                        polygon.set(crate::gml::Polygon::read(reader, &attributes, "Polygon")?)?
                     }
-                }
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -121,8 +119,8 @@ impl EiMarketContextType {
         }
 
         // construct the type from the cells
-        Ok(EiMarketContextType {
-            emix_market_context: emix_market_context.require()?,
+        Ok(Location {
+            polygon: polygon.require()?,
         })
     }
 
@@ -132,19 +130,19 @@ impl EiMarketContextType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiMarketContextType")?;
-        EiMarketContextType::read(reader, &attr, "eiMarketContextType")
+        let attr = xsd_util::read_start_tag(reader, "location")?;
+        Location::read(reader, &attr, "location")
     }
 }
 
-impl xsd_api::ReadXml for EiMarketContextType {
+impl xsd_api::ReadXml for Location {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match EiMarketContextType::read_top_level(&mut reader) {
+        match Location::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();

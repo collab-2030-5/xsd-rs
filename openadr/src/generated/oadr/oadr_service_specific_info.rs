@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrServiceSpecificInfo {
-    pub oadr_service: Vec<crate::oadr::OadrServiceType>,
+    pub oadr_service: Vec<crate::oadr::OadrService>,
 }
 
 impl OadrServiceSpecificInfo {
@@ -72,7 +72,7 @@ impl OadrServiceSpecificInfo {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_service: Vec<crate::oadr::OadrServiceType> = Default::default();
+        let mut oadr_service: Vec<crate::oadr::OadrService> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,7 +94,7 @@ impl OadrServiceSpecificInfo {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrService" => oadr_service.push(crate::oadr::OadrServiceType::read(
+                    "oadrService" => oadr_service.push(crate::oadr::OadrService::read(
                         reader,
                         &attributes,
                         "oadrService",

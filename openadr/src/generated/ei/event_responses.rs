@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EventResponses {
-    pub event_response: Vec<crate::ei::EventResponseType>,
+    pub event_response: Vec<crate::ei::EventResponse>,
 }
 
 impl EventResponses {
@@ -72,7 +72,7 @@ impl EventResponses {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut event_response: Vec<crate::ei::EventResponseType> = Default::default();
+        let mut event_response: Vec<crate::ei::EventResponse> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,7 +94,7 @@ impl EventResponses {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eventResponse" => event_response.push(crate::ei::EventResponseType::read(
+                    "eventResponse" => event_response.push(crate::ei::EventResponse::read(
                         reader,
                         &attributes,
                         "eventResponse",

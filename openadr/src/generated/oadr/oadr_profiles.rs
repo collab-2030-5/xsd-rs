@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrProfiles {
-    pub oadr_profile: Vec<String>,
+    pub oadr_profile: Vec<crate::oadr::OadrProfile>,
 }
 
 impl OadrProfiles {
@@ -15,7 +15,7 @@ impl OadrProfiles {
         W: std::io::Write,
     {
         for item in &self.oadr_profile {
-            xsd_util::write_simple_element(writer, "oadrProfile", item.as_str())?;
+            item.write_with_name(writer, "oadrProfile", false, false)?;
         }
         Ok(())
     }
@@ -72,7 +72,7 @@ impl OadrProfiles {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_profile: Vec<String> = Default::default();
+        let mut oadr_profile: Vec<crate::oadr::OadrProfile> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -91,14 +91,16 @@ impl OadrProfiles {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "oadrProfile" => {
-                            oadr_profile.push(xsd_util::read_string(reader, "oadrProfile")?)
-                        }
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
-                    }
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "oadrProfile" => oadr_profile.push(crate::oadr::OadrProfile::read(
+                        reader,
+                        &attributes,
+                        "oadrProfile",
+                    )?),
+                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)

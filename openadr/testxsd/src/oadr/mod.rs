@@ -1,11 +1,11 @@
 mod oadr_transport_type;
-mod oadr_transport_type;
+mod oadr_transport;
 mod oadr_transports;
 
 // re-export all the types in this namespace
 
 pub use oadr_transport_type::*;
-pub use oadr_transport_type::*;
+pub use oadr_transport::*;
 pub use oadr_transports::*;
 
 // helpers specific to this namespace

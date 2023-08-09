@@ -2,11 +2,12 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ExteriorType {
-    pub linear_ring: crate::gml::LinearRingType,
+pub struct Polygon {
+    pub exterior: crate::gml::Exterior,
+    pub gml_id: Option<String>,
 }
 
-impl ExteriorType {
+impl Polygon {
     fn write_elem<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -14,8 +15,8 @@ impl ExteriorType {
     where
         W: std::io::Write,
     {
-        self.linear_ring
-            .write_with_name(writer, "LinearRing", false, false)?;
+        self.exterior
+            .write_with_name(writer, "exterior", false, false)?;
         Ok(())
     }
 
@@ -34,8 +35,14 @@ impl ExteriorType {
         } else {
             events::XmlEvent::start_element(name)
         };
+        // ---- start attributes ----
+        let start = match &self.gml_id {
+            Some(attr) => start.attr("gml:id", attr.as_str()),
+            None => start,
+        };
+        // ---- end attributes ----
         let start = if write_type {
-            start.attr("xsi:type", "exteriorType")
+            start.attr("xsi:type", "Polygon")
         } else {
             start
         };
@@ -46,7 +53,7 @@ impl ExteriorType {
     }
 }
 
-impl xsd_api::WriteXml for ExteriorType {
+impl xsd_api::WriteXml for Polygon {
     fn write<W>(
         &self,
         config: xsd_api::WriteConfig,
@@ -56,12 +63,12 @@ impl xsd_api::WriteXml for ExteriorType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "gml:exteriorType", true, false)?;
+        self.write_with_name(&mut writer, "gml:Polygon", true, false)?;
         Ok(())
     }
 }
 
-impl ExteriorType {
+impl Polygon {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
         attrs: &Vec<xml::attribute::OwnedAttribute>,
@@ -71,10 +78,12 @@ impl ExteriorType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut linear_ring: xsd_util::SetOnce<crate::gml::LinearRingType> = Default::default();
+        let mut exterior: xsd_util::SetOnce<crate::gml::Exterior> = Default::default();
+        let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
+                "gml:id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }
@@ -93,10 +102,10 @@ impl ExteriorType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "LinearRing" => linear_ring.set(crate::gml::LinearRingType::read(
+                    "exterior" => exterior.set(crate::gml::Exterior::read(
                         reader,
                         &attributes,
-                        "LinearRing",
+                        "exterior",
                     )?)?,
                     _ => return Err(xsd_api::ReadError::UnexpectedEvent),
                 },
@@ -121,8 +130,9 @@ impl ExteriorType {
         }
 
         // construct the type from the cells
-        Ok(ExteriorType {
-            linear_ring: linear_ring.require()?,
+        Ok(Polygon {
+            exterior: exterior.require()?,
+            gml_id: gml_id.get(),
         })
     }
 
@@ -132,19 +142,19 @@ impl ExteriorType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "exteriorType")?;
-        ExteriorType::read(reader, &attr, "exteriorType")
+        let attr = xsd_util::read_start_tag(reader, "Polygon")?;
+        Polygon::read(reader, &attr, "Polygon")
     }
 }
 
-impl xsd_api::ReadXml for ExteriorType {
+impl xsd_api::ReadXml for Polygon {
     fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
     where
         R: std::io::Read,
     {
         let mut reader = xml::reader::EventReader::new(r);
 
-        match ExteriorType::read_top_level(&mut reader) {
+        match Polygon::read_top_level(&mut reader) {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
