@@ -102,7 +102,7 @@ fn parse_field_of_sequence(node: &Node, _: &Node) -> RsEntity {
 
     let mut field_type = parse_node(&content_node, node);
 
-    field_type.set_name(format!("{}Type", name).as_str());
+    field_type.set_name(format!("{}", name).as_str());
 
     RsEntity::StructField(StructField {
         name,
