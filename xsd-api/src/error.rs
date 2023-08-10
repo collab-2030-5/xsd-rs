@@ -7,6 +7,11 @@ pub enum WriteError {
     Other(Box<dyn std::error::Error>),
 }
 
+#[derive(Debug)]
+pub struct ParentToken(pub String);
+#[derive(Debug)]
+pub struct ChildToken(pub String);
+
 /// errors that can occur when reading XML
 #[derive(Debug)]
 pub enum ReadError {
@@ -26,6 +31,8 @@ pub enum ReadError {
     UnknownEnumVariant,
     /// Parser encountered an unexpected event
     UnexpectedEvent,
+    /// Invalid token
+    UnexpectedToken(ParentToken, ChildToken),
     /// Unknown xsi:type
     UnknownXsiType,
     /// Missing required xsi:type
@@ -125,6 +132,9 @@ impl std::fmt::Display for ReadError {
             ReadError::MissingXsiType => write!(f, "missing required xsi:type"),
             ReadError::UnknownXsiType => write!(f, "unknown xsi:type"),
             ReadError::UnexpectedEvent => write!(f, "unexpected event"),
+            ReadError::UnexpectedToken(parent, child) => {
+                write!(f, "unexpected event: {} --> {}", parent.0, child.0)
+            }
         }
     }
 }

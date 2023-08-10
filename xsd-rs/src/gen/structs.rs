@@ -283,7 +283,7 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                             indent(w, |w| write_element_handler(w, elem))?;
                             writeln!(w, "}}")?;
                         }
-                        writeln!(w, "_ => return Err(xsd_api::ReadError::UnexpectedEvent)")
+                        writeln!(w, "name => return Err(xsd_api::ReadError::UnexpectedToken(xsd_api::ParentToken(parent_tag.to_owned()), xsd_api::ChildToken(name.to_owned())))")
                     })?;
                     writeln!(w, "}}")
                 }
