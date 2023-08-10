@@ -93,7 +93,12 @@ impl EndDeviceAssetType {
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "mrid" => power_mrid.set(xsd_util::read_string(reader, "mrid")?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                        name => {
+                            return Err(xsd_api::ReadError::UnexpectedToken(
+                                xsd_api::ParentToken(parent_tag.to_owned()),
+                                xsd_api::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
                 }
                 // treat these events as errors

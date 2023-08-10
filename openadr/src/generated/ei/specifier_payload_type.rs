@@ -111,7 +111,12 @@ impl SpecifierPayloadType {
                     "readingType" => {
                         ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
                     }
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {

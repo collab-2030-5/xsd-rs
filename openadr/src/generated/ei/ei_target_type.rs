@@ -213,7 +213,12 @@ impl EiTargetType {
                     }
                     "venID" => ei_ven_id.push(xsd_util::read_string(reader, "venID")?),
                     "partyID" => ei_party_id.push(xsd_util::read_string(reader, "partyID")?),
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {

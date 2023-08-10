@@ -109,7 +109,12 @@ impl PulseCountType {
                         }
                         "pulseFactor" => oadr_pulse_factor
                             .set(xsd_util::read_type_from_string(reader, "pulseFactor")?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                        name => {
+                            return Err(xsd_api::ReadError::UnexpectedToken(
+                                xsd_api::ParentToken(parent_tag.to_owned()),
+                                xsd_api::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
                 }
                 // treat these events as errors

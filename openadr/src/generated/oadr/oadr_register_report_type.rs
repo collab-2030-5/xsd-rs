@@ -127,7 +127,12 @@ impl OadrRegisterReportType {
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     "reportRequestID" => ei_report_request_id
                         .set(xsd_util::read_string(reader, "reportRequestID")?)?,
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {

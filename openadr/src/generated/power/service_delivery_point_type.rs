@@ -93,7 +93,12 @@ impl ServiceDeliveryPointType {
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "node" => power_node.set(xsd_util::read_string(reader, "node")?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                        name => {
+                            return Err(xsd_api::ReadError::UnexpectedToken(
+                                xsd_api::ParentToken(parent_tag.to_owned()),
+                                xsd_api::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
                 }
                 // treat these events as errors

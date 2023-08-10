@@ -121,7 +121,12 @@ impl OadrLoadControlStateTypeType {
                             .set(xsd_util::read_type_from_string(reader, "oadrCurrent")?)?,
                         "oadrNormal" => oadr_normal
                             .set(xsd_util::read_type_from_string(reader, "oadrNormal")?)?,
-                        _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                        name => {
+                            return Err(xsd_api::ReadError::UnexpectedToken(
+                                xsd_api::ParentToken(parent_tag.to_owned()),
+                                xsd_api::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
                 }
                 // treat these events as errors

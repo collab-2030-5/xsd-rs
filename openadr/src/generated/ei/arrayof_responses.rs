@@ -100,7 +100,12 @@ impl ArrayofResponses {
                         &attributes,
                         "response",
                     )?),
-                    _ => return Err(xsd_api::ReadError::UnexpectedEvent),
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
