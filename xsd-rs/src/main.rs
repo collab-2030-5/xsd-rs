@@ -78,9 +78,11 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
         model
     };
 
-    tracing::info!("Merge complete.  Resolving model.");
+    tracing::info!("Merge complete.  Resolving model.\n");
 
     let model = model.resolve(config);
+
+    tracing::info!("Resolve complete.  Writing model.\n");
 
     create_main_output_dir(&options.output, options.remove_dir)?;
 
