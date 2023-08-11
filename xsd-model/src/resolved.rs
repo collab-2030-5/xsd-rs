@@ -87,7 +87,7 @@ pub enum AnyType {
 
 impl AnyType {
     pub fn is_struct(&self) -> bool {
-        std::matches!(self, Self::Struct(_))
+        !std::matches!(self, Self::Simple(_))
     }
 }
 

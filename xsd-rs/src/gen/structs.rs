@@ -151,6 +151,10 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
 fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     let (attr, elem) = split_fields(st);
 
+    if elem.is_empty() {
+        tracing::error!("Struct is empty: {}", st.id.name);
+    }
+
     writeln!(w, "impl {} {{", st.id.name.to_upper_camel_case())?;
     indent(w, |w| {
         writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
@@ -279,9 +283,21 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     writeln!(w, "match name.local_name.as_str() {{")?;
                     indent(w, |w| {
                         for elem in elems {
-                            writeln!(w, "\"{}\" => {{", &elem.bare_name())?;
-                            indent(w, |w| write_element_handler(w, elem))?;
-                            writeln!(w, "}}")?;
+                            if let AnyType::Choice(choice) = &elem.field_type {
+                                // ChoiceElems
+                                let choice_elems =
+                                    &split_fields_choice(&choice, &elem.multiplicity);
+
+                                for choice in choice_elems {
+                                    writeln!(w, "\"{}\" => {{", &choice.bare_name())?;
+                                    indent(w, |w| write_choice_element_handler(w, elem, choice))?;
+                                    writeln!(w, "}}")?;
+                                }
+                            } else {
+                                writeln!(w, "\"{}\" => {{", &elem.bare_name())?;
+                                indent(w, |w| write_element_handler(w, elem))?;
+                                writeln!(w, "}}")?;
+                            }
                         }
                         writeln!(w, "name => return Err(xsd_api::ReadError::UnexpectedToken(xsd_api::ParentToken(parent_tag.to_owned()), xsd_api::ChildToken(name.to_owned())))")
                     })?;
@@ -308,6 +324,37 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
         writeln!(w, "}}")
     })?;
     writeln!(w, "}}")
+}
+
+fn write_choice_element_handler(
+    w: &mut dyn Write,
+    elem: &Element,
+    choice: &Element,
+) -> std::io::Result<()> {
+    let tx = choice.field_type.read_transform(&choice.bare_name());
+
+    match &elem.multiplicity {
+        ElemMultiplicity::Single | ElemMultiplicity::Optional => {
+            writeln!(
+                w,
+                "{}.set({}::{}({}))?",
+                elem.name.rust_field_name(),
+                elem.field_type.rust_struct_type(),
+                choice.name.to_upper_camel_case(),
+                tx
+            )
+        }
+        ElemMultiplicity::Vec => {
+            writeln!(
+                w,
+                "{}.set({}::{}({}))?",
+                elem.name.rust_field_name(),
+                elem.field_type.rust_struct_type(),
+                choice.name.to_upper_camel_case(),
+                tx
+            )
+        }
+    }
 }
 
 fn write_element_handler(w: &mut dyn Write, elem: &Element) -> std::io::Result<()> {
@@ -360,6 +407,21 @@ fn write_struct_initializer(w: &mut dyn Write, st: &Struct) -> std::io::Result<(
     }
 
     Ok(())
+}
+
+fn split_fields_choice(ch: &Choice, m: &ElemMultiplicity) -> Vec<Element> {
+    let mut elems = Vec::new();
+
+    for choice in &ch.variants {
+        let x = Element {
+            name: choice.element_name.clone(),
+            field_type: choice.type_info.clone(),
+            multiplicity: *m,
+        };
+        elems.push(x);
+    }
+
+    elems
 }
 
 fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
