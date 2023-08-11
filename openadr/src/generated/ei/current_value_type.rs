@@ -90,18 +90,21 @@ impl CurrentValueType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "currentValueTypeChoice" => current_value_type_choice
-                            .set(crate::ei::CurrentValueTypeChoice::read(reader)?)?,
-                        name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
-                            ))
-                        }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "payloadFloat" => current_value_type_choice.set(
+                        crate::ei::CurrentValueTypeChoice::EiPayloadFloat(
+                            crate::ei::PayloadFloatType::read(reader, &attributes, "payloadFloat")?,
+                        ),
+                    )?,
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
                     }
-                }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)

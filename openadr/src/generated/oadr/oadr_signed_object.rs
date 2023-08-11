@@ -99,18 +99,219 @@ impl OadrSignedObject {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { name, .. } => {
-                    match name.local_name.as_str() {
-                        "oadrSignedObjectChoice" => oadr_signed_object_choice
-                            .set(crate::oadr::OadrSignedObjectChoice::read(reader)?)?,
-                        name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
-                            ))
-                        }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "oadrDistributeEvent" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrDistributeEvent(
+                            crate::oadr::OadrDistributeEventType::read(
+                                reader,
+                                &attributes,
+                                "oadrDistributeEvent",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreatedEvent" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedEvent(
+                            crate::oadr::OadrCreatedEventType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreatedEvent",
+                            )?,
+                        ),
+                    )?,
+                    "oadrRequestEvent" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrRequestEvent(
+                            crate::oadr::OadrRequestEventType::read(
+                                reader,
+                                &attributes,
+                                "oadrRequestEvent",
+                            )?,
+                        ),
+                    )?,
+                    "oadrResponse" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrResponse(
+                            crate::oadr::OadrResponseType::read(
+                                reader,
+                                &attributes,
+                                "oadrResponse",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCancelOpt" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCancelOpt(
+                            crate::oadr::OadrCancelOptType::read(
+                                reader,
+                                &attributes,
+                                "oadrCancelOpt",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCanceledOpt" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCanceledOpt(
+                            crate::oadr::OadrCanceledOptType::read(
+                                reader,
+                                &attributes,
+                                "oadrCanceledOpt",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreateOpt" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreateOpt(
+                            crate::oadr::OadrCreateOptType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreateOpt",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreatedOpt" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedOpt(
+                            crate::oadr::OadrCreatedOptType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreatedOpt",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCancelReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCancelReport(
+                            crate::oadr::OadrCancelReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrCancelReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCanceledReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCanceledReport(
+                            crate::oadr::OadrCanceledReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrCanceledReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreateReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreateReport(
+                            crate::oadr::OadrCreateReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreateReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreatedReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedReport(
+                            crate::oadr::OadrCreatedReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreatedReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrRegisterReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrRegisterReport(
+                            crate::oadr::OadrRegisterReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrRegisterReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrRegisteredReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrRegisteredReport(
+                            crate::oadr::OadrRegisteredReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrRegisteredReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrUpdateReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrUpdateReport(
+                            crate::oadr::OadrUpdateReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrUpdateReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrUpdatedReport" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrUpdatedReport(
+                            crate::oadr::OadrUpdatedReportType::read(
+                                reader,
+                                &attributes,
+                                "oadrUpdatedReport",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCancelPartyRegistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCancelPartyRegistration(
+                            crate::oadr::OadrCancelPartyRegistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrCancelPartyRegistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCanceledPartyRegistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCanceledPartyRegistration(
+                            crate::oadr::OadrCanceledPartyRegistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrCanceledPartyRegistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreatePartyRegistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreatePartyRegistration(
+                            crate::oadr::OadrCreatePartyRegistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreatePartyRegistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrCreatedPartyRegistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrCreatedPartyRegistration(
+                            crate::oadr::OadrCreatedPartyRegistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrCreatedPartyRegistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrRequestReregistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrRequestReregistration(
+                            crate::oadr::OadrRequestReregistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrRequestReregistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrQueryRegistration" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrQueryRegistration(
+                            crate::oadr::OadrQueryRegistrationType::read(
+                                reader,
+                                &attributes,
+                                "oadrQueryRegistration",
+                            )?,
+                        ),
+                    )?,
+                    "oadrPoll" => oadr_signed_object_choice.set(
+                        crate::oadr::OadrSignedObjectChoice::OadrOadrPoll(
+                            crate::oadr::OadrPollType::read(reader, &attributes, "oadrPoll")?,
+                        ),
+                    )?,
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
                     }
-                }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
