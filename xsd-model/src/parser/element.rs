@@ -27,6 +27,7 @@ fn element_default(node: &Node) -> RsEntity {
         original: ty.into(),
         comment: get_documentation(node),
         subtypes: vec![],
+        ..Default::default()
     })
 }
 
@@ -125,6 +126,7 @@ fn parse_global_element(node: &Node) -> RsEntity {
             original: node.attr_type().unwrap().into(),
             comment: get_documentation(node),
             subtypes: vec![],
+            substitution_group: node.attr_substitution_group(),
         });
     }
 

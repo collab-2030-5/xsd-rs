@@ -280,7 +280,7 @@ impl UnresolvedModel {
                     std::mem::swap(&mut unresolved, &mut remaining);
                 } else {
                     tracing::info!("success in {} iterations", count);
-                    return resolver.model();
+                    break;
                 }
             }
 
@@ -293,12 +293,17 @@ impl UnresolvedModel {
                 resolved_count += 1;
             } else {
                 unresolved_count += 1;
-                tracing::warn!("unresolved type: {} #{}", id, unresolved_count);
+                // tracing::warn!("unresolved type: {} #{}", id, unresolved_count);
                 remaining.insert(id, v);
             }
 
             count += 1;
         }
+
+        let resolved_model = resolver.model();
+        // Resolve substitution groups
+
+        resolved_model
     }
 
     fn resolve_base_types(&self, _config: &BaseTypeConfig) -> BTreeMap<TypeId, UnresolvedTypeEx> {

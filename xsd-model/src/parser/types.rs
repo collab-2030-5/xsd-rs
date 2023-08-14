@@ -113,6 +113,7 @@ pub struct Alias {
     pub original: String,
     pub comment: Option<String>,
     pub subtypes: Vec<RsEntity>,
+    pub substitution_group: Option<String>,
 }
 
 #[derive(Debug, Clone)]

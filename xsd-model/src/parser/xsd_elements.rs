@@ -80,6 +80,7 @@ pub trait XsdNode {
     fn attr_ref(&self) -> Option<&str>;
     fn attr_use(&self) -> UseType;
     fn attr_value(&self) -> Option<&str>;
+    fn attr_substitution_group(&self) -> Option<String>;
 }
 
 impl<'a> XsdNode for roxmltree::Node<'a, '_> {
@@ -173,6 +174,13 @@ impl<'a> XsdNode for roxmltree::Node<'a, '_> {
 
     fn attr_ref(&self) -> Option<&str> {
         self.attribute(attribute::REF)
+    }
+
+    fn attr_substitution_group(&self) -> Option<String> {
+        match self.attribute(attribute::SUBSTITUTION_GROUP) {
+            Some(value) => Some(value.to_owned()),
+            None => None,
+        }
     }
 
     fn attr_use(&self) -> UseType {
