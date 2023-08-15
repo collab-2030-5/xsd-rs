@@ -141,6 +141,7 @@ fn parse_global_element(node: &Node) -> RsEntity {
         return content_entity;
     }
 
+    tracing::warn!("Parsed empty struct {}", name);
     // No content => empty struct
     RsEntity::Struct(Struct {
         name: name.to_string(),

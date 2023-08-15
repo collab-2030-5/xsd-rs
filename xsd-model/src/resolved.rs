@@ -45,6 +45,7 @@ pub struct Struct {
     pub base_type: Option<Rc<Struct>>,
     pub fields: Vec<Field>,
     pub metadata: StructMetadata,
+    // pub variants: Option<Vec<ChoiceVariant>>,
 }
 
 #[derive(Debug, Clone)]

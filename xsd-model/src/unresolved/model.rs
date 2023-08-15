@@ -1,4 +1,5 @@
 use heck::ToUpperCamelCase;
+use std::collections::hash_map::*;
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::Debug;
 use std::path::Path;
@@ -25,6 +26,7 @@ pub struct UnresolvedModel {
     pub(crate) aliases: Map<TypeId, TypeId>,
     pub(crate) simple_types: Map<TypeId, SimpleType>,
     pub(crate) unresolved_types: Vec<UnresolvedType>,
+    pub(crate) substitution_groups: HashMap<TypeId, Vec<TypeId>>,
 }
 
 pub(crate) struct Settings<'a> {
@@ -194,7 +196,23 @@ impl UnresolvedModel {
     fn merge_alias(&mut self, x: &Alias, settings: &Settings) {
         let target = TypeId::parse(&x.original, settings.namespace);
         let alias = TypeId::parse(&x.name, settings.namespace);
-        tracing::info!("{} is an alias for {}", alias, target);
+
+        if let Some(substitution_group) = &x.substitution_group {
+            let substitution_group_type_id = TypeId::parse(substitution_group, settings.namespace);
+            // tracing::info!(
+            //     "Adding {} to substitution group {}",
+            //     target.name,
+            //     substitution_group_type_id
+            // );
+            let list = self
+                .substitution_groups
+                .entry(substitution_group_type_id.to_owned())
+                .or_default();
+
+            // target or alias?
+            list.push(target.clone())
+        }
+
         self.aliases.insert(alias, target);
     }
 
@@ -300,9 +318,35 @@ impl UnresolvedModel {
             count += 1;
         }
 
-        let resolved_model = resolver.model();
-        // Resolve substitution groups
+        for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
+            tracing::info!("**** Searching for SG Alias {}", sg_type_id);
 
+            // Convert from type to name
+            if let Some(result) = resolver.resolve_alias(sg_type_id) {
+                tracing::info!("  **** Found match {}", result);
+
+                if let Some(AnyType::Struct(element)) = resolver.resolved.get_mut(&result) {
+                    // Add ChoiceVariants to this resolved _element
+                    tracing::info!("  **** Found element to update");
+
+                    //element.variants = Default::default();
+
+                    for value in sg_type_id_variants.iter() {
+                        // DO I NEED TO LOOKUP TYPES FOR EACH VARIANT?
+                        if let Some(variant) = resolver.resolved.get_mut(&value) {
+                            // Add ChoiceVariants to this resolved _element
+                            tracing::info!("  **** Found Variant {}", value);
+                        }
+                    }
+                }
+            }
+
+            // if let Some(_element) = resolved_model.simple_types.get(key) {
+            //     tracing::info!("**** Found SG {}", key);
+            // }
+        }
+
+        let resolved_model = resolver.model();
         resolved_model
     }
 
@@ -319,11 +363,11 @@ impl UnresolvedModel {
                             .iter()
                             .map(|x| format!("{}", x.type_id))
                             .collect();
-                        tracing::warn!(
-                            "base struct: {} with inherited types: {:?}",
-                            st.type_id,
-                            names
-                        );
+                        // tracing::warn!(
+                        //     "base struct: {} with inherited types: {:?}",
+                        //     st.type_id,
+                        //     names
+                        // );
                     }
                 }
                 UnresolvedTypeEx::Choice(_) => {}

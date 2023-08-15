@@ -46,9 +46,9 @@ pub(crate) struct Resolver {
     /// resolved version of the configuration
     config: ResolvedConfig,
     /// running map of resolved types
-    resolved: Map<TypeId, AnyType>,
+    pub(crate) resolved: Map<TypeId, AnyType>,
     /// store simple types separate to avoid name collisions
-    simple: Map<TypeId, AnyType>,
+    pub(crate) simple: Map<TypeId, AnyType>,
     /// map of aliases we use to lookup types
     aliases: AliasMap,
 }
@@ -154,6 +154,23 @@ impl Resolver {
             _ => {
                 panic!("unhandled xs type: {}", type_id);
             }
+        }
+    }
+
+    pub fn resolve_alias(&self, id: &TypeId) -> Option<TypeId> {
+        // self.aliases.inner.iter().filter(|item| item.id == id)
+        // for (key, value) in self.aliases.inner.iter() {
+        //     if value == id {
+        //         return Some(key.clone());
+        //     }
+
+        //     tracing::info!("{} did not match {}", id, value);
+        // }
+
+        // None
+        match self.aliases.get(id) {
+            Some(id) => Some(id.to_owned()),
+            None => None,
         }
     }
 }
