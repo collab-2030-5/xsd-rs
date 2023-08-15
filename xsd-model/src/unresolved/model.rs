@@ -5,12 +5,12 @@ use std::fmt::Debug;
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::config::{BaseTypeConfig, Config};
+use crate::config::{BaseTypeConfig, Config, Variant};
 use crate::map::Map;
 use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
 };
-use crate::resolved::{AnyType, StructMetadata};
+use crate::resolved::{AnyType, ChoiceVariant, StructMetadata};
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;
 use crate::unresolved::structs::UnresolvedStruct;
@@ -319,31 +319,31 @@ impl UnresolvedModel {
         }
 
         for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
-            tracing::info!("**** Searching for SG Alias {}", sg_type_id);
+            let mut variants = Vec::<ChoiceVariant>::default();
 
-            // Convert from type to name
-            if let Some(result) = resolver.resolve_alias(sg_type_id) {
-                tracing::info!("  **** Found match {}", result);
+            for value in sg_type_id_variants.iter() {
+                if let Some(variant_any_type) = resolver.resolved.get(&value) {
+                    tracing::info!("  **** Found Variant {} for {}", value, sg_type_id);
 
-                if let Some(AnyType::Struct(element)) = resolver.resolved.get_mut(&result) {
-                    // Add ChoiceVariants to this resolved _element
-                    tracing::info!("  **** Found element to update");
+                    let variant = ChoiceVariant {
+                        comment: None,
+                        element_name: value.name.to_owned(),
+                        type_info: variant_any_type.clone(),
+                    };
 
-                    element.variants = Default::default();
-
-                    for value in sg_type_id_variants.iter() {
-                        // DO I NEED TO LOOKUP TYPES FOR EACH VARIANT?
-                        if let Some(variant) = resolver.resolved.get_mut(&value) {
-                            // Add ChoiceVariants to this resolved _element
-                            tracing::info!("  **** Found Variant {}", value);
-                        }
-                    }
+                    variants.push(variant);
                 }
             }
 
-            // if let Some(_element) = resolved_model.simple_types.get(key) {
-            //     tracing::info!("**** Found SG {}", key);
-            // }
+            // Convert from type to name, find the element and add the variants
+            tracing::info!("**** Searching for SG Alias {}", sg_type_id);
+            if let Some(result) = resolver.resolve_alias(sg_type_id) {
+                tracing::info!("  **** Found match {}", result);
+                if let Some(AnyType::Struct(element)) = resolver.resolved.get_mut(&result) {
+                    tracing::info!("  **** Found element to update");
+                    element.variants = Some(variants);
+                }
+            }
         }
 
         let resolved_model = resolver.model();
