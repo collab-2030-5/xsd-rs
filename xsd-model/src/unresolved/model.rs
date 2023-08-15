@@ -329,7 +329,7 @@ impl UnresolvedModel {
                     // Add ChoiceVariants to this resolved _element
                     tracing::info!("  **** Found element to update");
 
-                    //element.variants = Default::default();
+                    element.variants = Default::default();
 
                     for value in sg_type_id_variants.iter() {
                         // DO I NEED TO LOOKUP TYPES FOR EACH VARIANT?

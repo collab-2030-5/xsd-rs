@@ -22,7 +22,7 @@ pub(crate) mod structs;
 pub(crate) mod traits;
 
 enum GeneratedType {
-    Struct(Rc<Struct>),
+    Struct(Struct),
     Choice(Rc<Choice>),
     Wrapper(WrapperType),
 }

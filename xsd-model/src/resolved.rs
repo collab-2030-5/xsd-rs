@@ -45,7 +45,7 @@ pub struct Struct {
     pub base_type: Option<Rc<Struct>>,
     pub fields: Vec<Field>,
     pub metadata: StructMetadata,
-    // pub variants: Option<Vec<ChoiceVariant>>,
+    pub variants: Option<Vec<ChoiceVariant>>,
 }
 
 #[derive(Debug, Clone)]
@@ -82,7 +82,7 @@ pub struct UnionVariant {
 #[derive(Debug, Clone)]
 pub enum AnyType {
     Simple(SimpleType),
-    Struct(Rc<Struct>),
+    Struct(Struct),
     Choice(Rc<Choice>),
 }
 
@@ -151,7 +151,7 @@ impl Struct {
 }
 
 impl Model {
-    pub fn structs(&self) -> impl Iterator<Item = Rc<Struct>> + '_ {
+    pub fn structs(&self) -> impl Iterator<Item = Struct> + '_ {
         self.types.values().filter_map(|t| match t {
             AnyType::Struct(x) => Some(x.clone()),
             _ => None,
@@ -159,18 +159,18 @@ impl Model {
     }
 
     /// return all of the structs that are 1) base structs AND 2) used as fields in other structs
-    pub fn base_fields(&self) -> Vec<Rc<Struct>> {
+    pub fn base_fields(&self) -> Vec<Struct> {
         self.structs()
             .filter(|x| x.metadata.is_base && x.metadata.use_as_element)
             .collect()
     }
 
     /// All structs that inherit from a base struct, directly or indirectly
-    pub fn sub_structs_of(&self, base: &Rc<Struct>) -> Vec<Rc<Struct>> {
+    pub fn sub_structs_of(&self, base: &Rc<Struct>) -> Vec<Struct> {
         let mut structs = Vec::new();
 
         for other in self.structs() {
-            if other.inherits_from(base) && !structs.iter().any(|x| Rc::ptr_eq(x, &other)) {
+            if other.inherits_from(base) && !structs.iter().any(|x: &Struct| x.id == other.id) {
                 structs.push(other.clone());
             }
         }

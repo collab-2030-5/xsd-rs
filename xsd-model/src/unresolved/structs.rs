@@ -100,7 +100,7 @@ impl UnresolvedStruct {
                         // base class isn't resolved yet, can't resolve this struct
                         return None;
                     }
-                    Some(AnyType::Struct(x)) => Some(x),
+                    Some(AnyType::Struct(x)) => Some(Rc::new(x)),
                     Some(x) => {
                         tracing::warn!("Base type of {} is not a struct: {:?}", self.type_id, x);
                         None
@@ -126,13 +126,14 @@ impl UnresolvedStruct {
             }
         }
 
-        Some(AnyType::Struct(Rc::new(Struct {
+        Some(AnyType::Struct(Struct {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
             base_type,
             fields,
             metadata,
-        })))
+            variants: Default::default(),
+        }))
     }
 }
 
