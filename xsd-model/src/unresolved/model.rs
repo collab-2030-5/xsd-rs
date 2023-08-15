@@ -10,7 +10,7 @@ use crate::map::Map;
 use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
 };
-use crate::resolved::{AnyType, ChoiceVariant, StructMetadata};
+use crate::resolved::{AnyType, Choice, ChoiceVariant, StructMetadata};
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;
 use crate::unresolved::structs::UnresolvedStruct;
@@ -319,7 +319,8 @@ impl UnresolvedModel {
         }
 
         for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
-            let mut variants = Vec::<ChoiceVariant>::default();
+            // Store in a map to auto dedup
+            let mut variants = std::collections::HashMap::<TypeId, ChoiceVariant>::default();
 
             for value in sg_type_id_variants.iter() {
                 if let Some(variant_any_type) = resolver.resolved.get(&value) {
@@ -331,19 +332,35 @@ impl UnresolvedModel {
                         type_info: variant_any_type.clone(),
                     };
 
-                    variants.push(variant);
+                    variants.insert(value.clone(), variant);
                 }
             }
 
-            // Convert from type to name, find the element and add the variants
-            tracing::info!("**** Searching for SG Alias {}", sg_type_id);
-            if let Some(result) = resolver.resolve_alias(sg_type_id) {
-                tracing::info!("  **** Found match {}", result);
-                if let Some(AnyType::Struct(element)) = resolver.resolved.get_mut(&result) {
-                    tracing::info!("  **** Found element to update");
-                    element.variants = Some(variants);
-                }
-            }
+            // Convert to AnyType(Choice) and replace
+            let choice = Choice {
+                comment: None,
+                id: sg_type_id.clone(),
+                variants: variants.into_values().map(|v| v).collect(),
+            };
+
+            // Insert w/sg_type_id, or result below?
+            resolver
+                .resolved
+                .insert(sg_type_id.clone(), AnyType::Choice(choice.into()));
+
+            //Convert from type to name, find the element and add the variants
+            // tracing::info!("**** Searching for SG Alias {}", sg_type_id);
+            // if let Some(result) = resolver.resolve_alias(sg_type_id) {
+            //     resolver
+            //         .resolved
+            //         .replace(result.clone(), AnyType::Choice(choice.into()));
+
+            //     tracing::info!("  **** Found match {}", result);
+            //     // if let Some(AnyType::Struct(element)) = resolver.resolved.get_mut(&result) {
+            //     //     tracing::info!("  **** Found element to update");
+            //     //     element.variants = Some(variants);
+            //     // }
+            // }
         }
 
         let resolved_model = resolver.model();

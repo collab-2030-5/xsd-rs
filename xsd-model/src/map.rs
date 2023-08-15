@@ -46,6 +46,10 @@ where
         self.inner.insert(key, value);
     }
 
+    pub fn replace(&mut self, key: K, value: V) {
+        self.inner.insert(key, value);
+    }
+
     pub fn values(&self) -> Values<'_, K, V> {
         self.inner.values()
     }
