@@ -1,11 +1,13 @@
 mod intervals;
 mod stream_base_type;
+mod stream_payload_base;
 mod stream_payload_base_type;
 
 // re-export all the types in this namespace
 
 pub use intervals::*;
 pub use stream_base_type::*;
+pub use stream_payload_base::*;
 pub use stream_payload_base_type::*;
 
 // helpers specific to this namespace
