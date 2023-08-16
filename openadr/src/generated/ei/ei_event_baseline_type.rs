@@ -35,7 +35,7 @@ impl EiEventBaselineType {
         }
         xsd_util::write_simple_element(writer, "baselineName", self.baseline_name.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase", false, false)?;
+            elem.write(writer)?;
         }
         Ok(())
     }
@@ -145,11 +145,66 @@ impl EiEventBaselineType {
                     "baselineName" => {
                         baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
                     }
-                    "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
-                        reader,
-                        &attributes,
-                        "itemBase",
-                    )?)?,
+                    "VoltageType" => emix_item_base.set(crate::emix::ItemBaseType::VoltageType(
+                        crate::power::VoltageType::read(reader, &attributes, "VoltageType")?,
+                    ))?,
+                    "ThermType" => emix_item_base.set(crate::emix::ItemBaseType::ThermType(
+                        crate::oadr::ThermType::read(reader, &attributes, "ThermType")?,
+                    ))?,
+                    "EnergyItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyItemType(
+                            crate::power::EnergyItemType::read(
+                                reader,
+                                &attributes,
+                                "EnergyItemType",
+                            )?,
+                        ))?
+                    }
+                    "temperatureType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::TemperatureType(
+                            crate::oadr::TemperatureType::read(
+                                reader,
+                                &attributes,
+                                "temperatureType",
+                            )?,
+                        ))?
+                    }
+                    "PowerItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerItemType(
+                            crate::power::PowerItemType::read(
+                                reader,
+                                &attributes,
+                                "PowerItemType",
+                            )?,
+                        ))?
+                    }
+                    "pulseCountType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PulseCountType(
+                            crate::oadr::PulseCountType::read(
+                                reader,
+                                &attributes,
+                                "pulseCountType",
+                            )?,
+                        ))?
+                    }
+                    "CurrentType" => emix_item_base.set(crate::emix::ItemBaseType::CurrentType(
+                        crate::oadr::CurrentType::read(reader, &attributes, "CurrentType")?,
+                    ))?,
+                    "currencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyType(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyType")?,
+                        ))?
+                    }
+                    "FrequencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::FrequencyType(
+                            crate::oadr::FrequencyType::read(reader, &attributes, "FrequencyType")?,
+                        ))?
+                    }
+                    "BaseUnitType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::BaseUnitType(
+                            crate::oadr::BaseUnitType::read(reader, &attributes, "BaseUnitType")?,
+                        ))?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

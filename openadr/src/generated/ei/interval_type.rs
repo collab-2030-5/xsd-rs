@@ -27,7 +27,7 @@ impl IntervalType {
             elem.write_with_name(writer, "xcal:uid", false, false)?;
         }
         for item in &self.strm_stream_payload_base {
-            item.write_with_name(writer, "strm:streamPayloadBase", false, false)?;
+            item.write(writer)?;
         }
         Ok(())
     }
@@ -122,13 +122,24 @@ impl IntervalType {
                         "duration",
                     )?)?,
                     "uid" => xcal_uid.set(crate::xcal::Uid::read(reader, &attributes, "uid")?)?,
-                    "streamPayloadBase" => {
-                        strm_stream_payload_base.push(crate::strm::StreamPayloadBaseType::read(
-                            reader,
-                            &attributes,
-                            "streamPayloadBase",
-                        )?)
-                    }
+                    "oadrReportPayloadType" => strm_stream_payload_base.set(
+                        crate::strm::StreamPayloadBaseType::OadrReportPayloadType(
+                            crate::oadr::OadrReportPayloadType::read(
+                                reader,
+                                &attributes,
+                                "oadrReportPayloadType",
+                            )?,
+                        ),
+                    )?,
+                    "signalPayloadType" => strm_stream_payload_base.set(
+                        crate::strm::StreamPayloadBaseType::SignalPayloadType(
+                            crate::ei::SignalPayloadType::read(
+                                reader,
+                                &attributes,
+                                "signalPayloadType",
+                            )?,
+                        ),
+                    )?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

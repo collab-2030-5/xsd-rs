@@ -27,8 +27,7 @@ impl ReportPayloadType {
         if let Some(elem) = &self.ei_accuracy {
             xsd_util::write_element_using_to_string(writer, "ei:accuracy", elem)?;
         }
-        self.ei_payload_base
-            .write_with_name(writer, "ei:payloadBase", false, false)?;
+        self.ei_payload_base.write(writer)?;
         Ok(())
     }
 
@@ -116,11 +115,24 @@ impl ReportPayloadType {
                     "accuracy" => {
                         ei_accuracy.set(xsd_util::read_type_from_string(reader, "accuracy")?)?
                     }
-                    "payloadBase" => ei_payload_base.set(crate::ei::PayloadBaseType::read(
-                        reader,
-                        &attributes,
-                        "payloadBase",
-                    )?)?,
+                    "oadrPayloadResourceStatusType" => ei_payload_base.set(
+                        crate::ei::PayloadBaseType::OadrPayloadResourceStatusType(
+                            crate::oadr::OadrPayloadResourceStatusType::read(
+                                reader,
+                                &attributes,
+                                "oadrPayloadResourceStatusType",
+                            )?,
+                        ),
+                    )?,
+                    "PayloadFloatType" => {
+                        ei_payload_base.set(crate::ei::PayloadBaseType::PayloadFloatType(
+                            crate::ei::PayloadFloatType::read(
+                                reader,
+                                &attributes,
+                                "PayloadFloatType",
+                            )?,
+                        ))?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

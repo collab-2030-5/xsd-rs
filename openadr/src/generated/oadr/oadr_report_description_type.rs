@@ -32,7 +32,7 @@ impl OadrReportDescriptionType {
         }
         xsd_util::write_simple_element(writer, "ei:reportType", self.ei_report_type.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase", false, false)?;
+            elem.write(writer)?;
         }
         xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
         if let Some(elem) = &self.emix_market_context {
@@ -139,11 +139,66 @@ impl OadrReportDescriptionType {
                     "reportType" => {
                         ei_report_type.set(xsd_util::read_string(reader, "reportType")?)?
                     }
-                    "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
-                        reader,
-                        &attributes,
-                        "itemBase",
-                    )?)?,
+                    "VoltageType" => emix_item_base.set(crate::emix::ItemBaseType::VoltageType(
+                        crate::power::VoltageType::read(reader, &attributes, "VoltageType")?,
+                    ))?,
+                    "ThermType" => emix_item_base.set(crate::emix::ItemBaseType::ThermType(
+                        crate::oadr::ThermType::read(reader, &attributes, "ThermType")?,
+                    ))?,
+                    "EnergyItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyItemType(
+                            crate::power::EnergyItemType::read(
+                                reader,
+                                &attributes,
+                                "EnergyItemType",
+                            )?,
+                        ))?
+                    }
+                    "temperatureType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::TemperatureType(
+                            crate::oadr::TemperatureType::read(
+                                reader,
+                                &attributes,
+                                "temperatureType",
+                            )?,
+                        ))?
+                    }
+                    "PowerItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerItemType(
+                            crate::power::PowerItemType::read(
+                                reader,
+                                &attributes,
+                                "PowerItemType",
+                            )?,
+                        ))?
+                    }
+                    "pulseCountType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PulseCountType(
+                            crate::oadr::PulseCountType::read(
+                                reader,
+                                &attributes,
+                                "pulseCountType",
+                            )?,
+                        ))?
+                    }
+                    "CurrentType" => emix_item_base.set(crate::emix::ItemBaseType::CurrentType(
+                        crate::oadr::CurrentType::read(reader, &attributes, "CurrentType")?,
+                    ))?,
+                    "currencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyType(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyType")?,
+                        ))?
+                    }
+                    "FrequencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::FrequencyType(
+                            crate::oadr::FrequencyType::read(reader, &attributes, "FrequencyType")?,
+                        ))?
+                    }
+                    "BaseUnitType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::BaseUnitType(
+                            crate::oadr::BaseUnitType::read(reader, &attributes, "BaseUnitType")?,
+                        ))?
+                    }
                     "readingType" => {
                         ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
                     }

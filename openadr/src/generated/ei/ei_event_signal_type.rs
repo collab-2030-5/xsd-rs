@@ -33,7 +33,7 @@ impl EiEventSignalType {
         xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
         xsd_util::write_simple_element(writer, "signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
-            elem.write_with_name(writer, "emix:itemBase", false, false)?;
+            elem.write(writer)?;
         }
         if let Some(elem) = &self.ei_current_value {
             elem.write_with_name(writer, "ei:currentValue", false, false)?;
@@ -122,41 +122,96 @@ impl EiEventSignalType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => {
-                    match name.local_name.as_str() {
-                        "intervals" => strm_intervals.set(crate::strm::Intervals::read(
-                            reader,
-                            &attributes,
-                            "intervals",
-                        )?)?,
-                        "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
-                            reader,
-                            &attributes,
-                            "eiTarget",
-                        )?)?,
-                        "signalName" => {
-                            ei_signal_name.set(xsd_util::read_string(reader, "signalName")?)?
-                        }
-                        "signalType" => {
-                            ei_signal_type.set(xsd_util::read_string_enum(reader, "signalType")?)?
-                        }
-                        "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
-                        "itemBase" => emix_item_base.set(crate::emix::ItemBaseType::read(
-                            reader,
-                            &attributes,
-                            "itemBase",
-                        )?)?,
-                        "currentValue" => ei_current_value.set(
-                            crate::ei::CurrentValueType::read(reader, &attributes, "currentValue")?,
-                        )?,
-                        name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
-                            ))
-                        }
+                } => match name.local_name.as_str() {
+                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                        reader,
+                        &attributes,
+                        "intervals",
+                    )?)?,
+                    "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                        reader,
+                        &attributes,
+                        "eiTarget",
+                    )?)?,
+                    "signalName" => {
+                        ei_signal_name.set(xsd_util::read_string(reader, "signalName")?)?
                     }
-                }
+                    "signalType" => {
+                        ei_signal_type.set(xsd_util::read_string_enum(reader, "signalType")?)?
+                    }
+                    "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
+                    "VoltageType" => emix_item_base.set(crate::emix::ItemBaseType::VoltageType(
+                        crate::power::VoltageType::read(reader, &attributes, "VoltageType")?,
+                    ))?,
+                    "ThermType" => emix_item_base.set(crate::emix::ItemBaseType::ThermType(
+                        crate::oadr::ThermType::read(reader, &attributes, "ThermType")?,
+                    ))?,
+                    "EnergyItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyItemType(
+                            crate::power::EnergyItemType::read(
+                                reader,
+                                &attributes,
+                                "EnergyItemType",
+                            )?,
+                        ))?
+                    }
+                    "temperatureType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::TemperatureType(
+                            crate::oadr::TemperatureType::read(
+                                reader,
+                                &attributes,
+                                "temperatureType",
+                            )?,
+                        ))?
+                    }
+                    "PowerItemType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerItemType(
+                            crate::power::PowerItemType::read(
+                                reader,
+                                &attributes,
+                                "PowerItemType",
+                            )?,
+                        ))?
+                    }
+                    "pulseCountType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PulseCountType(
+                            crate::oadr::PulseCountType::read(
+                                reader,
+                                &attributes,
+                                "pulseCountType",
+                            )?,
+                        ))?
+                    }
+                    "CurrentType" => emix_item_base.set(crate::emix::ItemBaseType::CurrentType(
+                        crate::oadr::CurrentType::read(reader, &attributes, "CurrentType")?,
+                    ))?,
+                    "currencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyType(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyType")?,
+                        ))?
+                    }
+                    "FrequencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::FrequencyType(
+                            crate::oadr::FrequencyType::read(reader, &attributes, "FrequencyType")?,
+                        ))?
+                    }
+                    "BaseUnitType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::BaseUnitType(
+                            crate::oadr::BaseUnitType::read(reader, &attributes, "BaseUnitType")?,
+                        ))?
+                    }
+                    "currentValue" => ei_current_value.set(crate::ei::CurrentValueType::read(
+                        reader,
+                        &attributes,
+                        "currentValue",
+                    )?)?,
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
