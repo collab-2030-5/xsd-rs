@@ -67,6 +67,10 @@ impl TypeId {
         tracing::warn!("enum type {}", type_name);
         Self::parse(&format!("{}", type_name), fallback_ns)
     }
+
+    pub fn field_name(&self) -> String {
+        format!("{}:{}", self.ns, self.name)
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -90,6 +90,13 @@ impl AnyType {
     pub fn is_struct(&self) -> bool {
         !std::matches!(self, Self::Simple(_))
     }
+
+    pub fn replace_substitution_group(&mut self, field_name: &str, choice: &Choice) -> bool {
+        match self {
+            AnyType::Struct(element) => element.replace_substitution_group(field_name, choice),
+            _ => false,
+        }
+    }
 }
 
 impl From<SimpleType> for AnyType {
@@ -147,6 +154,26 @@ impl Struct {
                 }
             }
         }
+    }
+
+    pub fn replace_substitution_group(&mut self, field_name: &str, choice: &Choice) -> bool {
+        for field in self.fields.iter_mut() {
+            if field.name == field_name {
+                tracing::info!("    Struct {} contains {}", self.id, field_name);
+                match field.field_type {
+                    FieldType::Element(multiplicity, _) => {
+                        field.field_type = FieldType::Element(
+                            multiplicity,
+                            AnyType::Choice(choice.clone().into()),
+                        );
+
+                        return true;
+                    }
+                    _ => (),
+                };
+            }
+        }
+        false
     }
 }
 

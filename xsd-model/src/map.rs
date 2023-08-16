@@ -36,6 +36,10 @@ where
         self.inner
     }
 
+    pub fn to_inner_mut(&mut self) -> &mut BTreeMap<K, V> {
+        &mut self.inner
+    }
+
     pub fn insert(&mut self, key: K, value: V) {
         if let Some(x) = self.inner.get(&key) {
             panic!(
@@ -48,6 +52,10 @@ where
 
     pub fn replace(&mut self, key: K, value: V) {
         self.inner.insert(key, value);
+    }
+
+    pub fn remove(&mut self, key: &K) {
+        self.inner.remove(key);
     }
 
     pub fn values(&self) -> Values<'_, K, V> {
