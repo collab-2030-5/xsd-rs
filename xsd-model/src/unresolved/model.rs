@@ -320,6 +320,8 @@ impl UnresolvedModel {
             count += 1;
         }
 
+        let mut substitution_groups: HashMap<TypeId, Choice> = Default::default();
+
         for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
             // Store in a map to auto dedup
             let mut variants = std::collections::HashMap::<TypeId, ChoiceVariant>::default();
@@ -349,21 +351,28 @@ impl UnresolvedModel {
                     result.name
                 );
 
+                let mut variants = variants.into_values().collect::<Vec<ChoiceVariant>>();
+                variants.sort_by(|lhs, rhs| lhs.element_name.cmp(&rhs.element_name));
+
                 // Convert to AnyType(Choice) and replace all occurences
                 let choice = Choice {
                     comment: None,
                     id: result.clone(),
-                    variants: variants.into_values().map(|v| v).collect(),
+                    variants,
                 };
 
                 resolver
                     .resolved
                     .replace(result.clone(), AnyType::Choice(choice.clone().into()));
 
-                for (_type_id, any_type) in resolver.resolved.to_inner_mut() {
-                    let _result =
-                        any_type.replace_substitution_group(&sg_type_id.field_name(), &choice);
-                }
+                substitution_groups.insert(sg_type_id.clone(), choice);
+            }
+        }
+
+        for (sg_type_id, choice) in substitution_groups {
+            for (_type_id, any_type) in resolver.resolved.to_inner_mut() {
+                let _result =
+                    any_type.replace_substitution_group(&sg_type_id.field_name(), &choice);
             }
         }
 
