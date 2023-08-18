@@ -5,14 +5,12 @@ use std::fmt::Debug;
 use std::path::Path;
 use std::rc::Rc;
 
-use crate::config::{BaseTypeConfig, Config, Variant};
+use crate::config::{BaseTypeConfig, Config};
 use crate::map::Map;
 use crate::parser::types::{
     Alias, Enum, EnumSource, RsEntity, Struct, StructFieldSource, TupleStruct, TypeModifier,
 };
-use crate::resolved::{
-    AnyType, Choice, ChoiceVariant, ElemMultiplicity, FieldType, StructMetadata,
-};
+use crate::resolved::{AnyType, Choice, ChoiceVariant, StructMetadata};
 use crate::resolver::Resolver;
 use crate::unresolved::choice::UnresolvedChoice;
 use crate::unresolved::structs::UnresolvedStruct;
@@ -323,13 +321,12 @@ impl UnresolvedModel {
         let mut substitution_groups: HashMap<TypeId, Choice> = Default::default();
 
         for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
+            // Find the resolved structs for each variant
             // Store in a map to auto dedup
             let mut variants = std::collections::HashMap::<TypeId, ChoiceVariant>::default();
 
             for value in sg_type_id_variants.iter() {
                 if let Some(variant_any_type) = resolver.resolved.get(&value) {
-                    // tracing::info!("  **** Found Variant {} for {}", value, sg_type_id);
-
                     let variant = ChoiceVariant {
                         comment: None,
                         element_name: value.name.to_owned(),
@@ -340,13 +337,13 @@ impl UnresolvedModel {
                 }
             }
 
+            // Remove the type def for the SubstitutionGroup.  This struct is empty
             resolver.resolved.remove(sg_type_id);
 
-            // Convert from type to name, find the element and add the variants
-            // tracing::info!("**** Searching for SG Alias {}", sg_type_id);
+            // Convert from type to name (from the alias map)
             if let Some(result) = resolver.resolve_alias(sg_type_id) {
                 tracing::info!(
-                    "SG (removed) {}, alias (replaced) {}",
+                    "SbustitutionGroup: Name (removed) {}, type (replaced) {}",
                     sg_type_id.name,
                     result.name
                 );
@@ -361,15 +358,36 @@ impl UnresolvedModel {
                     variants,
                 };
 
-                resolver
-                    .resolved
-                    .replace(result.clone(), AnyType::Choice(choice.clone().into()));
-
                 substitution_groups.insert(sg_type_id.clone(), choice);
             }
         }
 
+        // Search SubstitutionGroups for fields that are a SubstitutionGroup
+        let type_ids: HashSet<TypeId> = substitution_groups
+            .values()
+            .map(|choice| choice.id.clone())
+            .collect();
+
+        let key_ids: HashSet<TypeId> = substitution_groups
+            .keys()
+            .map(|key| key.clone())
+            .collect::<HashSet<TypeId>>();
+
+        // Replace field instances of SubstitutionGroup in each SubstitutionGroup
+        for key_id in &key_ids {
+            let copy = substitution_groups.clone();
+            let group = substitution_groups.get_mut(key_id).unwrap();
+
+            group.replace_substitution_groups(&type_ids, copy);
+        }
+
         for (sg_type_id, choice) in substitution_groups {
+            // Replace the subgroup definitions
+            resolver
+                .resolved
+                .replace(choice.id.clone(), AnyType::Choice(choice.clone().into()));
+
+            // Replace field instances of SubstitutionGroup in each resolved type
             for (_type_id, any_type) in resolver.resolved.to_inner_mut() {
                 let _result =
                     any_type.replace_substitution_group(&sg_type_id.field_name(), &choice);

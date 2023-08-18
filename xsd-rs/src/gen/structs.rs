@@ -347,7 +347,7 @@ fn write_choice_element_handler(
         ElemMultiplicity::Vec => {
             writeln!(
                 w,
-                "{}.set({}::{}({}))?",
+                "{}.push({}::{}({}))",
                 elem.name.rust_field_name(),
                 elem.field_type.rust_struct_type(),
                 choice.name.to_upper_camel_case(),

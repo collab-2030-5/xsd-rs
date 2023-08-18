@@ -1,5 +1,5 @@
 use crate::{SimpleType, TypeId};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use std::rc::Rc;
 
@@ -42,7 +42,7 @@ impl Field {
 pub struct Struct {
     pub comment: Option<String>,
     pub id: TypeId,
-    pub base_type: Option<Rc<Struct>>,
+    pub base_type: Option<Box<Struct>>,
     pub fields: Vec<Field>,
     pub metadata: StructMetadata,
     pub variants: Option<Vec<ChoiceVariant>>,
@@ -97,6 +97,17 @@ impl AnyType {
             _ => false,
         }
     }
+
+    pub fn type_id(&self) -> TypeId {
+        match self {
+            AnyType::Simple(_element) => TypeId {
+                name: "".to_owned(),
+                ns: "".to_owned(),
+            },
+            AnyType::Struct(element) => element.id.clone(),
+            AnyType::Choice(element) => element.id.clone(),
+        }
+    }
 }
 
 impl From<SimpleType> for AnyType {
@@ -123,7 +134,7 @@ impl Struct {
     /// test if this struct inherits from a base struct, directly or indirectly
     pub fn inherits_from(&self, base: &Rc<Struct>) -> bool {
         if let Some(child) = &self.base_type {
-            if Rc::ptr_eq(child, base) {
+            if child.id == self.id {
                 true
             } else {
                 child.inherits_from(base)
@@ -157,23 +168,74 @@ impl Struct {
     }
 
     pub fn replace_substitution_group(&mut self, field_name: &str, choice: &Choice) -> bool {
-        for field in self.fields.iter_mut() {
+        Self::replace_substitution_group_fields(field_name, choice, &mut self.fields);
+
+        if let Some(base) = &mut self.base_type {
+            Self::replace_substitution_group_fields(field_name, choice, &mut base.fields);
+        }
+
+        true
+    }
+
+    pub fn replace_substitution_group_fields(
+        field_name: &str,
+        choice: &Choice,
+        fields: &mut Vec<Field>,
+    ) {
+        for field in fields.iter_mut() {
             if field.name == field_name {
-                tracing::info!("    Struct {} contains {}", self.id, field_name);
                 match field.field_type {
                     FieldType::Element(multiplicity, _) => {
                         field.field_type = FieldType::Element(
                             multiplicity,
                             AnyType::Choice(choice.clone().into()),
                         );
-
-                        return true;
                     }
                     _ => (),
                 };
             }
         }
-        false
+    }
+}
+
+impl Choice {
+    pub fn replace_substitution_groups(
+        &mut self,
+        ids: &HashSet<TypeId>,
+        groups: HashMap<TypeId, Choice>,
+    ) {
+        let substitutions = self
+            .variants
+            .iter()
+            .filter(|variant| ids.contains(&variant.type_info.type_id()))
+            .cloned()
+            .map(|variant| variant.type_info.type_id().clone())
+            .collect::<Vec<TypeId>>();
+
+        if substitutions.is_empty() {
+            return;
+        }
+
+        let mut variants = self
+            .variants
+            .iter()
+            .filter(|variant| !ids.contains(&variant.type_info.type_id()))
+            .cloned()
+            .collect::<Vec<ChoiceVariant>>()
+            .clone();
+
+        let mut groups = groups
+            .iter()
+            .filter(|(_type_id, group)| substitutions.contains(&group.id))
+            .collect::<HashMap<&TypeId, &Choice>>();
+
+        tracing::info!("    Filtered out {} groups", groups.len());
+
+        for group in groups.values() {
+            variants.append(&mut group.variants.clone());
+        }
+
+        self.variants = variants;
     }
 }
 
