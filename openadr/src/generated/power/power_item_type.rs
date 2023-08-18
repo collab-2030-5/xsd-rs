@@ -2,8 +2,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PowerItemType {
-    PowerReactiveType(crate::power::PowerReactiveType),
     PowerApparentType(crate::power::PowerApparentType),
+    PowerReactiveType(crate::power::PowerReactiveType),
     PowerRealType(crate::power::PowerRealType),
 }
 
@@ -16,11 +16,11 @@ impl PowerItemType {
         W: std::io::Write,
     {
         match self {
-            PowerItemType::PowerReactiveType(x) => {
-                x.write_with_name(writer, "PowerReactiveType", false, false)?;
-            }
             PowerItemType::PowerApparentType(x) => {
                 x.write_with_name(writer, "PowerApparentType", false, false)?;
+            }
+            PowerItemType::PowerReactiveType(x) => {
+                x.write_with_name(writer, "PowerReactiveType", false, false)?;
             }
             PowerItemType::PowerRealType(x) => {
                 x.write_with_name(writer, "PowerRealType", false, false)?;

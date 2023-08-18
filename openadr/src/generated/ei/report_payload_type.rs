@@ -115,15 +115,6 @@ impl ReportPayloadType {
                     "accuracy" => {
                         ei_accuracy.set(xsd_util::read_type_from_string(reader, "accuracy")?)?
                     }
-                    "oadrPayloadResourceStatusType" => ei_payload_base.set(
-                        crate::ei::PayloadBaseType::OadrPayloadResourceStatusType(
-                            crate::oadr::OadrPayloadResourceStatusType::read(
-                                reader,
-                                &attributes,
-                                "oadrPayloadResourceStatusType",
-                            )?,
-                        ),
-                    )?,
                     "PayloadFloatType" => {
                         ei_payload_base.set(crate::ei::PayloadBaseType::PayloadFloatType(
                             crate::ei::PayloadFloatType::read(
@@ -133,6 +124,15 @@ impl ReportPayloadType {
                             )?,
                         ))?
                     }
+                    "oadrPayloadResourceStatusType" => ei_payload_base.set(
+                        crate::ei::PayloadBaseType::OadrPayloadResourceStatusType(
+                            crate::oadr::OadrPayloadResourceStatusType::read(
+                                reader,
+                                &attributes,
+                                "oadrPayloadResourceStatusType",
+                            )?,
+                        ),
+                    )?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

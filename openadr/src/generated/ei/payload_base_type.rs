@@ -2,8 +2,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PayloadBaseType {
-    OadrPayloadResourceStatusType(crate::oadr::OadrPayloadResourceStatusType),
     PayloadFloatType(crate::ei::PayloadFloatType),
+    OadrPayloadResourceStatusType(crate::oadr::OadrPayloadResourceStatusType),
 }
 
 impl PayloadBaseType {
@@ -15,11 +15,11 @@ impl PayloadBaseType {
         W: std::io::Write,
     {
         match self {
-            PayloadBaseType::OadrPayloadResourceStatusType(x) => {
-                x.write_with_name(writer, "oadrPayloadResourceStatusType", false, false)?;
-            }
             PayloadBaseType::PayloadFloatType(x) => {
                 x.write_with_name(writer, "PayloadFloatType", false, false)?;
+            }
+            PayloadBaseType::OadrPayloadResourceStatusType(x) => {
+                x.write_with_name(writer, "oadrPayloadResourceStatusType", false, false)?;
             }
         }
         Ok(())

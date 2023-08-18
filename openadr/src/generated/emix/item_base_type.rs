@@ -2,16 +2,20 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ItemBaseType {
-    VoltageType(crate::power::VoltageType),
-    ThermType(crate::oadr::ThermType),
-    EnergyItemType(crate::power::EnergyItemType),
-    TemperatureType(crate::oadr::TemperatureType),
-    PowerItemType(crate::power::PowerItemType),
-    PulseCountType(crate::oadr::PulseCountType),
-    CurrentType(crate::oadr::CurrentType),
-    CurrencyType(crate::oadr::CurrencyType),
-    FrequencyType(crate::oadr::FrequencyType),
     BaseUnitType(crate::oadr::BaseUnitType),
+    CurrentType(crate::oadr::CurrentType),
+    FrequencyType(crate::oadr::FrequencyType),
+    ThermType(crate::oadr::ThermType),
+    VoltageType(crate::power::VoltageType),
+    CurrencyType(crate::oadr::CurrencyType),
+    PulseCountType(crate::oadr::PulseCountType),
+    TemperatureType(crate::oadr::TemperatureType),
+    PowerApparentType(crate::power::PowerApparentType),
+    PowerReactiveType(crate::power::PowerReactiveType),
+    PowerRealType(crate::power::PowerRealType),
+    EnergyApparentType(crate::power::EnergyApparentType),
+    EnergyReactiveType(crate::power::EnergyReactiveType),
+    EnergyRealType(crate::power::EnergyRealType),
 }
 
 impl ItemBaseType {
@@ -23,35 +27,47 @@ impl ItemBaseType {
         W: std::io::Write,
     {
         match self {
-            ItemBaseType::VoltageType(x) => {
-                x.write_with_name(writer, "VoltageType", false, false)?;
-            }
-            ItemBaseType::ThermType(x) => {
-                x.write_with_name(writer, "ThermType", false, false)?;
-            }
-            ItemBaseType::EnergyItemType(x) => {
-                x.write(writer)?;
-            }
-            ItemBaseType::TemperatureType(x) => {
-                x.write_with_name(writer, "temperatureType", false, false)?;
-            }
-            ItemBaseType::PowerItemType(x) => {
-                x.write_with_name(writer, "PowerItemType", false, false)?;
-            }
-            ItemBaseType::PulseCountType(x) => {
-                x.write_with_name(writer, "pulseCountType", false, false)?;
+            ItemBaseType::BaseUnitType(x) => {
+                x.write_with_name(writer, "BaseUnitType", false, false)?;
             }
             ItemBaseType::CurrentType(x) => {
                 x.write_with_name(writer, "CurrentType", false, false)?;
             }
-            ItemBaseType::CurrencyType(x) => {
-                x.write_with_name(writer, "currencyType", false, false)?;
-            }
             ItemBaseType::FrequencyType(x) => {
                 x.write_with_name(writer, "FrequencyType", false, false)?;
             }
-            ItemBaseType::BaseUnitType(x) => {
-                x.write_with_name(writer, "BaseUnitType", false, false)?;
+            ItemBaseType::ThermType(x) => {
+                x.write_with_name(writer, "ThermType", false, false)?;
+            }
+            ItemBaseType::VoltageType(x) => {
+                x.write_with_name(writer, "VoltageType", false, false)?;
+            }
+            ItemBaseType::CurrencyType(x) => {
+                x.write_with_name(writer, "currencyType", false, false)?;
+            }
+            ItemBaseType::PulseCountType(x) => {
+                x.write_with_name(writer, "pulseCountType", false, false)?;
+            }
+            ItemBaseType::TemperatureType(x) => {
+                x.write_with_name(writer, "temperatureType", false, false)?;
+            }
+            ItemBaseType::PowerApparentType(x) => {
+                x.write_with_name(writer, "PowerApparentType", false, false)?;
+            }
+            ItemBaseType::PowerReactiveType(x) => {
+                x.write_with_name(writer, "PowerReactiveType", false, false)?;
+            }
+            ItemBaseType::PowerRealType(x) => {
+                x.write_with_name(writer, "PowerRealType", false, false)?;
+            }
+            ItemBaseType::EnergyApparentType(x) => {
+                x.write_with_name(writer, "EnergyApparentType", false, false)?;
+            }
+            ItemBaseType::EnergyReactiveType(x) => {
+                x.write_with_name(writer, "EnergyReactiveType", false, false)?;
+            }
+            ItemBaseType::EnergyRealType(x) => {
+                x.write_with_name(writer, "EnergyRealType", false, false)?;
             }
         }
         Ok(())

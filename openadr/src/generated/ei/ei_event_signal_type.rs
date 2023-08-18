@@ -140,18 +140,36 @@ impl EiEventSignalType {
                         ei_signal_type.set(xsd_util::read_string_enum(reader, "signalType")?)?
                     }
                     "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
-                    "VoltageType" => emix_item_base.set(crate::emix::ItemBaseType::VoltageType(
-                        crate::power::VoltageType::read(reader, &attributes, "VoltageType")?,
+                    "BaseUnitType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::BaseUnitType(
+                            crate::oadr::BaseUnitType::read(reader, &attributes, "BaseUnitType")?,
+                        ))?
+                    }
+                    "CurrentType" => emix_item_base.set(crate::emix::ItemBaseType::CurrentType(
+                        crate::oadr::CurrentType::read(reader, &attributes, "CurrentType")?,
                     ))?,
+                    "FrequencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::FrequencyType(
+                            crate::oadr::FrequencyType::read(reader, &attributes, "FrequencyType")?,
+                        ))?
+                    }
                     "ThermType" => emix_item_base.set(crate::emix::ItemBaseType::ThermType(
                         crate::oadr::ThermType::read(reader, &attributes, "ThermType")?,
                     ))?,
-                    "EnergyItemType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::EnergyItemType(
-                            crate::power::EnergyItemType::read(
+                    "VoltageType" => emix_item_base.set(crate::emix::ItemBaseType::VoltageType(
+                        crate::power::VoltageType::read(reader, &attributes, "VoltageType")?,
+                    ))?,
+                    "currencyType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyType(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyType")?,
+                        ))?
+                    }
+                    "pulseCountType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PulseCountType(
+                            crate::oadr::PulseCountType::read(
                                 reader,
                                 &attributes,
-                                "EnergyItemType",
+                                "pulseCountType",
                             )?,
                         ))?
                     }
@@ -164,40 +182,58 @@ impl EiEventSignalType {
                             )?,
                         ))?
                     }
-                    "PowerItemType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PowerItemType(
-                            crate::power::PowerItemType::read(
+                    "PowerApparentType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerApparentType(
+                            crate::power::PowerApparentType::read(
                                 reader,
                                 &attributes,
-                                "PowerItemType",
+                                "PowerApparentType",
                             )?,
                         ))?
                     }
-                    "pulseCountType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PulseCountType(
-                            crate::oadr::PulseCountType::read(
+                    "PowerReactiveType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerReactiveType(
+                            crate::power::PowerReactiveType::read(
                                 reader,
                                 &attributes,
-                                "pulseCountType",
+                                "PowerReactiveType",
                             )?,
                         ))?
                     }
-                    "CurrentType" => emix_item_base.set(crate::emix::ItemBaseType::CurrentType(
-                        crate::oadr::CurrentType::read(reader, &attributes, "CurrentType")?,
-                    ))?,
-                    "currencyType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyType(
-                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyType")?,
+                    "PowerRealType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerRealType(
+                            crate::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "PowerRealType",
+                            )?,
                         ))?
                     }
-                    "FrequencyType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::FrequencyType(
-                            crate::oadr::FrequencyType::read(reader, &attributes, "FrequencyType")?,
+                    "EnergyApparentType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyApparentType(
+                            crate::power::EnergyApparentType::read(
+                                reader,
+                                &attributes,
+                                "EnergyApparentType",
+                            )?,
                         ))?
                     }
-                    "BaseUnitType" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::BaseUnitType(
-                            crate::oadr::BaseUnitType::read(reader, &attributes, "BaseUnitType")?,
+                    "EnergyReactiveType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyReactiveType(
+                            crate::power::EnergyReactiveType::read(
+                                reader,
+                                &attributes,
+                                "EnergyReactiveType",
+                            )?,
+                        ))?
+                    }
+                    "EnergyRealType" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyRealType(
+                            crate::power::EnergyRealType::read(
+                                reader,
+                                &attributes,
+                                "EnergyRealType",
+                            )?,
                         ))?
                     }
                     "currentValue" => ei_current_value.set(crate::ei::CurrentValueType::read(
