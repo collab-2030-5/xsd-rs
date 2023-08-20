@@ -979,7 +979,7 @@
 		</xs:sequence>
 	</xs:complexType>
 	<!-- registrationID-->
-	<xs:element name="registrationID" substitutionGroup="ei:refID">
+	<xs:element name="registrationID" type="xs:string">
 		<xs:annotation>
 			<xs:documentation>Identifier for Registration transaction. Not included in response to query registration unless already registered</xs:documentation>
 		</xs:annotation>
