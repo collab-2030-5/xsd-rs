@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrCreatedPartyRegistrationType {
     pub ei_ei_response: crate::ei::EiResponseType,
-    pub ei_registration_id: Option<crate::ei::RegistrationId>,
+    pub ei_registration_id: Option<String>,
     /// venID not included in query unless already registered
     pub ei_ven_id: Option<String>,
     pub ei_vtn_id: String,
@@ -28,7 +28,7 @@ impl OadrCreatedPartyRegistrationType {
         self.ei_ei_response
             .write_with_name(writer, "ei:eiResponse", false, false)?;
         if let Some(elem) = &self.ei_registration_id {
-            elem.write_with_name(writer, "ei:registrationID", false, false)?;
+            xsd_util::write_simple_element(writer, "ei:registrationID", elem.as_str())?;
         }
         if let Some(elem) = &self.ei_ven_id {
             xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
@@ -112,8 +112,7 @@ impl OadrCreatedPartyRegistrationType {
     {
         // one variable for each attribute and element
         let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
-        let mut ei_registration_id: xsd_util::SetOnce<crate::ei::RegistrationId> =
-            Default::default();
+        let mut ei_registration_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_vtn_id: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_profiles: xsd_util::SetOnce<crate::oadr::OadrProfiles> =
@@ -148,50 +147,48 @@ impl OadrCreatedPartyRegistrationType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => {
-                    match name.local_name.as_str() {
-                        "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                } => match name.local_name.as_str() {
+                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                        reader,
+                        &attributes,
+                        "eiResponse",
+                    )?)?,
+                    "registrationID" => {
+                        ei_registration_id.set(xsd_util::read_string(reader, "registrationID")?)?
+                    }
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
+                    "oadrProfiles" => oadr_oadr_profiles.set(crate::oadr::OadrProfiles::read(
+                        reader,
+                        &attributes,
+                        "oadrProfiles",
+                    )?)?,
+                    "oadrRequestedOadrPollFreq" => oadr_oadr_requested_oadr_poll_freq.set(
+                        crate::xcal::DurationPropType::read(
                             reader,
                             &attributes,
-                            "eiResponse",
-                        )?)?,
-                        "registrationID" => ei_registration_id.set(
-                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
+                            "oadrRequestedOadrPollFreq",
                         )?,
-                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
-                        "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
-                        "oadrProfiles" => oadr_oadr_profiles.set(
-                            crate::oadr::OadrProfiles::read(reader, &attributes, "oadrProfiles")?,
+                    )?,
+                    "oadrServiceSpecificInfo" => oadr_oadr_service_specific_info.set(
+                        crate::oadr::OadrServiceSpecificInfo::read(
+                            reader,
+                            &attributes,
+                            "oadrServiceSpecificInfo",
                         )?,
-                        "oadrRequestedOadrPollFreq" => oadr_oadr_requested_oadr_poll_freq.set(
-                            crate::xcal::DurationPropType::read(
-                                reader,
-                                &attributes,
-                                "oadrRequestedOadrPollFreq",
-                            )?,
-                        )?,
-                        "oadrServiceSpecificInfo" => oadr_oadr_service_specific_info.set(
-                            crate::oadr::OadrServiceSpecificInfo::read(
-                                reader,
-                                &attributes,
-                                "oadrServiceSpecificInfo",
-                            )?,
-                        )?,
-                        "oadrExtensions" => {
-                            oadr_extensions.set(crate::oadr::OadrExtensions::read(
-                                reader,
-                                &attributes,
-                                "oadrExtensions",
-                            )?)?
-                        }
-                        name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
-                            ))
-                        }
+                    )?,
+                    "oadrExtensions" => oadr_extensions.set(crate::oadr::OadrExtensions::read(
+                        reader,
+                        &attributes,
+                        "oadrExtensions",
+                    )?)?,
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
                     }
-                }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)

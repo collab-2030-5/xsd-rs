@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrCancelPartyRegistrationType {
     pub pyld_request_id: String,
-    pub ei_registration_id: crate::ei::RegistrationId,
+    pub ei_registration_id: String,
     pub ei_ven_id: Option<String>,
     pub ei_schema_version: Option<String>,
 }
@@ -18,8 +18,11 @@ impl OadrCancelPartyRegistrationType {
         W: std::io::Write,
     {
         xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
-        self.ei_registration_id
-            .write_with_name(writer, "ei:registrationID", false, false)?;
+        xsd_util::write_simple_element(
+            writer,
+            "ei:registrationID",
+            self.ei_registration_id.as_str(),
+        )?;
         if let Some(elem) = &self.ei_ven_id {
             xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
         }
@@ -90,8 +93,7 @@ impl OadrCancelPartyRegistrationType {
     {
         // one variable for each attribute and element
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_registration_id: xsd_util::SetOnce<crate::ei::RegistrationId> =
-            Default::default();
+        let mut ei_registration_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -113,16 +115,13 @@ impl OadrCancelPartyRegistrationType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement {
-                    name, attributes, ..
-                } => {
+                xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "requestID" => {
                             pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                         }
-                        "registrationID" => ei_registration_id.set(
-                            crate::ei::RegistrationId::read(reader, &attributes, "registrationID")?,
-                        )?,
+                        "registrationID" => ei_registration_id
+                            .set(xsd_util::read_string(reader, "registrationID")?)?,
                         "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                         name => {
                             return Err(xsd_api::ReadError::UnexpectedToken(
