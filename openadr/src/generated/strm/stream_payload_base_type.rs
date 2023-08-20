@@ -2,8 +2,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum StreamPayloadBaseType {
-    OadrReportPayloadType(crate::oadr::OadrReportPayloadType),
-    SignalPayloadType(crate::ei::SignalPayloadType),
+    OadrReportPayload(crate::oadr::OadrReportPayloadType),
+    SignalPayload(crate::ei::SignalPayloadType),
 }
 
 impl StreamPayloadBaseType {
@@ -15,11 +15,11 @@ impl StreamPayloadBaseType {
         W: std::io::Write,
     {
         match self {
-            StreamPayloadBaseType::OadrReportPayloadType(x) => {
-                x.write_with_name(writer, "oadrReportPayloadType", false, false)?;
+            StreamPayloadBaseType::OadrReportPayload(x) => {
+                x.write_with_name(writer, "oadrReportPayload", false, false)?;
             }
-            StreamPayloadBaseType::SignalPayloadType(x) => {
-                x.write_with_name(writer, "signalPayloadType", false, false)?;
+            StreamPayloadBaseType::SignalPayload(x) => {
+                x.write_with_name(writer, "signalPayload", false, false)?;
             }
         }
         Ok(())

@@ -2,9 +2,9 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EnergyItemType {
-    EnergyApparentType(crate::power::EnergyApparentType),
-    EnergyReactiveType(crate::power::EnergyReactiveType),
-    EnergyRealType(crate::power::EnergyRealType),
+    EnergyApparent(crate::power::EnergyApparentType),
+    EnergyReactive(crate::power::EnergyReactiveType),
+    EnergyReal(crate::power::EnergyRealType),
 }
 
 impl EnergyItemType {
@@ -16,14 +16,14 @@ impl EnergyItemType {
         W: std::io::Write,
     {
         match self {
-            EnergyItemType::EnergyApparentType(x) => {
-                x.write_with_name(writer, "EnergyApparentType", false, false)?;
+            EnergyItemType::EnergyApparent(x) => {
+                x.write_with_name(writer, "energyApparent", false, false)?;
             }
-            EnergyItemType::EnergyReactiveType(x) => {
-                x.write_with_name(writer, "EnergyReactiveType", false, false)?;
+            EnergyItemType::EnergyReactive(x) => {
+                x.write_with_name(writer, "energyReactive", false, false)?;
             }
-            EnergyItemType::EnergyRealType(x) => {
-                x.write_with_name(writer, "EnergyRealType", false, false)?;
+            EnergyItemType::EnergyReal(x) => {
+                x.write_with_name(writer, "energyReal", false, false)?;
             }
         }
         Ok(())
