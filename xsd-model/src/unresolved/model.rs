@@ -213,6 +213,7 @@ impl UnresolvedModel {
             list.push(target.clone())
         }
 
+        tracing::info!("Creating alias {} target {}", alias, target);
         self.aliases.insert(alias, target);
     }
 
@@ -327,13 +328,24 @@ impl UnresolvedModel {
 
             for value in sg_type_id_variants.iter() {
                 if let Some(variant_any_type) = resolver.resolved.get(&value) {
-                    let variant = ChoiceVariant {
-                        comment: None,
-                        element_name: value.name.to_owned(),
-                        type_info: variant_any_type.clone(),
-                    };
+                    // Lookup variant in alias map - we have the value but need to find the key
+                    // The key in the alias map will be the element_name (which is the XML tag)
+                    if let Some(alias) = resolver.reverse_alias(&value) {
+                        tracing::info!("Found alias {} for {}", alias, value);
+                        let variant = ChoiceVariant {
+                            comment: None,
+                            element_name: alias.name.to_owned(),
+                            type_info: variant_any_type.clone(),
+                        };
 
-                    variants.insert(value.clone(), variant);
+                        variants.insert(value.clone(), variant);
+                    } else {
+                        tracing::error!(
+                            "Did not find alias for variatn {} in substitutionGroup {}.  Variant skipped",
+                            value,
+                            sg_type_id
+                        );
+                    }
                 }
             }
 
