@@ -16,10 +16,10 @@ impl StreamPayloadBaseType {
     {
         match self {
             StreamPayloadBaseType::OadrReportPayload(x) => {
-                x.write_with_name(writer, "oadrReportPayload", false, false)?;
+                x.write_with_name(writer, "oadr:oadrReportPayload", false, false)?;
             }
             StreamPayloadBaseType::SignalPayload(x) => {
-                x.write_with_name(writer, "signalPayload", false, false)?;
+                x.write_with_name(writer, "ei:signalPayload", false, false)?;
             }
         }
         Ok(())

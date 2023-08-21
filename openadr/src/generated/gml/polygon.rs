@@ -16,7 +16,7 @@ impl Polygon {
         W: std::io::Write,
     {
         self.exterior
-            .write_with_name(writer, "exterior", false, false)?;
+            .write_with_name(writer, "gml:exterior", false, false)?;
         Ok(())
     }
 
@@ -83,7 +83,7 @@ impl Polygon {
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "gml:id" => gml_id.set(attr.value.clone())?,
+                "id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }

@@ -18,10 +18,10 @@ impl OadrPayloadResourceStatusType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_element_using_to_string(writer, "oadrOnline", self.oadr_online)?;
+        xsd_util::write_element_using_to_string(writer, "oadr:oadrOnline", self.oadr_online)?;
         xsd_util::write_element_using_to_string(
             writer,
-            "oadrManualOverride",
+            "oadr:oadrManualOverride",
             self.oadr_manual_override,
         )?;
         if let Some(elem) = &self.oadr_oadr_load_control_state {

@@ -17,7 +17,7 @@ impl OadrExtension {
     {
         xsd_util::write_simple_element(
             writer,
-            "oadrExtensionName",
+            "oadr:oadrExtensionName",
             self.oadr_extension_name.as_str(),
         )?;
         for item in &self.oadr_oadr_info {

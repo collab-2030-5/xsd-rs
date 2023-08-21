@@ -18,14 +18,14 @@ impl OadrLoadControlStateTypeType {
         W: std::io::Write,
     {
         if let Some(elem) = &self.oadr_min {
-            xsd_util::write_element_using_to_string(writer, "oadrMin", elem)?;
+            xsd_util::write_element_using_to_string(writer, "oadr:oadrMin", elem)?;
         }
         if let Some(elem) = &self.oadr_max {
-            xsd_util::write_element_using_to_string(writer, "oadrMax", elem)?;
+            xsd_util::write_element_using_to_string(writer, "oadr:oadrMax", elem)?;
         }
-        xsd_util::write_element_using_to_string(writer, "oadrCurrent", self.oadr_current)?;
+        xsd_util::write_element_using_to_string(writer, "oadr:oadrCurrent", self.oadr_current)?;
         if let Some(elem) = &self.oadr_normal {
-            xsd_util::write_element_using_to_string(writer, "oadrNormal", elem)?;
+            xsd_util::write_element_using_to_string(writer, "oadr:oadrNormal", elem)?;
         }
         Ok(())
     }

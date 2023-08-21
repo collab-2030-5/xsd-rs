@@ -16,10 +16,10 @@ impl PayloadBaseType {
     {
         match self {
             PayloadBaseType::OadrPayloadResourceStatus(x) => {
-                x.write_with_name(writer, "oadrPayloadResourceStatus", false, false)?;
+                x.write_with_name(writer, "oadr:oadrPayloadResourceStatus", false, false)?;
             }
             PayloadBaseType::PayloadFloat(x) => {
-                x.write_with_name(writer, "payloadFloat", false, false)?;
+                x.write_with_name(writer, "ei:payloadFloat", false, false)?;
             }
         }
         Ok(())

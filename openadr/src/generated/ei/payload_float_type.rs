@@ -14,7 +14,7 @@ impl PayloadFloatType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_element_using_to_string(writer, "value", self.value)?;
+        xsd_util::write_element_using_to_string(writer, "ei:value", self.value)?;
         Ok(())
     }
 

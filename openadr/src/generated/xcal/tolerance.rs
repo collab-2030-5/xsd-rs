@@ -15,7 +15,7 @@ impl Tolerance {
         W: std::io::Write,
     {
         self.tolerate
-            .write_with_name(writer, "tolerate", false, false)?;
+            .write_with_name(writer, "xcal:tolerate", false, false)?;
         Ok(())
     }
 

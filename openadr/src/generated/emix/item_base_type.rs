@@ -28,46 +28,46 @@ impl ItemBaseType {
     {
         match self {
             ItemBaseType::Therm(x) => {
-                x.write_with_name(writer, "Therm", false, false)?;
+                x.write_with_name(writer, "oadr:Therm", false, false)?;
             }
             ItemBaseType::Currency(x) => {
-                x.write_with_name(writer, "currency", false, false)?;
+                x.write_with_name(writer, "oadr:currency", false, false)?;
             }
             ItemBaseType::Current(x) => {
-                x.write_with_name(writer, "current", false, false)?;
+                x.write_with_name(writer, "oadr:current", false, false)?;
             }
             ItemBaseType::CustomUnit(x) => {
-                x.write_with_name(writer, "customUnit", false, false)?;
+                x.write_with_name(writer, "oadr:customUnit", false, false)?;
             }
             ItemBaseType::Frequency(x) => {
-                x.write_with_name(writer, "frequency", false, false)?;
+                x.write_with_name(writer, "oadr:frequency", false, false)?;
             }
             ItemBaseType::PulseCount(x) => {
-                x.write_with_name(writer, "pulseCount", false, false)?;
+                x.write_with_name(writer, "oadr:pulseCount", false, false)?;
             }
             ItemBaseType::Temperature(x) => {
-                x.write_with_name(writer, "temperature", false, false)?;
+                x.write_with_name(writer, "oadr:temperature", false, false)?;
             }
             ItemBaseType::Voltage(x) => {
-                x.write_with_name(writer, "voltage", false, false)?;
+                x.write_with_name(writer, "power:voltage", false, false)?;
             }
             ItemBaseType::PowerApparent(x) => {
-                x.write_with_name(writer, "powerApparent", false, false)?;
+                x.write_with_name(writer, "power:powerApparent", false, false)?;
             }
             ItemBaseType::PowerReactive(x) => {
-                x.write_with_name(writer, "powerReactive", false, false)?;
+                x.write_with_name(writer, "power:powerReactive", false, false)?;
             }
             ItemBaseType::PowerReal(x) => {
-                x.write_with_name(writer, "powerReal", false, false)?;
+                x.write_with_name(writer, "power:powerReal", false, false)?;
             }
             ItemBaseType::EnergyApparent(x) => {
-                x.write_with_name(writer, "energyApparent", false, false)?;
+                x.write_with_name(writer, "power:energyApparent", false, false)?;
             }
             ItemBaseType::EnergyReactive(x) => {
-                x.write_with_name(writer, "energyReactive", false, false)?;
+                x.write_with_name(writer, "power:energyReactive", false, false)?;
             }
             ItemBaseType::EnergyReal(x) => {
-                x.write_with_name(writer, "energyReal", false, false)?;
+                x.write_with_name(writer, "power:energyReal", false, false)?;
             }
         }
         Ok(())

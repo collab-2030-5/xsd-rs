@@ -31,7 +31,7 @@ impl EiEventSignalType {
         }
         xsd_util::write_simple_element(writer, "ei:signalName", self.ei_signal_name.as_str())?;
         xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
-        xsd_util::write_simple_element(writer, "signalID", self.signal_id.as_str())?;
+        xsd_util::write_simple_element(writer, "ei:signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }

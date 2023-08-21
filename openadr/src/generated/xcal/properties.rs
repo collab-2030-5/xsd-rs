@@ -25,7 +25,7 @@ impl Properties {
         self.xcal_duration
             .write_with_name(writer, "xcal:duration", false, false)?;
         if let Some(elem) = &self.tolerance {
-            elem.write_with_name(writer, "tolerance", false, false)?;
+            elem.write_with_name(writer, "xcal:tolerance", false, false)?;
         }
         if let Some(elem) = &self.ei_x_ei_notification {
             elem.write_with_name(writer, "ei:x-eiNotification", false, false)?;

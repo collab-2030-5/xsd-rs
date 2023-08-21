@@ -19,9 +19,17 @@ impl OadrSamplingRateType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "oadrMinPeriod", self.oadr_min_period.as_str())?;
-        xsd_util::write_simple_element(writer, "oadrMaxPeriod", self.oadr_max_period.as_str())?;
-        xsd_util::write_element_using_to_string(writer, "oadrOnChange", self.oadr_on_change)?;
+        xsd_util::write_simple_element(
+            writer,
+            "oadr:oadrMinPeriod",
+            self.oadr_min_period.as_str(),
+        )?;
+        xsd_util::write_simple_element(
+            writer,
+            "oadr:oadrMaxPeriod",
+            self.oadr_max_period.as_str(),
+        )?;
+        xsd_util::write_element_using_to_string(writer, "oadr:oadrOnChange", self.oadr_on_change)?;
         Ok(())
     }
 

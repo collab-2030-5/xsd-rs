@@ -17,13 +17,13 @@ impl PowerItemType {
     {
         match self {
             PowerItemType::PowerApparent(x) => {
-                x.write_with_name(writer, "powerApparent", false, false)?;
+                x.write_with_name(writer, "power:powerApparent", false, false)?;
             }
             PowerItemType::PowerReactive(x) => {
-                x.write_with_name(writer, "powerReactive", false, false)?;
+                x.write_with_name(writer, "power:powerReactive", false, false)?;
             }
             PowerItemType::PowerReal(x) => {
-                x.write_with_name(writer, "powerReal", false, false)?;
+                x.write_with_name(writer, "power:powerReal", false, false)?;
             }
         }
         Ok(())

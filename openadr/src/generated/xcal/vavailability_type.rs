@@ -15,7 +15,7 @@ impl VavailabilityType {
         W: std::io::Write,
     {
         self.components
-            .write_with_name(writer, "components", false, false)?;
+            .write_with_name(writer, "xcal:components", false, false)?;
         Ok(())
     }
 

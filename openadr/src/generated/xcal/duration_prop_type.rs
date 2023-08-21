@@ -14,7 +14,7 @@ impl DurationPropType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "duration", self.duration.as_str())?;
+        xsd_util::write_simple_element(writer, "xcal:duration", self.duration.as_str())?;
         Ok(())
     }
 

@@ -15,7 +15,7 @@ impl OadrTransports {
         W: std::io::Write,
     {
         for item in &self.oadr_transport {
-            item.write_with_name(writer, "oadrTransport", false, false)?;
+            item.write_with_name(writer, "oadr:oadrTransport", false, false)?;
         }
         Ok(())
     }

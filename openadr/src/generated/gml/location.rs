@@ -15,7 +15,7 @@ impl Location {
         W: std::io::Write,
     {
         self.polygon
-            .write_with_name(writer, "Polygon", false, false)?;
+            .write_with_name(writer, "gml:Polygon", false, false)?;
         Ok(())
     }
 

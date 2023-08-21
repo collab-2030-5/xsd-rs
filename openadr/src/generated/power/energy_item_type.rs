@@ -17,13 +17,13 @@ impl EnergyItemType {
     {
         match self {
             EnergyItemType::EnergyApparent(x) => {
-                x.write_with_name(writer, "energyApparent", false, false)?;
+                x.write_with_name(writer, "power:energyApparent", false, false)?;
             }
             EnergyItemType::EnergyReactive(x) => {
-                x.write_with_name(writer, "energyReactive", false, false)?;
+                x.write_with_name(writer, "power:energyReactive", false, false)?;
             }
             EnergyItemType::EnergyReal(x) => {
-                x.write_with_name(writer, "energyReal", false, false)?;
+                x.write_with_name(writer, "power:energyReal", false, false)?;
             }
         }
         Ok(())

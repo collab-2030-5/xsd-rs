@@ -15,7 +15,7 @@ impl Tolerate {
         W: std::io::Write,
     {
         if let Some(elem) = &self.startafter {
-            xsd_util::write_simple_element(writer, "startafter", elem.as_str())?;
+            xsd_util::write_simple_element(writer, "xcal:startafter", elem.as_str())?;
         }
         Ok(())
     }

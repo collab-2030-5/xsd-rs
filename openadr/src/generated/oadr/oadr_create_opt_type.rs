@@ -128,7 +128,7 @@ impl OadrCreateOptType {
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "ei:schemaVersion" => ei_schema_version.set(attr.value.clone())?,
+                "schemaVersion" => ei_schema_version.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }

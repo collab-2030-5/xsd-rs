@@ -15,7 +15,7 @@ impl Exterior {
         W: std::io::Write,
     {
         self.linear_ring
-            .write_with_name(writer, "LinearRing", false, false)?;
+            .write_with_name(writer, "gml:LinearRing", false, false)?;
         Ok(())
     }
 

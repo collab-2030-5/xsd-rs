@@ -17,8 +17,8 @@ impl CurrencyType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_string_enumeration(writer, "itemDescription", self.item_description)?;
-        xsd_util::write_string_enumeration(writer, "itemUnits", self.item_units)?;
+        xsd_util::write_string_enumeration(writer, "oadr:itemDescription", self.item_description)?;
+        xsd_util::write_string_enumeration(writer, "oadr:itemUnits", self.item_units)?;
         xsd_util::write_string_enumeration(writer, "scale:siScaleCode", self.scale_si_scale_code)?;
         Ok(())
     }

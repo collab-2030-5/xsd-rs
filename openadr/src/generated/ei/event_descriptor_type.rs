@@ -36,16 +36,16 @@ impl EventDescriptorType {
             self.ei_modification_number,
         )?;
         if let Some(elem) = &self.modification_date_time {
-            xsd_util::write_simple_element(writer, "modificationDateTime", elem.as_str())?;
+            xsd_util::write_simple_element(writer, "ei:modificationDateTime", elem.as_str())?;
         }
         if let Some(elem) = &self.modification_reason {
-            xsd_util::write_simple_element(writer, "modificationReason", elem.as_str())?;
+            xsd_util::write_simple_element(writer, "ei:modificationReason", elem.as_str())?;
         }
         if let Some(elem) = &self.priority {
-            xsd_util::write_element_using_to_string(writer, "priority", elem)?;
+            xsd_util::write_element_using_to_string(writer, "ei:priority", elem)?;
         }
         self.ei_market_context
-            .write_with_name(writer, "eiMarketContext", false, false)?;
+            .write_with_name(writer, "ei:eiMarketContext", false, false)?;
         xsd_util::write_simple_element(
             writer,
             "ei:createdDateTime",
@@ -53,10 +53,10 @@ impl EventDescriptorType {
         )?;
         xsd_util::write_string_enumeration(writer, "ei:eventStatus", self.ei_event_status)?;
         if let Some(elem) = &self.test_event {
-            xsd_util::write_simple_element(writer, "testEvent", elem.as_str())?;
+            xsd_util::write_simple_element(writer, "ei:testEvent", elem.as_str())?;
         }
         if let Some(elem) = &self.vtn_comment {
-            xsd_util::write_simple_element(writer, "vtnComment", elem.as_str())?;
+            xsd_util::write_simple_element(writer, "ei:vtnComment", elem.as_str())?;
         }
         Ok(())
     }

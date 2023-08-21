@@ -16,7 +16,7 @@ impl FeatureCollection {
         W: std::io::Write,
     {
         self.location
-            .write_with_name(writer, "location", false, false)?;
+            .write_with_name(writer, "gml:location", false, false)?;
         Ok(())
     }
 
@@ -83,7 +83,7 @@ impl FeatureCollection {
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "gml:id" => gml_id.set(attr.value.clone())?,
+                "id" => gml_id.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }

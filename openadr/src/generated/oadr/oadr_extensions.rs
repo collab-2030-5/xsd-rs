@@ -15,7 +15,7 @@ impl OadrExtensions {
         W: std::io::Write,
     {
         for item in &self.oadr_extension {
-            item.write_with_name(writer, "oadrExtension", false, false)?;
+            item.write_with_name(writer, "oadr:oadrExtension", false, false)?;
         }
         Ok(())
     }

@@ -16,8 +16,16 @@ impl TransportInterfaceType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "pointOfReceipt", self.point_of_receipt.as_str())?;
-        xsd_util::write_simple_element(writer, "pointOfDelivery", self.point_of_delivery.as_str())?;
+        xsd_util::write_simple_element(
+            writer,
+            "power:pointOfReceipt",
+            self.point_of_receipt.as_str(),
+        )?;
+        xsd_util::write_simple_element(
+            writer,
+            "power:pointOfDelivery",
+            self.point_of_delivery.as_str(),
+        )?;
         Ok(())
     }
 

@@ -29,11 +29,11 @@ impl EiEventBaselineType {
             .write_with_name(writer, "xcal:duration", false, false)?;
         self.strm_intervals
             .write_with_name(writer, "strm:intervals", false, false)?;
-        xsd_util::write_simple_element(writer, "baselineID", self.baseline_id.as_str())?;
+        xsd_util::write_simple_element(writer, "ei:baselineID", self.baseline_id.as_str())?;
         for item in &self.ei_resource_id {
             xsd_util::write_simple_element(writer, "ei:resourceID", item.as_str())?;
         }
-        xsd_util::write_simple_element(writer, "baselineName", self.baseline_name.as_str())?;
+        xsd_util::write_simple_element(writer, "ei:baselineName", self.baseline_name.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }

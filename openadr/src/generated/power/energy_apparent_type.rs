@@ -16,8 +16,12 @@ impl EnergyApparentType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "itemDescription", self.item_description.as_str())?;
-        xsd_util::write_simple_element(writer, "itemUnits", self.item_units.as_str())?;
+        xsd_util::write_simple_element(
+            writer,
+            "power:itemDescription",
+            self.item_description.as_str(),
+        )?;
+        xsd_util::write_simple_element(writer, "power:itemUnits", self.item_units.as_str())?;
         xsd_util::write_string_enumeration(writer, "scale:siScaleCode", self.scale_si_scale_code)?;
         Ok(())
     }

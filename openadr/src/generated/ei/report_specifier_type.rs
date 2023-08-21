@@ -30,9 +30,9 @@ impl ReportSpecifierType {
         self.xcal_granularity
             .write_with_name(writer, "xcal:granularity", false, false)?;
         self.report_back_duration
-            .write_with_name(writer, "reportBackDuration", false, false)?;
+            .write_with_name(writer, "ei:reportBackDuration", false, false)?;
         if let Some(elem) = &self.report_interval {
-            elem.write_with_name(writer, "reportInterval", false, false)?;
+            elem.write_with_name(writer, "ei:reportInterval", false, false)?;
         }
         for item in &self.ei_specifier_payload {
             item.write_with_name(writer, "ei:specifierPayload", false, false)?;

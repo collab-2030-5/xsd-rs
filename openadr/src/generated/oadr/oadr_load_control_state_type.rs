@@ -18,16 +18,16 @@ impl OadrLoadControlStateType {
         W: std::io::Write,
     {
         if let Some(elem) = &self.oadr_capacity {
-            elem.write_with_name(writer, "oadrCapacity", false, false)?;
+            elem.write_with_name(writer, "oadr:oadrCapacity", false, false)?;
         }
         if let Some(elem) = &self.oadr_level_offset {
-            elem.write_with_name(writer, "oadrLevelOffset", false, false)?;
+            elem.write_with_name(writer, "oadr:oadrLevelOffset", false, false)?;
         }
         if let Some(elem) = &self.oadr_percent_offset {
-            elem.write_with_name(writer, "oadrPercentOffset", false, false)?;
+            elem.write_with_name(writer, "oadr:oadrPercentOffset", false, false)?;
         }
         if let Some(elem) = &self.oadr_set_point {
-            elem.write_with_name(writer, "oadrSetPoint", false, false)?;
+            elem.write_with_name(writer, "oadr:oadrSetPoint", false, false)?;
         }
         Ok(())
     }

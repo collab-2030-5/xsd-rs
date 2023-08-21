@@ -17,8 +17,12 @@ impl PulseCountType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "itemDescription", self.item_description.as_str())?;
-        xsd_util::write_simple_element(writer, "itemUnits", self.item_units.as_str())?;
+        xsd_util::write_simple_element(
+            writer,
+            "oadr:itemDescription",
+            self.item_description.as_str(),
+        )?;
+        xsd_util::write_simple_element(writer, "oadr:itemUnits", self.item_units.as_str())?;
         xsd_util::write_element_using_to_string(
             writer,
             "oadr:pulseFactor",

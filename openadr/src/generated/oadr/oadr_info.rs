@@ -15,8 +15,8 @@ impl OadrInfo {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "oadrKey", self.oadr_key.as_str())?;
-        xsd_util::write_simple_element(writer, "oadrValue", self.oadr_value.as_str())?;
+        xsd_util::write_simple_element(writer, "oadr:oadrKey", self.oadr_key.as_str())?;
+        xsd_util::write_simple_element(writer, "oadr:oadrValue", self.oadr_value.as_str())?;
         Ok(())
     }
 

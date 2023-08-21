@@ -15,7 +15,7 @@ impl OadrServiceSpecificInfo {
         W: std::io::Write,
     {
         for item in &self.oadr_service {
-            item.write_with_name(writer, "oadrService", false, false)?;
+            item.write_with_name(writer, "oadr:oadrService", false, false)?;
         }
         Ok(())
     }

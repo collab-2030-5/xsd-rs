@@ -15,7 +15,7 @@ impl OadrProfiles {
         W: std::io::Write,
     {
         for item in &self.oadr_profile {
-            item.write_with_name(writer, "oadrProfile", false, false)?;
+            item.write_with_name(writer, "oadr:oadrProfile", false, false)?;
         }
         Ok(())
     }

@@ -43,7 +43,7 @@ impl OadrCreatedPartyRegistrationType {
             elem.write_with_name(writer, "oadr:oadrServiceSpecificInfo", false, false)?;
         }
         if let Some(elem) = &self.oadr_extensions {
-            elem.write_with_name(writer, "oadrExtensions", false, false)?;
+            elem.write_with_name(writer, "oadr:oadrExtensions", false, false)?;
         }
         Ok(())
     }
@@ -129,7 +129,7 @@ impl OadrCreatedPartyRegistrationType {
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "ei:schemaVersion" => ei_schema_version.set(attr.value.clone())?,
+                "schemaVersion" => ei_schema_version.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }

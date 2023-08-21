@@ -25,7 +25,7 @@ impl OadrDistributeEventType {
         xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
         xsd_util::write_simple_element(writer, "ei:vtnID", self.ei_vtn_id.as_str())?;
         for item in &self.oadr_event {
-            item.write_with_name(writer, "oadrEvent", false, false)?;
+            item.write_with_name(writer, "oadr:oadrEvent", false, false)?;
         }
         Ok(())
     }
@@ -96,7 +96,7 @@ impl OadrDistributeEventType {
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "ei:schemaVersion" => ei_schema_version.set(attr.value.clone())?,
+                "schemaVersion" => ei_schema_version.set(attr.value.clone())?,
                 _ => {} // ignore unknown attributes
             };
         }

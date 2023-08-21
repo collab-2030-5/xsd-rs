@@ -15,7 +15,7 @@ impl EventResponses {
         W: std::io::Write,
     {
         for item in &self.event_response {
-            item.write_with_name(writer, "eventResponse", false, false)?;
+            item.write_with_name(writer, "ei:eventResponse", false, false)?;
         }
         Ok(())
     }
