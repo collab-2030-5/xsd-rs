@@ -386,9 +386,9 @@
 	<xs:complexType name="signalPayloadType">
 		<xs:complexContent>
 			<xs:extension base="strm:StreamPayloadBaseType">
-				<xs:choice>
+				<xs:sequence>
 					<xs:element ref="ei:payloadBase"/>
-				</xs:choice>
+				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
