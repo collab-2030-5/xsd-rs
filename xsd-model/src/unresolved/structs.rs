@@ -31,6 +31,7 @@ pub(crate) struct UnresolvedStruct {
     /// single optional base struct
     pub(crate) base_type: Option<TypeId>,
     pub(crate) fields: Vec<UnresolvedField>,
+    pub(crate) default_ns: String,
 }
 
 #[derive(Debug, Clone)]
@@ -39,6 +40,7 @@ pub(crate) struct UnresolvedField {
     pub(crate) name: String,
     pub(crate) field_type: TypeId,
     pub(crate) info: FieldTypeInfo,
+    pub(crate) default_ns: String,
 }
 
 impl UnresolvedField {
@@ -49,13 +51,13 @@ impl UnresolvedField {
             field_name: self.name.clone(),
         };
 
-        tracing::debug!("resolving: {}", field_id);
-
         if let Some(any_type) = resolver.resolve_field(&field_id, &self.field_type) {
+            tracing::debug!("Resolved type: {}, ns: {}", field_id, self.default_ns);
             return Some(Field {
                 comment: self.comment.clone(),
                 name: self.name.clone(),
                 field_type: get_field_type(self.info, any_type),
+                default_ns: self.default_ns.to_owned(),
             });
         }
 

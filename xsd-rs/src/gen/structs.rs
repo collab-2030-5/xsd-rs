@@ -417,6 +417,7 @@ fn split_fields_choice(ch: &Choice, m: &ElemMultiplicity) -> Vec<Element> {
             name: choice.element_name.clone(),
             field_type: choice.type_info.clone(),
             multiplicity: *m,
+            default_ns: choice.type_info.type_id().ns.clone(),
         };
         elems.push(x);
     }
@@ -435,6 +436,7 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
                     name: field.name.clone(),
                     field_type: t.clone(),
                     multiplicity: *m,
+                    default_ns: field.default_ns.clone(),
                 };
                 attrs.push(x);
             }
@@ -443,6 +445,7 @@ fn split_fields(st: &Struct) -> (Vec<Attribute>, Vec<Element>) {
                     name: field.name.clone(),
                     field_type: t.clone(),
                     multiplicity: *m,
+                    default_ns: field.default_ns.clone(),
                 };
                 elems.push(x);
             }
@@ -596,11 +599,15 @@ where
     match &elem.multiplicity {
         ElemMultiplicity::Single => {
             let name = format!("self.{}", elem.name.rust_field_name());
-            let tx = elem.field_type.write_transform(&name, &elem.name);
+            let tx = elem
+                .field_type
+                .write_transform(&name, &elem.name_w_namespace());
             writeln!(w, "{}", tx)?;
         }
         ElemMultiplicity::Vec => {
-            let tx = elem.field_type.write_transform("item", &elem.name);
+            let tx = elem
+                .field_type
+                .write_transform("item", &elem.name_w_namespace());
             writeln!(w, "for item in &self.{} {{", elem.name.rust_field_name())?;
             indent(w, |w| writeln!(w, "{}", tx))?;
             writeln!(w, "}}")?;
@@ -611,7 +618,9 @@ where
                 "if let Some(elem) = &self.{} {{",
                 elem.name.to_snake_case()
             )?;
-            let tx = elem.field_type.write_transform("elem", &elem.name);
+            let tx = elem
+                .field_type
+                .write_transform("elem", &elem.name_w_namespace());
             indent(w, |w| writeln!(w, "{}", tx))?;
             writeln!(w, "}}")?;
         }
@@ -624,12 +633,14 @@ struct Attribute {
     name: String,
     field_type: SimpleType,
     multiplicity: AttrMultiplicity,
+    default_ns: String,
 }
 
 struct Element {
     name: String,
     field_type: AnyType,
     multiplicity: ElemMultiplicity,
+    default_ns: String,
 }
 
 impl Element {
@@ -637,6 +648,13 @@ impl Element {
         match self.name.split_once(':') {
             None => self.name.to_owned(),
             Some((_ns, name)) => name.to_owned(),
+        }
+    }
+
+    pub fn name_w_namespace(&self) -> String {
+        match self.name.split_once(':') {
+            None => format!("{}:{}", self.default_ns, self.name),
+            Some(_) => self.name.to_owned(),
         }
     }
 }

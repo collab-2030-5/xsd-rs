@@ -27,6 +27,7 @@ pub struct Field {
     pub comment: Option<String>,
     pub name: String,
     pub field_type: FieldType,
+    pub default_ns: String,
 }
 
 impl Field {
@@ -62,6 +63,14 @@ pub struct ChoiceVariant {
     pub type_info: AnyType,
 }
 
+impl ChoiceVariant {
+    pub fn name_w_namespace(&self) -> String {
+        match self.element_name.split_once(':') {
+            None => format!("{}:{}", self.type_info.type_id().ns, self.element_name),
+            Some(_) => self.element_name.to_owned(),
+        }
+    }
+}
 /*
 #[derive(Debug, Clone)]
 pub struct Union {

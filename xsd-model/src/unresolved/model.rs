@@ -85,6 +85,7 @@ impl UnresolvedModel {
             type_id,
             base_type,
             fields,
+            default_ns: settings.namespace.to_owned(),
         };
 
         self.unresolved_types.push(UnresolvedType::Struct(st));
@@ -123,6 +124,7 @@ impl UnresolvedModel {
                     name: field.name.clone(),
                     field_type: TypeId::parse(&field.type_name, settings.namespace),
                     info,
+                    default_ns: settings.namespace.to_owned(),
                 };
                 output.push(field);
             }

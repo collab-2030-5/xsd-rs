@@ -60,7 +60,7 @@ fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::E
                     var.element_name.to_upper_camel_case()
                 )?;
                 indent(w, |w| {
-                    let tx = var.type_info.write_transform("x", &var.element_name);
+                    let tx = var.type_info.write_transform("x", &var.name_w_namespace());
                     writeln!(w, "{}", tx)?;
                     Ok(())
                 })?;
