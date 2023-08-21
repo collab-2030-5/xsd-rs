@@ -202,7 +202,7 @@ fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Res
                 writeln!(
                     w,
                     "\"{}\" => {}.set({})?,",
-                    &attr.name,
+                    &attr.bare_name(),
                     attr.name.rust_field_name(),
                     parse_attribute(attr)
                 )?;
@@ -634,6 +634,22 @@ struct Attribute {
     field_type: SimpleType,
     multiplicity: AttrMultiplicity,
     default_ns: String,
+}
+
+impl Attribute {
+    pub fn bare_name(&self) -> String {
+        match self.name.split_once(':') {
+            None => self.name.to_owned(),
+            Some((_ns, name)) => name.to_owned(),
+        }
+    }
+
+    pub fn name_w_namespace(&self) -> String {
+        match self.name.split_once(':') {
+            None => format!("{}:{}", self.default_ns, self.name),
+            Some(_) => self.name.to_owned(),
+        }
+    }
 }
 
 struct Element {
