@@ -2,9 +2,22 @@ use xml::common::Position;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SignalPayloadType {}
+pub struct SignalPayloadType {
+    pub ei_payload_base: crate::ei::PayloadBaseType,
+}
 
 impl SignalPayloadType {
+    fn write_elem<W>(
+        &self,
+        writer: &mut EventWriter<W>,
+    ) -> core::result::Result<(), xml::writer::Error>
+    where
+        W: std::io::Write,
+    {
+        self.ei_payload_base.write(writer)?;
+        Ok(())
+    }
+
     pub(crate) fn write_with_name<W>(
         &self,
         writer: &mut EventWriter<W>,
@@ -26,6 +39,7 @@ impl SignalPayloadType {
             start
         };
         writer.write(start)?;
+        self.write_elem(writer)?;
         writer.write(events::XmlEvent::end_element())?;
         Ok(())
     }
@@ -56,6 +70,7 @@ impl SignalPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
+        let mut ei_payload_base: xsd_util::SetOnce<crate::ei::PayloadBaseType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -74,10 +89,30 @@ impl SignalPayloadType {
                         return Err(xsd_api::ReadError::UnexpectedEvent);
                     }
                 }
-                xml::reader::XmlEvent::StartElement { .. } => {
-                    // this struct has no elements
-                    return Err(xsd_api::ReadError::UnexpectedEvent);
-                }
+                xml::reader::XmlEvent::StartElement {
+                    name, attributes, ..
+                } => match name.local_name.as_str() {
+                    "oadrPayloadResourceStatus" => ei_payload_base.set(
+                        crate::ei::PayloadBaseType::OadrPayloadResourceStatus(
+                            crate::oadr::OadrPayloadResourceStatusType::read(
+                                reader,
+                                &attributes,
+                                "oadrPayloadResourceStatus",
+                            )?,
+                        ),
+                    )?,
+                    "payloadFloat" => {
+                        ei_payload_base.set(crate::ei::PayloadBaseType::PayloadFloat(
+                            crate::ei::PayloadFloatType::read(reader, &attributes, "payloadFloat")?,
+                        ))?
+                    }
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)
@@ -99,7 +134,9 @@ impl SignalPayloadType {
         }
 
         // construct the type from the cells
-        Ok(SignalPayloadType {})
+        Ok(SignalPayloadType {
+            ei_payload_base: ei_payload_base.require()?,
+        })
     }
 
     fn read_top_level<R>(
