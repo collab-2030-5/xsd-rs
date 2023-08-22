@@ -7,3 +7,5 @@ edition = "2021"
 xml-rs = "0.8.4"
 xsd-api = { path = "../xsd-api" }
 xsd-util = { path = "../xsd-util" }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.16"
