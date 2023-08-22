@@ -164,27 +164,6 @@ impl EiEventSignalType {
                     "voltage" => emix_item_base.set(crate::emix::ItemBaseType::Voltage(
                         crate::power::VoltageType::read(reader, &attributes, "voltage")?,
                     ))?,
-                    "powerApparent" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PowerApparent(
-                            crate::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PowerReactive(
-                            crate::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => emix_item_base.set(crate::emix::ItemBaseType::PowerReal(
-                        crate::power::PowerRealType::read(reader, &attributes, "powerReal")?,
-                    ))?,
                     "energyApparent" => {
                         emix_item_base.set(crate::emix::ItemBaseType::EnergyApparent(
                             crate::power::EnergyApparentType::read(
@@ -205,6 +184,27 @@ impl EiEventSignalType {
                     }
                     "energyReal" => emix_item_base.set(crate::emix::ItemBaseType::EnergyReal(
                         crate::power::EnergyRealType::read(reader, &attributes, "energyReal")?,
+                    ))?,
+                    "powerApparent" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerApparent(
+                            crate::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::PowerReactive(
+                            crate::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => emix_item_base.set(crate::emix::ItemBaseType::PowerReal(
+                        crate::power::PowerRealType::read(reader, &attributes, "powerReal")?,
                     ))?,
                     "currentValue" => ei_current_value.set(crate::ei::CurrentValueType::read(
                         reader,
