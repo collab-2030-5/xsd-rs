@@ -551,13 +551,15 @@ where
                 writeln!(
                     w,
                     "let start = start.attr(\"{}\", {}.as_str());",
-                    attr.name, &name
+                    attr.name_w_namespace(),
+                    &name
                 )?;
             } else {
                 writeln!(
                     w,
                     "let start = start.attr(\"{}\", {}.as_str());",
-                    attr.name, &self_name
+                    attr.name_w_namespace(),
+                    &self_name
                 )?;
             }
         }
@@ -578,7 +580,11 @@ where
             indent(w, |w| {
                 writeln!(w, "Some(attr) => {{")?;
                 indent(w, |w| {
-                    writeln!(w, "start.attr(\"{}\", attr.as_str())", attr.name)
+                    writeln!(
+                        w,
+                        "start.attr(\"{}\", attr.as_str())",
+                        attr.name_w_namespace()
+                    )
                 })?;
                 writeln!(w, "}},")?;
                 writeln!(w, "None => start,")?;
