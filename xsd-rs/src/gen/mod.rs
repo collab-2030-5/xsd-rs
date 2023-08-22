@@ -60,6 +60,7 @@ impl GeneratedType {
 }
 
 pub(crate) fn write_model(dir: &Path, model: Model) -> Result<(), FatalError> {
+    let namespace_map = model.namespaces.clone();
     let namespaces = split_into_namespaces(model);
 
     // use the extracted namespace info to generate all the parser files
@@ -75,7 +76,7 @@ pub(crate) fn write_model(dir: &Path, model: Model) -> Result<(), FatalError> {
         let ns_dir = dir.join(&ns.to_snake_case());
 
         std::fs::create_dir(&ns_dir)?;
-        write_ns_mod_file(&ns_dir, ns, &types)?;
+        write_ns_mod_file(&ns_dir, &namespace_map, &types)?;
 
         for gen_type in types {
             let path = ns_dir.join(format!("{}.rs", gen_type.name().to_snake_case()));
@@ -87,7 +88,11 @@ pub(crate) fn write_model(dir: &Path, model: Model) -> Result<(), FatalError> {
     Ok(())
 }
 
-fn write_ns_mod_file(dir: &Path, ns: &str, types: &[GeneratedType]) -> Result<(), FatalError> {
+fn write_ns_mod_file(
+    dir: &Path,
+    namespaces: &HashMap<String, String>,
+    types: &[GeneratedType],
+) -> Result<(), FatalError> {
     let mut w = create(&dir.join("mod.rs"))?;
 
     for typ in types {
@@ -106,7 +111,7 @@ fn write_ns_mod_file(dir: &Path, ns: &str, types: &[GeneratedType]) -> Result<()
     if types.iter().any(|x| matches!(x, GeneratedType::Struct(_))) {
         writeln!(w)?;
         writeln!(w, "// helpers specific to this namespace")?;
-        write_add_schema_attr(&mut w, ns.as_ref())?;
+        write_add_schema_attr(&mut w, namespaces)?;
     }
 
     Ok(())
@@ -171,7 +176,10 @@ where
     f(&mut w)
 }
 
-fn write_add_schema_attr(w: &mut dyn Write, ns: &str) -> std::io::Result<()> {
+fn write_add_schema_attr(
+    w: &mut dyn Write,
+    namespaces: &HashMap<String, String>,
+) -> std::io::Result<()> {
     writeln!(
         w,
         "pub(crate) fn add_schema_attr(start: xml::writer::events::StartElementBuilder) -> xml::writer::events::StartElementBuilder {{"
@@ -179,15 +187,10 @@ fn write_add_schema_attr(w: &mut dyn Write, ns: &str) -> std::io::Result<()> {
     indent(w, |w| {
         writeln!(w, "start")?;
         indent(w, |w| {
-            writeln!(
-                w,
-                ".attr(\"xmlns:xsi\", \"http://www.w3.org/2001/XMLSchema-instance\")"
-            )?;
-            writeln!(
-                w,
-                ".attr(\"xmlns:xsd\", \"http://www.w3.org/2001/XMLSchema\")"
-            )?;
-            writeln!(w, ".attr(\"xmlns\", \"{}\")", ns)
+            for (name, uri) in namespaces.iter() {
+                writeln!(w, ".attr(\"xmlns:{}\", \"{}\")", name, uri)?;
+            }
+            Ok(())
         })?;
         Ok(())
     })?;

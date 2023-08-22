@@ -11,6 +11,7 @@ pub struct RsFile<'input> {
     pub attribute_groups: Vec<RsEntity>,
     pub target_ns: Option<Namespace<'input>>,
     pub xsd_ns: Option<Namespace<'input>>,
+    pub namespaces: Vec<Namespace<'input>>,
 }
 
 #[derive(Debug, Default, Clone)]

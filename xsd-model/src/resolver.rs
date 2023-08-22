@@ -5,6 +5,7 @@ use crate::{
     HexByteConstraints, NumericConstraint, NumericType, PrimitiveType, SimpleType,
     StringConstraints, TypeId,
 };
+use std::collections::HashMap;
 
 #[derive(Debug)]
 struct AliasMap {
@@ -117,10 +118,11 @@ impl Resolver {
         self.resolved.insert(id, any)
     }
 
-    pub(crate) fn model(self) -> Model {
+    pub(crate) fn model(self, namespaces: HashMap<String, String>) -> Model {
         Model {
             types: self.resolved.to_inner(),
             simple_types: self.simple.to_inner(),
+            namespaces,
         }
     }
 

@@ -27,6 +27,7 @@ pub struct UnresolvedModel {
     pub(crate) simple_types: Map<TypeId, SimpleType>,
     pub(crate) unresolved_types: Vec<UnresolvedType>,
     pub(crate) substitution_groups: HashMap<TypeId, Vec<TypeId>>,
+    pub(crate) namespaces: HashMap<String, String>,
 }
 
 pub(crate) struct Settings<'a> {
@@ -49,6 +50,13 @@ impl UnresolvedModel {
         tracing::info!("target namespace: {}", ns_name);
 
         let settings = Settings { namespace: ns_name };
+
+        for namespace in xsd.namespaces {
+            if let Some(name) = namespace.name() {
+                self.namespaces
+                    .insert(name.to_owned(), namespace.uri().to_owned());
+            }
+        }
 
         for entity in xsd.types.iter() {
             self.merge_entity(entity, &settings);
@@ -408,7 +416,7 @@ impl UnresolvedModel {
             }
         }
 
-        let resolved_model = resolver.model();
+        let resolved_model = resolver.model(self.namespaces);
         resolved_model
     }
 
