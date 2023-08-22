@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07"
-  xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110" p3:schemaVersion="2.0b"
+  xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110"
   xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads">
   <p1:oadrSignedObject>
-    <p1:oadrCreatePartyRegistration>
+    <p1:oadrCreatePartyRegistration p3:schemaVersion="2.0b">
       <p2:requestID>06489FCEF4</p2:requestID>
       <p1:oadrProfileName>2.0b</p1:oadrProfileName>
       <p1:oadrTransportName>simpleHttp</p1:oadrTransportName>
