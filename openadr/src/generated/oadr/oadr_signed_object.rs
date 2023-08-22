@@ -36,7 +36,7 @@ impl OadrSignedObject {
         };
         // ---- start attributes ----
         let start = match &self.id {
-            Some(attr) => start.attr("Id", attr.as_str()),
+            Some(attr) => start.attr("oadr:Id", attr.as_str()),
             None => start,
         };
         // ---- end attributes ----
