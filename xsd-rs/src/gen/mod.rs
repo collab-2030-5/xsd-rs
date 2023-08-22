@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::{LineWriter, Write};
 use std::path::Path;
 use std::rc::Rc;
@@ -90,7 +90,7 @@ pub(crate) fn write_model(dir: &Path, model: Model) -> Result<(), FatalError> {
 
 fn write_ns_mod_file(
     dir: &Path,
-    namespaces: &HashMap<String, String>,
+    namespaces: &BTreeMap<String, String>,
     types: &[GeneratedType],
 ) -> Result<(), FatalError> {
     let mut w = create(&dir.join("mod.rs"))?;
@@ -178,7 +178,7 @@ where
 
 fn write_add_schema_attr(
     w: &mut dyn Write,
-    namespaces: &HashMap<String, String>,
+    namespaces: &BTreeMap<String, String>,
 ) -> std::io::Result<()> {
     writeln!(
         w,

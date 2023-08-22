@@ -27,7 +27,7 @@ pub struct UnresolvedModel {
     pub(crate) simple_types: Map<TypeId, SimpleType>,
     pub(crate) unresolved_types: Vec<UnresolvedType>,
     pub(crate) substitution_groups: HashMap<TypeId, Vec<TypeId>>,
-    pub(crate) namespaces: HashMap<String, String>,
+    pub(crate) namespaces: BTreeMap<String, String>,
 }
 
 pub(crate) struct Settings<'a> {
