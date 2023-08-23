@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrCreatePartyRegistration p3:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:requestID>101FC2874D</p2:requestID>
+      <p3:venID>669c2e39-c160-41f2-a5eb-19f20e737828</p3:venID>
+      <p1:oadrProfileName>2.0b</p1:oadrProfileName>
+      <p1:oadrTransportName>simpleHttp</p1:oadrTransportName>
+      <p1:oadrReportOnly>false</p1:oadrReportOnly>
+      <p1:oadrXmlSignature>false</p1:oadrXmlSignature>
+      <p1:oadrVenName>NOVA_DEMO1</p1:oadrVenName>
+      <p1:oadrHttpPullModel>true</p1:oadrHttpPullModel>
+    </p1:oadrCreatePartyRegistration>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

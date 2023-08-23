@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrPoll p2:schemaVersion="2.0b" xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:venID>VEN121819_185305_357</p2:venID>
+    </p1:oadrPoll>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

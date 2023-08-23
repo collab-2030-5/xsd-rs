@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrQueryRegistration p3:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:requestID>BEAD9682EC</p2:requestID>
+    </p1:oadrQueryRegistration>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

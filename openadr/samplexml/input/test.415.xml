@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrUpdateReport p3:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:requestID>E8529E1920</p2:requestID>
+      <p1:oadrReport xmlns:p3="urn:ietf:params:xml:ns:icalendar-2.0"
+        xmlns:p4="urn:ietf:params:xml:ns:icalendar-2.0:stream" xmlns:p5="http://docs.oasis-open.org/ns/energyinterop/201110">
+        <p3:dtstart>
+          <p3:date-time>2019-12-19T01:31:00Z</p3:date-time>
+        </p3:dtstart>
+        <p4:intervals xmlns:p5="http://docs.oasis-open.org/ns/energyinterop/201110">
+          <p5:interval>
+            <p3:dtstart>
+              <p3:date-time>2019-12-19T01:31:00Z</p3:date-time>
+            </p3:dtstart>
+            <p3:duration>
+              <p3:duration>PT1M</p3:duration>
+            </p3:duration>
+            <p3:uid>
+              <p3:text>0</p3:text>
+            </p3:uid>
+            <p1:oadrReportPayload>
+              <p5:rID>STATUS</p5:rID>
+              <p5:confidence>1</p5:confidence>
+              <p5:accuracy>1</p5:accuracy>
+              <p1:oadrPayloadResourceStatus>
+                <p1:oadrOnline>true</p1:oadrOnline>
+                <p1:oadrManualOverride>false</p1:oadrManualOverride>
+                <p1:oadrLoadControlState>
+                  <p1:oadrCapacity>
+                    <p1:oadrMin>0</p1:oadrMin>
+                    <p1:oadrMax>0</p1:oadrMax>
+                    <p1:oadrCurrent>0</p1:oadrCurrent>
+                    <p1:oadrNormal>0</p1:oadrNormal>
+                  </p1:oadrCapacity>
+                  <p1:oadrLevelOffset>
+                    <p1:oadrMin>0</p1:oadrMin>
+                    <p1:oadrMax>0</p1:oadrMax>
+                    <p1:oadrCurrent>0</p1:oadrCurrent>
+                    <p1:oadrNormal>0</p1:oadrNormal>
+                  </p1:oadrLevelOffset>
+                  <p1:oadrPercentOffset>
+                    <p1:oadrMin>0</p1:oadrMin>
+                    <p1:oadrMax>0</p1:oadrMax>
+                    <p1:oadrCurrent>0</p1:oadrCurrent>
+                    <p1:oadrNormal>0</p1:oadrNormal>
+                  </p1:oadrPercentOffset>
+                  <p1:oadrSetPoint>
+                    <p1:oadrMin>0</p1:oadrMin>
+                    <p1:oadrMax>0</p1:oadrMax>
+                    <p1:oadrCurrent>0</p1:oadrCurrent>
+                    <p1:oadrNormal>0</p1:oadrNormal>
+                  </p1:oadrSetPoint>
+                </p1:oadrLoadControlState>
+              </p1:oadrPayloadResourceStatus>
+              <p1:oadrDataQuality>Quality Good - Non Specific</p1:oadrDataQuality>
+            </p1:oadrReportPayload>
+          </p5:interval>
+        </p4:intervals>
+        <p5:reportRequestID>ReportReqID121819_193055_515</p5:reportRequestID>
+        <p5:reportSpecifierID>NOVA_TELEMTRY_STATUS</p5:reportSpecifierID>
+        <p5:reportName>TELEMETRY_STATUS</p5:reportName>
+        <p5:createdDateTime>2019-12-19T01:31:55Z</p5:createdDateTime>
+      </p1:oadrReport>
+      <p3:venID>VEN121819_190545_986</p3:venID>
+    </p1:oadrUpdateReport>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

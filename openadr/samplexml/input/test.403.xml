@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrCancelPartyRegistration p3:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:requestID>FCA055FD7F</p2:requestID>
+      <p3:registrationID>REG121819_194611_777</p3:registrationID>
+      <p3:venID>669c2e39-c160-41f2-a5eb-19f20e737828</p3:venID>
+    </p1:oadrCancelPartyRegistration>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

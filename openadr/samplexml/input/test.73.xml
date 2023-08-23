@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrRequestEvent p3:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110/payloads" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:eiRequestEvent xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110">
+        <p2:requestID>25013246EA</p2:requestID>
+        <p3:venID>VEN121819_194456_229</p3:venID>
+      </p2:eiRequestEvent>
+    </p1:oadrRequestEvent>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

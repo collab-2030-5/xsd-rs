@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrRegisteredReport p2:schemaVersion="2.0b" xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110">
+      <p2:eiResponse xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110/payloads">
+        <p2:responseCode>200</p2:responseCode>
+        <p2:responseDescription>OK</p2:responseDescription>
+        <p3:requestID>RegReq121819_194614_536</p3:requestID>
+      </p2:eiResponse>
+      <p2:venID>669c2e39-c160-41f2-a5eb-19f20e737828</p2:venID>
+    </p1:oadrRegisteredReport>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

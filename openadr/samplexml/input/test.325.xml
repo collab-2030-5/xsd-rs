@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrCreateOpt p2:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110"
+      xmlns:p3="http://docs.oasis-open.org/ns/emix/2011/06"
+      xmlns:p4="urn:ietf:params:xml:ns:icalendar-2.0" xmlns:p5="http://docs.oasis-open.org/ns/energyinterop/201110/payloads">
+      <p2:optID>8f82f5c9-059e-447a-8d8b-ebcbf0423056</p2:optID>
+      <p2:optType>optIn</p2:optType>
+      <p2:optReason>economic</p2:optReason>
+      <p3:marketContext>http://MarketContext1</p3:marketContext>
+      <p2:venID>VEN121819_190545_986</p2:venID>
+      <p4:vavailability>
+        <p4:components>
+          <p4:available>
+            <p4:properties>
+              <p4:dtstart>
+                <p4:date-time>2019-12-20T01:43:40Z</p4:date-time>
+              </p4:dtstart>
+              <p4:duration>
+                <p4:duration>PT4H</p4:duration>
+              </p4:duration>
+            </p4:properties>
+          </p4:available>
+          <p4:available>
+            <p4:properties>
+              <p4:dtstart>
+                <p4:date-time>2019-12-22T01:43:40Z</p4:date-time>
+              </p4:dtstart>
+              <p4:duration>
+                <p4:duration>PT8H</p4:duration>
+              </p4:duration>
+            </p4:properties>
+          </p4:available>
+        </p4:components>
+      </p4:vavailability>
+      <p2:createdDateTime>2019-12-19T01:43:40Z</p2:createdDateTime>
+      <p5:requestID>9ADB0BC943</p5:requestID>
+      <p2:eiTarget>
+        <p2:resourceID>resource1</p2:resourceID>
+        <p2:venID>VEN121819_190545_986</p2:venID>
+      </p2:eiTarget>
+      <p1:oadrDeviceClass xmlns:p6="http://docs.oasis-open.org/ns/emix/2011/06/power">
+        <p6:endDeviceAsset>
+          <p6:mrid>Thermostat</p6:mrid>
+        </p6:endDeviceAsset>
+      </p1:oadrDeviceClass>
+    </p1:oadrCreateOpt>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>

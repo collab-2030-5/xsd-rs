@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p1:oadrPayload xmlns:p1="http://openadr.org/oadr-2.0b/2012/07">
+  <p1:oadrSignedObject>
+    <p1:oadrCreateOpt p2:schemaVersion="2.0b"
+      xmlns:p2="http://docs.oasis-open.org/ns/energyinterop/201110" xmlns:p3="http://docs.oasis-open.org/ns/energyinterop/201110/payloads">
+      <p2:optID>optId</p2:optID>
+      <p2:optType>optOut</p2:optType>
+      <p2:optReason>economic</p2:optReason>
+      <p2:venID>VEN121819_160052_085</p2:venID>
+      <p2:createdDateTime>2019-12-19T00:33:28Z</p2:createdDateTime>
+      <p3:requestID>requestId</p3:requestID>
+      <p2:qualifiedEventID>
+        <p2:eventID>Event121819_183307_295_0</p2:eventID>
+        <p2:modificationNumber>0</p2:modificationNumber>
+      </p2:qualifiedEventID>
+      <p2:eiTarget>
+        <p2:resourceID>resource1</p2:resourceID>
+      </p2:eiTarget>
+    </p1:oadrCreateOpt>
+  </p1:oadrSignedObject>
+</p1:oadrPayload>
