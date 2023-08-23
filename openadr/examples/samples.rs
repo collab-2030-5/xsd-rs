@@ -37,7 +37,7 @@ fn handle_file<T: ReadXml + WriteXml + PartialEq + Debug>(name: &str) {
 fn validate_w_xsd(path: &str) {
     // Run python XSD validator
     let stdout = Command::new("python")
-        .arg("validate.py")
+        .arg("openadr/validate.py")
         .arg(path)
         .stdout(Stdio::piped())
         .spawn()
