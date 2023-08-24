@@ -219,8 +219,8 @@ impl UnresolvedModel {
                 .entry(substitution_group_type_id.to_owned())
                 .or_default();
 
-            // target or alias?
-            list.push(target.clone())
+            // store element name <element name="" />
+            list.push(alias.clone())
         }
 
         tracing::info!("Creating alias {} target {}", alias, target);
@@ -334,27 +334,18 @@ impl UnresolvedModel {
         for (sg_type_id, sg_type_id_variants) in self.substitution_groups.iter() {
             // Find the resolved structs for each variant
             // Store in a map to auto dedup
-            let mut variants = std::collections::HashMap::<TypeId, ChoiceVariant>::default();
+            let mut variants = std::collections::BTreeMap::<TypeId, ChoiceVariant>::default();
 
             for value in sg_type_id_variants.iter() {
-                if let Some(variant_any_type) = resolver.resolved.get(&value) {
-                    // Lookup variant in alias map - we have the value but need to find the key
-                    // The key in the alias map will be the element_name (which is the XML tag)
-                    if let Some(alias) = resolver.reverse_alias(&value) {
-                        tracing::info!("Found alias {} for {}", alias, value);
+                if let Some(alias) = resolver.resolve_alias(&value) {
+                    if let Some(variant_any_type) = resolver.resolved.get(&alias) {
                         let variant = ChoiceVariant {
                             comment: None,
-                            element_name: alias.name.to_owned(),
+                            element_name: value.name.to_owned(),
                             type_info: variant_any_type.clone(),
                         };
 
                         variants.insert(value.clone(), variant);
-                    } else {
-                        tracing::error!(
-                            "Did not find alias for variatn {} in substitutionGroup {}.  Variant skipped",
-                            value,
-                            sg_type_id
-                        );
                     }
                 }
             }
@@ -365,7 +356,7 @@ impl UnresolvedModel {
             // Convert from type to name (from the alias map)
             if let Some(result) = resolver.resolve_alias(sg_type_id) {
                 tracing::info!(
-                    "SbustitutionGroup: Name (removed) {}, type (replaced) {}",
+                    "SubstitutionGroup: Name (removed) {}, type (replaced) {}",
                     sg_type_id.name,
                     result.name
                 );

@@ -175,11 +175,4 @@ impl Resolver {
             None => None,
         }
     }
-
-    pub fn reverse_alias(&self, id: &TypeId) -> Option<TypeId> {
-        match self.aliases.inner.iter().find(|(key, value)| *value == id) {
-            Some((key, _value)) => Some(key.clone()),
-            None => None,
-        }
-    }
 }

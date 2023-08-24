@@ -110,7 +110,9 @@ pub struct EnumCase {
 
 #[derive(Debug, Clone, Default)]
 pub struct Alias {
+    /// <element name=""/>
     pub name: String,
+    /// <element type=""/>, also <complexType name=""/>
     pub original: String,
     pub comment: Option<String>,
     pub subtypes: Vec<RsEntity>,
