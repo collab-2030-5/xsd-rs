@@ -109,6 +109,21 @@ impl SpecifierPayloadType {
                     "currency" => emix_item_base.set(crate::emix::ItemBaseType::Currency(
                         crate::oadr::CurrencyType::read(reader, &attributes, "currency")?,
                     ))?,
+                    "currencyPerKW" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerKw(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerKW")?,
+                        ))?
+                    }
+                    "currencyPerKWh" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerKWh(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerKWh")?,
+                        ))?
+                    }
+                    "currencyPerThm" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerThm(
+                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerThm")?,
+                        ))?
+                    }
                     "current" => emix_item_base.set(crate::emix::ItemBaseType::Current(
                         crate::oadr::CurrentType::read(reader, &attributes, "current")?,
                     ))?,
@@ -126,27 +141,6 @@ impl SpecifierPayloadType {
                     ))?,
                     "voltage" => emix_item_base.set(crate::emix::ItemBaseType::Voltage(
                         crate::power::VoltageType::read(reader, &attributes, "voltage")?,
-                    ))?,
-                    "energyApparent" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::EnergyApparent(
-                            crate::power::EnergyApparentType::read(
-                                reader,
-                                &attributes,
-                                "energyApparent",
-                            )?,
-                        ))?
-                    }
-                    "energyReactive" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::EnergyReactive(
-                            crate::power::EnergyReactiveType::read(
-                                reader,
-                                &attributes,
-                                "energyReactive",
-                            )?,
-                        ))?
-                    }
-                    "energyReal" => emix_item_base.set(crate::emix::ItemBaseType::EnergyReal(
-                        crate::power::EnergyRealType::read(reader, &attributes, "energyReal")?,
                     ))?,
                     "powerApparent" => {
                         emix_item_base.set(crate::emix::ItemBaseType::PowerApparent(
@@ -168,6 +162,27 @@ impl SpecifierPayloadType {
                     }
                     "powerReal" => emix_item_base.set(crate::emix::ItemBaseType::PowerReal(
                         crate::power::PowerRealType::read(reader, &attributes, "powerReal")?,
+                    ))?,
+                    "energyApparent" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyApparent(
+                            crate::power::EnergyApparentType::read(
+                                reader,
+                                &attributes,
+                                "energyApparent",
+                            )?,
+                        ))?
+                    }
+                    "energyReactive" => {
+                        emix_item_base.set(crate::emix::ItemBaseType::EnergyReactive(
+                            crate::power::EnergyReactiveType::read(
+                                reader,
+                                &attributes,
+                                "energyReactive",
+                            )?,
+                        ))?
+                    }
+                    "energyReal" => emix_item_base.set(crate::emix::ItemBaseType::EnergyReal(
+                        crate::power::EnergyRealType::read(reader, &attributes, "energyReal")?,
                     ))?,
                     "readingType" => {
                         ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
