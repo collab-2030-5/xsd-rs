@@ -69,7 +69,7 @@ impl xsd_api::WriteXml for OadrLoadControlStateType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrLoadControlStateType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrLoadControlState", true, false)?;
         Ok(())
     }
 }
@@ -183,8 +183,8 @@ impl OadrLoadControlStateType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrLoadControlStateType")?;
-        OadrLoadControlStateType::read(reader, &attr, "oadrLoadControlStateType")
+        let attr = xsd_util::read_start_tag(reader, "oadrLoadControlState")?;
+        OadrLoadControlStateType::read(reader, &attr, "oadrLoadControlState")
     }
 }
 

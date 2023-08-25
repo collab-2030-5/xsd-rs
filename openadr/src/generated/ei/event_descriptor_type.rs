@@ -98,7 +98,7 @@ impl xsd_api::WriteXml for EventDescriptorType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eventDescriptorType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eventDescriptor", true, false)?;
         Ok(())
     }
 }
@@ -217,8 +217,8 @@ impl EventDescriptorType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eventDescriptorType")?;
-        EventDescriptorType::read(reader, &attr, "eventDescriptorType")
+        let attr = xsd_util::read_start_tag(reader, "eventDescriptor")?;
+        EventDescriptorType::read(reader, &attr, "eventDescriptor")
     }
 }
 

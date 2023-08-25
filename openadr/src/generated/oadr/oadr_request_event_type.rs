@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for OadrRequestEventType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrRequestEventType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrRequestEvent", true, false)?;
         Ok(())
     }
 }
@@ -146,8 +146,8 @@ impl OadrRequestEventType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrRequestEventType")?;
-        OadrRequestEventType::read(reader, &attr, "oadrRequestEventType")
+        let attr = xsd_util::read_start_tag(reader, "oadrRequestEvent")?;
+        OadrRequestEventType::read(reader, &attr, "oadrRequestEvent")
     }
 }
 

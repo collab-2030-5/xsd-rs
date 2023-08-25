@@ -60,7 +60,7 @@ impl xsd_api::WriteXml for CurrencyType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:currencyType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:currency", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl CurrencyType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "currencyType")?;
-        CurrencyType::read(reader, &attr, "currencyType")
+        let attr = xsd_util::read_start_tag(reader, "currency")?;
+        CurrencyType::read(reader, &attr, "currency")
     }
 }
 

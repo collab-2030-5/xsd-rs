@@ -71,7 +71,7 @@ impl xsd_api::WriteXml for OadrRegisteredReportType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrRegisteredReportType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrRegisteredReport", true, false)?;
         Ok(())
     }
 }
@@ -168,8 +168,8 @@ impl OadrRegisteredReportType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrRegisteredReportType")?;
-        OadrRegisteredReportType::read(reader, &attr, "oadrRegisteredReportType")
+        let attr = xsd_util::read_start_tag(reader, "oadrRegisteredReport")?;
+        OadrRegisteredReportType::read(reader, &attr, "oadrRegisteredReport")
     }
 }
 

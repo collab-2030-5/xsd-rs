@@ -72,12 +72,7 @@ impl xsd_api::WriteXml for OadrCancelPartyRegistrationType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(
-            &mut writer,
-            "oadr:oadrCancelPartyRegistrationType",
-            true,
-            false,
-        )?;
+        self.write_with_name(&mut writer, "oadr:oadrCancelPartyRegistration", true, false)?;
         Ok(())
     }
 }
@@ -166,8 +161,8 @@ impl OadrCancelPartyRegistrationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCancelPartyRegistrationType")?;
-        OadrCancelPartyRegistrationType::read(reader, &attr, "oadrCancelPartyRegistrationType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCancelPartyRegistration")?;
+        OadrCancelPartyRegistrationType::read(reader, &attr, "oadrCancelPartyRegistration")
     }
 }
 

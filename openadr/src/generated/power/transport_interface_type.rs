@@ -66,7 +66,7 @@ impl xsd_api::WriteXml for TransportInterfaceType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:TransportInterfaceType", true, false)?;
+        self.write_with_name(&mut writer, "power:transportInterface", true, false)?;
         Ok(())
     }
 }
@@ -148,8 +148,8 @@ impl TransportInterfaceType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "TransportInterfaceType")?;
-        TransportInterfaceType::read(reader, &attr, "TransportInterfaceType")
+        let attr = xsd_util::read_start_tag(reader, "transportInterface")?;
+        TransportInterfaceType::read(reader, &attr, "transportInterface")
     }
 }
 

@@ -62,7 +62,7 @@ impl xsd_api::WriteXml for OadrPollType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrPollType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrPoll", true, false)?;
         Ok(())
     }
 }
@@ -142,8 +142,8 @@ impl OadrPollType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrPollType")?;
-        OadrPollType::read(reader, &attr, "oadrPollType")
+        let attr = xsd_util::read_start_tag(reader, "oadrPoll")?;
+        OadrPollType::read(reader, &attr, "oadrPoll")
     }
 }
 

@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for EnergyReactiveType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyReactiveType", true, false)?;
+        self.write_with_name(&mut writer, "power:energyReactive", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl EnergyReactiveType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyReactiveType")?;
-        EnergyReactiveType::read(reader, &attr, "EnergyReactiveType")
+        let attr = xsd_util::read_start_tag(reader, "energyReactive")?;
+        EnergyReactiveType::read(reader, &attr, "energyReactive")
     }
 }
 

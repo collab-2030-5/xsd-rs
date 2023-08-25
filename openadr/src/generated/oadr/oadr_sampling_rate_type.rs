@@ -70,7 +70,7 @@ impl xsd_api::WriteXml for OadrSamplingRateType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrSamplingRateType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrSamplingRate", true, false)?;
         Ok(())
     }
 }
@@ -158,8 +158,8 @@ impl OadrSamplingRateType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrSamplingRateType")?;
-        OadrSamplingRateType::read(reader, &attr, "oadrSamplingRateType")
+        let attr = xsd_util::read_start_tag(reader, "oadrSamplingRate")?;
+        OadrSamplingRateType::read(reader, &attr, "oadrSamplingRate")
     }
 }
 

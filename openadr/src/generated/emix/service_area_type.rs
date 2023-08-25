@@ -61,7 +61,7 @@ impl xsd_api::WriteXml for ServiceAreaType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "emix:ServiceAreaType", true, false)?;
+        self.write_with_name(&mut writer, "emix:serviceArea", true, false)?;
         Ok(())
     }
 }
@@ -145,8 +145,8 @@ impl ServiceAreaType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ServiceAreaType")?;
-        ServiceAreaType::read(reader, &attr, "ServiceAreaType")
+        let attr = xsd_util::read_start_tag(reader, "serviceArea")?;
+        ServiceAreaType::read(reader, &attr, "serviceArea")
     }
 }
 

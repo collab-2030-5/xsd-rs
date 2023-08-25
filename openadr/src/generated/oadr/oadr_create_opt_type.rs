@@ -95,7 +95,7 @@ impl xsd_api::WriteXml for OadrCreateOptType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrCreateOptType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrCreateOpt", true, false)?;
         Ok(())
     }
 }
@@ -229,8 +229,8 @@ impl OadrCreateOptType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCreateOptType")?;
-        OadrCreateOptType::read(reader, &attr, "oadrCreateOptType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCreateOpt")?;
+        OadrCreateOptType::read(reader, &attr, "oadrCreateOpt")
     }
 }
 

@@ -67,7 +67,7 @@ impl xsd_api::WriteXml for OadrCanceledOptType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrCanceledOptType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrCanceledOpt", true, false)?;
         Ok(())
     }
 }
@@ -154,8 +154,8 @@ impl OadrCanceledOptType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCanceledOptType")?;
-        OadrCanceledOptType::read(reader, &attr, "oadrCanceledOptType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCanceledOpt")?;
+        OadrCanceledOptType::read(reader, &attr, "oadrCanceledOpt")
     }
 }
 

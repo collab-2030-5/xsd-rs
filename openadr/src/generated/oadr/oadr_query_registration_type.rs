@@ -62,7 +62,7 @@ impl xsd_api::WriteXml for OadrQueryRegistrationType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrQueryRegistrationType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrQueryRegistration", true, false)?;
         Ok(())
     }
 }
@@ -144,8 +144,8 @@ impl OadrQueryRegistrationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrQueryRegistrationType")?;
-        OadrQueryRegistrationType::read(reader, &attr, "oadrQueryRegistrationType")
+        let attr = xsd_util::read_start_tag(reader, "oadrQueryRegistration")?;
+        OadrQueryRegistrationType::read(reader, &attr, "oadrQueryRegistration")
     }
 }
 

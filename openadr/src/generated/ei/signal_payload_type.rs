@@ -55,7 +55,7 @@ impl xsd_api::WriteXml for SignalPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:signalPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "ei:signalPayload", true, false)?;
         Ok(())
     }
 }
@@ -145,8 +145,8 @@ impl SignalPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "signalPayloadType")?;
-        SignalPayloadType::read(reader, &attr, "signalPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "signalPayload")?;
+        SignalPayloadType::read(reader, &attr, "signalPayload")
     }
 }
 

@@ -56,7 +56,7 @@ impl xsd_api::WriteXml for MeterAssetType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:MeterAssetType", true, false)?;
+        self.write_with_name(&mut writer, "power:meterAsset", true, false)?;
         Ok(())
     }
 }
@@ -133,8 +133,8 @@ impl MeterAssetType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "MeterAssetType")?;
-        MeterAssetType::read(reader, &attr, "MeterAssetType")
+        let attr = xsd_util::read_start_tag(reader, "meterAsset")?;
+        MeterAssetType::read(reader, &attr, "meterAsset")
     }
 }
 

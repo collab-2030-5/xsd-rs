@@ -67,12 +67,7 @@ impl xsd_api::WriteXml for OadrPayloadResourceStatusType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(
-            &mut writer,
-            "oadr:oadrPayloadResourceStatusType",
-            true,
-            false,
-        )?;
+        self.write_with_name(&mut writer, "oadr:oadrPayloadResourceStatus", true, false)?;
         Ok(())
     }
 }
@@ -167,8 +162,8 @@ impl OadrPayloadResourceStatusType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrPayloadResourceStatusType")?;
-        OadrPayloadResourceStatusType::read(reader, &attr, "oadrPayloadResourceStatusType")
+        let attr = xsd_util::read_start_tag(reader, "oadrPayloadResourceStatus")?;
+        OadrPayloadResourceStatusType::read(reader, &attr, "oadrPayloadResourceStatus")
     }
 }
 

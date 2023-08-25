@@ -68,7 +68,7 @@ impl xsd_api::WriteXml for PulseCountType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:pulseCountType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:pulseCount", true, false)?;
         Ok(())
     }
 }
@@ -155,8 +155,8 @@ impl PulseCountType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "pulseCountType")?;
-        PulseCountType::read(reader, &attr, "pulseCountType")
+        let attr = xsd_util::read_start_tag(reader, "pulseCount")?;
+        PulseCountType::read(reader, &attr, "pulseCount")
     }
 }
 

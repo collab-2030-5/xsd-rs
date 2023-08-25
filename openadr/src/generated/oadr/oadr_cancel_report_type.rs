@@ -76,7 +76,7 @@ impl xsd_api::WriteXml for OadrCancelReportType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrCancelReportType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrCancelReport", true, false)?;
         Ok(())
     }
 }
@@ -169,8 +169,8 @@ impl OadrCancelReportType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCancelReportType")?;
-        OadrCancelReportType::read(reader, &attr, "oadrCancelReportType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCancelReport")?;
+        OadrCancelReportType::read(reader, &attr, "oadrCancelReport")
     }
 }
 

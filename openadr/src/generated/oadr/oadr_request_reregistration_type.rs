@@ -62,12 +62,7 @@ impl xsd_api::WriteXml for OadrRequestReregistrationType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(
-            &mut writer,
-            "oadr:oadrRequestReregistrationType",
-            true,
-            false,
-        )?;
+        self.write_with_name(&mut writer, "oadr:oadrRequestReregistration", true, false)?;
         Ok(())
     }
 }
@@ -147,8 +142,8 @@ impl OadrRequestReregistrationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrRequestReregistrationType")?;
-        OadrRequestReregistrationType::read(reader, &attr, "oadrRequestReregistrationType")
+        let attr = xsd_util::read_start_tag(reader, "oadrRequestReregistration")?;
+        OadrRequestReregistrationType::read(reader, &attr, "oadrRequestReregistration")
     }
 }
 

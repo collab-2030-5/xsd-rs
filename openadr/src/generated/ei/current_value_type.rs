@@ -55,7 +55,7 @@ impl xsd_api::WriteXml for CurrentValueType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:currentValueType", true, false)?;
+        self.write_with_name(&mut writer, "ei:currentValue", true, false)?;
         Ok(())
     }
 }
@@ -137,8 +137,8 @@ impl CurrentValueType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "currentValueType")?;
-        CurrentValueType::read(reader, &attr, "currentValueType")
+        let attr = xsd_util::read_start_tag(reader, "currentValue")?;
+        CurrentValueType::read(reader, &attr, "currentValue")
     }
 }
 

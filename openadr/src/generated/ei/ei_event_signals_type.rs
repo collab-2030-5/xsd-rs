@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for EiEventSignalsType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eiEventSignalsType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiEventSignals", true, false)?;
         Ok(())
     }
 }
@@ -154,8 +154,8 @@ impl EiEventSignalsType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiEventSignalsType")?;
-        EiEventSignalsType::read(reader, &attr, "eiEventSignalsType")
+        let attr = xsd_util::read_start_tag(reader, "eiEventSignals")?;
+        EiEventSignalsType::read(reader, &attr, "eiEventSignals")
     }
 }
 

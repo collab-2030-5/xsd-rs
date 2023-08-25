@@ -56,7 +56,7 @@ impl xsd_api::WriteXml for ServiceDeliveryPointType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:ServiceDeliveryPointType", true, false)?;
+        self.write_with_name(&mut writer, "power:serviceDeliveryPoint", true, false)?;
         Ok(())
     }
 }
@@ -133,8 +133,8 @@ impl ServiceDeliveryPointType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ServiceDeliveryPointType")?;
-        ServiceDeliveryPointType::read(reader, &attr, "ServiceDeliveryPointType")
+        let attr = xsd_util::read_start_tag(reader, "serviceDeliveryPoint")?;
+        ServiceDeliveryPointType::read(reader, &attr, "serviceDeliveryPoint")
     }
 }
 

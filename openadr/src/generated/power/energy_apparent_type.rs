@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for EnergyApparentType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyApparentType", true, false)?;
+        self.write_with_name(&mut writer, "power:energyApparent", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl EnergyApparentType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyApparentType")?;
-        EnergyApparentType::read(reader, &attr, "EnergyApparentType")
+        let attr = xsd_util::read_start_tag(reader, "energyApparent")?;
+        EnergyApparentType::read(reader, &attr, "energyApparent")
     }
 }
 

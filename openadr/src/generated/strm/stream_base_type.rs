@@ -66,7 +66,7 @@ impl xsd_api::WriteXml for StreamBaseType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "strm:StreamBaseType", true, false)?;
+        self.write_with_name(&mut writer, "strm:streamBase", true, false)?;
         Ok(())
     }
 }
@@ -162,8 +162,8 @@ impl StreamBaseType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "StreamBaseType")?;
-        StreamBaseType::read(reader, &attr, "StreamBaseType")
+        let attr = xsd_util::read_start_tag(reader, "streamBase")?;
+        StreamBaseType::read(reader, &attr, "streamBase")
     }
 }
 

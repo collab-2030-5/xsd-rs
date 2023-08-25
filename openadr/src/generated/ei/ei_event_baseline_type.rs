@@ -77,7 +77,7 @@ impl xsd_api::WriteXml for EiEventBaselineType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eiEventBaselineType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiEventBaseline", true, false)?;
         Ok(())
     }
 }
@@ -271,8 +271,8 @@ impl EiEventBaselineType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiEventBaselineType")?;
-        EiEventBaselineType::read(reader, &attr, "eiEventBaselineType")
+        let attr = xsd_util::read_start_tag(reader, "eiEventBaseline")?;
+        EiEventBaselineType::read(reader, &attr, "eiEventBaseline")
     }
 }
 

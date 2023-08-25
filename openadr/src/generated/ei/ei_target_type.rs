@@ -105,7 +105,7 @@ impl xsd_api::WriteXml for EiTargetType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:EiTargetType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiTarget", true, false)?;
         Ok(())
     }
 }
@@ -264,8 +264,8 @@ impl EiTargetType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EiTargetType")?;
-        EiTargetType::read(reader, &attr, "EiTargetType")
+        let attr = xsd_util::read_start_tag(reader, "eiTarget")?;
+        EiTargetType::read(reader, &attr, "eiTarget")
     }
 }
 

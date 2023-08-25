@@ -69,7 +69,7 @@ impl xsd_api::WriteXml for IntervalType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:IntervalType", true, false)?;
+        self.write_with_name(&mut writer, "ei:interval", true, false)?;
         Ok(())
     }
 }
@@ -182,8 +182,8 @@ impl IntervalType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "IntervalType")?;
-        IntervalType::read(reader, &attr, "IntervalType")
+        let attr = xsd_util::read_start_tag(reader, "interval")?;
+        IntervalType::read(reader, &attr, "interval")
     }
 }
 

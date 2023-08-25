@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for BaseUnitType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:BaseUnitType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:customUnit", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl BaseUnitType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "BaseUnitType")?;
-        BaseUnitType::read(reader, &attr, "BaseUnitType")
+        let attr = xsd_util::read_start_tag(reader, "customUnit")?;
+        BaseUnitType::read(reader, &attr, "customUnit")
     }
 }
 

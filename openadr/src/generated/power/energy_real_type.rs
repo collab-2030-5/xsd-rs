@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for EnergyRealType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:EnergyRealType", true, false)?;
+        self.write_with_name(&mut writer, "power:energyReal", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl EnergyRealType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EnergyRealType")?;
-        EnergyRealType::read(reader, &attr, "EnergyRealType")
+        let attr = xsd_util::read_start_tag(reader, "energyReal")?;
+        EnergyRealType::read(reader, &attr, "energyReal")
     }
 }
 

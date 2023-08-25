@@ -56,7 +56,7 @@ impl xsd_api::WriteXml for VavailabilityType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "xcal:VavailabilityType", true, false)?;
+        self.write_with_name(&mut writer, "xcal:vavailability", true, false)?;
         Ok(())
     }
 }
@@ -141,8 +141,8 @@ impl VavailabilityType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "VavailabilityType")?;
-        VavailabilityType::read(reader, &attr, "VavailabilityType")
+        let attr = xsd_util::read_start_tag(reader, "vavailability")?;
+        VavailabilityType::read(reader, &attr, "vavailability")
     }
 }
 

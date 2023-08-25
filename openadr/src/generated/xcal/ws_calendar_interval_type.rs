@@ -59,7 +59,7 @@ impl xsd_api::WriteXml for WsCalendarIntervalType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "xcal:WsCalendarIntervalType", true, false)?;
+        self.write_with_name(&mut writer, "xcal:interval", true, false)?;
         Ok(())
     }
 }
@@ -140,8 +140,8 @@ impl WsCalendarIntervalType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "WsCalendarIntervalType")?;
-        WsCalendarIntervalType::read(reader, &attr, "WsCalendarIntervalType")
+        let attr = xsd_util::read_start_tag(reader, "interval")?;
+        WsCalendarIntervalType::read(reader, &attr, "interval")
     }
 }
 

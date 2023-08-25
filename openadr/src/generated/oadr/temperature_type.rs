@@ -64,7 +64,7 @@ impl xsd_api::WriteXml for TemperatureType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:temperatureType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:temperature", true, false)?;
         Ok(())
     }
 }
@@ -153,8 +153,8 @@ impl TemperatureType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "temperatureType")?;
-        TemperatureType::read(reader, &attr, "temperatureType")
+        let attr = xsd_util::read_start_tag(reader, "temperature")?;
+        TemperatureType::read(reader, &attr, "temperature")
     }
 }
 

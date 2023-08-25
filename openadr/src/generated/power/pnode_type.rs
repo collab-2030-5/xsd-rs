@@ -56,7 +56,7 @@ impl xsd_api::WriteXml for PnodeType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:PnodeType", true, false)?;
+        self.write_with_name(&mut writer, "power:pnode", true, false)?;
         Ok(())
     }
 }
@@ -133,8 +133,8 @@ impl PnodeType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PnodeType")?;
-        PnodeType::read(reader, &attr, "PnodeType")
+        let attr = xsd_util::read_start_tag(reader, "pnode")?;
+        PnodeType::read(reader, &attr, "pnode")
     }
 }
 

@@ -93,7 +93,7 @@ impl xsd_api::WriteXml for OadrCreatedPartyRegistrationType {
         let mut writer = config.build_xml_rs().create_writer(writer);
         self.write_with_name(
             &mut writer,
-            "oadr:oadrCreatedPartyRegistrationType",
+            "oadr:oadrCreatedPartyRegistration",
             true,
             false,
         )?;
@@ -229,8 +229,8 @@ impl OadrCreatedPartyRegistrationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCreatedPartyRegistrationType")?;
-        OadrCreatedPartyRegistrationType::read(reader, &attr, "oadrCreatedPartyRegistrationType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCreatedPartyRegistration")?;
+        OadrCreatedPartyRegistrationType::read(reader, &attr, "oadrCreatedPartyRegistration")
     }
 }
 

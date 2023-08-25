@@ -59,7 +59,7 @@ impl xsd_api::WriteXml for EiActivePeriodType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:eiActivePeriodType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiActivePeriod", true, false)?;
         Ok(())
     }
 }
@@ -147,8 +147,8 @@ impl EiActivePeriodType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiActivePeriodType")?;
-        EiActivePeriodType::read(reader, &attr, "eiActivePeriodType")
+        let attr = xsd_util::read_start_tag(reader, "eiActivePeriod")?;
+        EiActivePeriodType::read(reader, &attr, "eiActivePeriod")
     }
 }
 

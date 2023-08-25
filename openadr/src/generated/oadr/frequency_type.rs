@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for FrequencyType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:FrequencyType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:frequency", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl FrequencyType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "FrequencyType")?;
-        FrequencyType::read(reader, &attr, "FrequencyType")
+        let attr = xsd_util::read_start_tag(reader, "frequency")?;
+        FrequencyType::read(reader, &attr, "frequency")
     }
 }
 

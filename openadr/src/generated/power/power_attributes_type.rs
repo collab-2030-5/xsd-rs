@@ -59,7 +59,7 @@ impl xsd_api::WriteXml for PowerAttributesType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:PowerAttributesType", true, false)?;
+        self.write_with_name(&mut writer, "power:powerAttributes", true, false)?;
         Ok(())
     }
 }
@@ -144,8 +144,8 @@ impl PowerAttributesType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PowerAttributesType")?;
-        PowerAttributesType::read(reader, &attr, "PowerAttributesType")
+        let attr = xsd_util::read_start_tag(reader, "powerAttributes")?;
+        PowerAttributesType::read(reader, &attr, "powerAttributes")
     }
 }
 

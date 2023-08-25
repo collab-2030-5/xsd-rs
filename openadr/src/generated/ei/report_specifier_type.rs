@@ -77,7 +77,7 @@ impl xsd_api::WriteXml for ReportSpecifierType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:ReportSpecifierType", true, false)?;
+        self.write_with_name(&mut writer, "ei:reportSpecifier", true, false)?;
         Ok(())
     }
 }
@@ -192,8 +192,8 @@ impl ReportSpecifierType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ReportSpecifierType")?;
-        ReportSpecifierType::read(reader, &attr, "ReportSpecifierType")
+        let attr = xsd_util::read_start_tag(reader, "reportSpecifier")?;
+        ReportSpecifierType::read(reader, &attr, "reportSpecifier")
     }
 }
 

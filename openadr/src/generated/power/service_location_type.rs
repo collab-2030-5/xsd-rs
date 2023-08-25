@@ -61,7 +61,7 @@ impl xsd_api::WriteXml for ServiceLocationType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:ServiceLocationType", true, false)?;
+        self.write_with_name(&mut writer, "power:serviceLocation", true, false)?;
         Ok(())
     }
 }
@@ -145,8 +145,8 @@ impl ServiceLocationType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ServiceLocationType")?;
-        ServiceLocationType::read(reader, &attr, "ServiceLocationType")
+        let attr = xsd_util::read_start_tag(reader, "serviceLocation")?;
+        ServiceLocationType::read(reader, &attr, "serviceLocation")
     }
 }
 

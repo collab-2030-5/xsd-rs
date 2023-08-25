@@ -55,7 +55,7 @@ impl xsd_api::WriteXml for PayloadFloatType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:PayloadFloatType", true, false)?;
+        self.write_with_name(&mut writer, "ei:payloadFloat", true, false)?;
         Ok(())
     }
 }
@@ -132,8 +132,8 @@ impl PayloadFloatType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PayloadFloatType")?;
-        PayloadFloatType::read(reader, &attr, "PayloadFloatType")
+        let attr = xsd_util::read_start_tag(reader, "payloadFloat")?;
+        PayloadFloatType::read(reader, &attr, "payloadFloat")
     }
 }
 

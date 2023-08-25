@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for CurrentType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:CurrentType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:current", true, false)?;
         Ok(())
     }
 }
@@ -151,8 +151,8 @@ impl CurrentType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "CurrentType")?;
-        CurrentType::read(reader, &attr, "CurrentType")
+        let attr = xsd_util::read_start_tag(reader, "current")?;
+        CurrentType::read(reader, &attr, "current")
     }
 }
 

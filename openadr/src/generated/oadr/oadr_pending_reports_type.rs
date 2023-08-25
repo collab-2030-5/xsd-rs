@@ -57,7 +57,7 @@ impl xsd_api::WriteXml for OadrPendingReportsType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrPendingReportsType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrPendingReports", true, false)?;
         Ok(())
     }
 }
@@ -135,8 +135,8 @@ impl OadrPendingReportsType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrPendingReportsType")?;
-        OadrPendingReportsType::read(reader, &attr, "oadrPendingReportsType")
+        let attr = xsd_util::read_start_tag(reader, "oadrPendingReports")?;
+        OadrPendingReportsType::read(reader, &attr, "oadrPendingReports")
     }
 }
 

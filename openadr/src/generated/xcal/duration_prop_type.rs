@@ -55,7 +55,7 @@ impl xsd_api::WriteXml for DurationPropType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "xcal:DurationPropType", true, false)?;
+        self.write_with_name(&mut writer, "ei:x-eiNotification", true, false)?;
         Ok(())
     }
 }
@@ -132,8 +132,8 @@ impl DurationPropType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "DurationPropType")?;
-        DurationPropType::read(reader, &attr, "DurationPropType")
+        let attr = xsd_util::read_start_tag(reader, "x-eiNotification")?;
+        DurationPropType::read(reader, &attr, "x-eiNotification")
     }
 }
 

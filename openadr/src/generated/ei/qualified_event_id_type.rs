@@ -62,7 +62,7 @@ impl xsd_api::WriteXml for QualifiedEventIdType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:QualifiedEventIDType", true, false)?;
+        self.write_with_name(&mut writer, "ei:qualifiedEventID", true, false)?;
         Ok(())
     }
 }
@@ -144,8 +144,8 @@ impl QualifiedEventIdType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "QualifiedEventIDType")?;
-        QualifiedEventIdType::read(reader, &attr, "QualifiedEventIDType")
+        let attr = xsd_util::read_start_tag(reader, "qualifiedEventID")?;
+        QualifiedEventIdType::read(reader, &attr, "qualifiedEventID")
     }
 }
 

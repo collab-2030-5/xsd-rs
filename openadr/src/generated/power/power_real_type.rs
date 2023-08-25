@@ -70,7 +70,7 @@ impl xsd_api::WriteXml for PowerRealType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "power:PowerRealType", true, false)?;
+        self.write_with_name(&mut writer, "power:powerReal", true, false)?;
         Ok(())
     }
 }
@@ -167,8 +167,8 @@ impl PowerRealType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "PowerRealType")?;
-        PowerRealType::read(reader, &attr, "PowerRealType")
+        let attr = xsd_util::read_start_tag(reader, "powerReal")?;
+        PowerRealType::read(reader, &attr, "powerReal")
     }
 }
 

@@ -81,7 +81,7 @@ impl xsd_api::WriteXml for OadrReportDescriptionType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrReportDescriptionType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrReportDescription", true, false)?;
         Ok(())
     }
 }
@@ -279,8 +279,8 @@ impl OadrReportDescriptionType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrReportDescriptionType")?;
-        OadrReportDescriptionType::read(reader, &attr, "oadrReportDescriptionType")
+        let attr = xsd_util::read_start_tag(reader, "oadrReportDescription")?;
+        OadrReportDescriptionType::read(reader, &attr, "oadrReportDescription")
     }
 }
 

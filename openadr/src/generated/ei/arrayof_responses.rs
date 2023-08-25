@@ -58,7 +58,7 @@ impl xsd_api::WriteXml for ArrayofResponses {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:ArrayofResponses", true, false)?;
+        self.write_with_name(&mut writer, "ei:responses", true, false)?;
         Ok(())
     }
 }
@@ -137,8 +137,8 @@ impl ArrayofResponses {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "ArrayofResponses")?;
-        ArrayofResponses::read(reader, &attr, "ArrayofResponses")
+        let attr = xsd_util::read_start_tag(reader, "responses")?;
+        ArrayofResponses::read(reader, &attr, "responses")
     }
 }
 

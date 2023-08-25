@@ -61,7 +61,7 @@ impl xsd_api::WriteXml for EiResponseType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:EiResponseType", true, false)?;
+        self.write_with_name(&mut writer, "ei:eiResponse", true, false)?;
         Ok(())
     }
 }
@@ -149,8 +149,8 @@ impl EiResponseType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EiResponseType")?;
-        EiResponseType::read(reader, &attr, "EiResponseType")
+        let attr = xsd_util::read_start_tag(reader, "eiResponse")?;
+        EiResponseType::read(reader, &attr, "eiResponse")
     }
 }
 

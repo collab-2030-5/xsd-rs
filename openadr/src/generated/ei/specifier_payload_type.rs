@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for SpecifierPayloadType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "ei:SpecifierPayloadType", true, false)?;
+        self.write_with_name(&mut writer, "ei:specifierPayload", true, false)?;
         Ok(())
     }
 }
@@ -228,8 +228,8 @@ impl SpecifierPayloadType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "SpecifierPayloadType")?;
-        SpecifierPayloadType::read(reader, &attr, "SpecifierPayloadType")
+        let attr = xsd_util::read_start_tag(reader, "specifierPayload")?;
+        SpecifierPayloadType::read(reader, &attr, "specifierPayload")
     }
 }
 

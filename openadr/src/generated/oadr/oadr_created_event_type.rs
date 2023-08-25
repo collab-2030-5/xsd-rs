@@ -63,7 +63,7 @@ impl xsd_api::WriteXml for OadrCreatedEventType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrCreatedEventType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrCreatedEvent", true, false)?;
         Ok(())
     }
 }
@@ -146,8 +146,8 @@ impl OadrCreatedEventType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCreatedEventType")?;
-        OadrCreatedEventType::read(reader, &attr, "oadrCreatedEventType")
+        let attr = xsd_util::read_start_tag(reader, "oadrCreatedEvent")?;
+        OadrCreatedEventType::read(reader, &attr, "oadrCreatedEvent")
     }
 }
 

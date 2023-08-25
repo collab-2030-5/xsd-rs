@@ -73,7 +73,7 @@ impl xsd_api::WriteXml for OadrDistributeEventType {
         W: std::io::Write,
     {
         let mut writer = config.build_xml_rs().create_writer(writer);
-        self.write_with_name(&mut writer, "oadr:oadrDistributeEventType", true, false)?;
+        self.write_with_name(&mut writer, "oadr:oadrDistributeEvent", true, false)?;
         Ok(())
     }
 }
@@ -172,8 +172,8 @@ impl OadrDistributeEventType {
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrDistributeEventType")?;
-        OadrDistributeEventType::read(reader, &attr, "oadrDistributeEventType")
+        let attr = xsd_util::read_start_tag(reader, "oadrDistributeEvent")?;
+        OadrDistributeEventType::read(reader, &attr, "oadrDistributeEvent")
     }
 }
 
