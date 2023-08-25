@@ -175,4 +175,33 @@ impl Resolver {
             None => None,
         }
     }
+
+    pub fn reverse_alias(&self, id: &TypeId) -> Option<TypeId> {
+        let results: Vec<(&TypeId, &TypeId)> = self
+            .aliases
+            .inner
+            .iter()
+            .filter(|(_key, value)| *value == id)
+            .collect();
+
+        match results.len() {
+            0 => None,
+            1 => Some(results[0].0.clone()),
+            _ => {
+                // TODO: add mapping to config to specify default name to use
+                // when multiple matches found
+                tracing::warn!(
+                    "Resolved multiple names from type {}: {:?}",
+                    id,
+                    results
+                        .iter()
+                        .map(|item| format!("{}", item.0.name))
+                        .collect::<Vec<String>>()
+                );
+
+                tracing::warn!("Using name: {} ", results[0].0.name);
+                Some(results[0].0.clone())
+            }
+        }
+    }
 }

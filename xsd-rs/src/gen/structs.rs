@@ -103,7 +103,7 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
             writeln!(
                 w,
                 "self.write_with_name(&mut writer, \"{}\", true, false)?;",
-                st.id
+                st.element_name
             )?;
             writeln!(w, "Ok(())")
         })?;
@@ -178,13 +178,13 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
             writeln!(
                 w,
                 "let attr = xsd_util::read_start_tag(reader, \"{}\")?;",
-                &st.id.name
+                &st.element_name.name
             )?;
             writeln!(
                 w,
                 "{}::read(reader, &attr, \"{}\")",
                 st.id.name.to_upper_camel_case(),
-                &st.id.name
+                &st.element_name.name
             )
         })?;
         writeln!(w, "}}")?;

@@ -127,9 +127,16 @@ impl UnresolvedStruct {
             }
         }
 
+        // Get element name: <element name="" />
+        let element_name = match resolver.reverse_alias(&self.type_id) {
+            Some(type_id) => type_id.clone(),
+            None => self.type_id.clone(),
+        };
+
         Some(AnyType::Struct(Struct {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
+            element_name,
             base_type,
             fields,
             metadata,

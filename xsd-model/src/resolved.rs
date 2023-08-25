@@ -43,6 +43,7 @@ impl Field {
 pub struct Struct {
     pub comment: Option<String>,
     pub id: TypeId,
+    pub element_name: TypeId,
     pub base_type: Option<Box<Struct>>,
     pub fields: Vec<Field>,
     pub metadata: StructMetadata,
