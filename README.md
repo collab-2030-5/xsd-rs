@@ -8,6 +8,9 @@ cargo run --bin xsd-rs -- generate -i openadr/xsd/oadr_20b.xsd -i openadr/xsd/oa
 ## Schema specified in the config
 cargo run --bin xsd-rs -- generate -c openadr/config.json -o openadr/src/generated/ -r
 
+## Build and format
+cargo run --bin xsd-rs -- generate -c openadr/config.json -o openadr/src/generated/ -r && cd openadr && cargo fmt && cd ../
+
 # Testing the sample
 cargo run --bin xsd-rs -- generate -i openadr/testxsd/oadr_20b.xsd -c openadr/config.json -o openadr/testxsd/src/ -r
 cargo run --example samples
