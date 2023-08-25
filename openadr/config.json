@@ -1,13 +1,18 @@
 {
   "schemas": [
-    "xsd\\oadr_gml_20b.xsd",
-    "xsd\\oadr_ISO_ISO3AlphaCurrencyCode_20100407.xsd",
-    "xsd\\oadr_emix_20b.xsd",
-    "xsd\\oadr_siscale_20b.xsd",
-    "xsd\\oadr_power_20b.xsd"
+    "openadr/xsd/oadr_20b.xsd",
+    "openadr/xsd/oadr_ei_20b.xsd",
+    "openadr/xsd/oadr_emix_20b.xsd",
+    "openadr/xsd/oadr_gml_20b.xsd",
+    "openadr/xsd/oadr_ISO_ISO3AlphaCurrencyCode_20100407.xsd",
+    "openadr/xsd/oadr_power_20b.xsd",
+    "openadr/xsd/oadr_pyld_20b.xsd",
+    "openadr/xsd/oadr_siscale_20b.xsd",
+    "openadr/xsd/oadr_strm_20b.xsd",
+    "openadr/xsd/oadr_xcal_20b.xsd"
   ],
   "base_types": {
-    "whitelist" : {}
+    "whitelist": {}
   },
   "mappings": {
     "type_mappings": {},
