@@ -1,14 +1,6 @@
-#[derive(Copy, Clone, Debug)]
+#[derive(Default, Copy, Clone, Debug)]
 pub struct WriteConfig {
     pub write_document_declaration: bool,
-}
-
-impl Default for WriteConfig {
-    fn default() -> Self {
-        Self {
-            write_document_declaration: false
-        }
-    }
 }
 
 impl WriteConfig {
