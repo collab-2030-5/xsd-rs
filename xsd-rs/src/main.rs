@@ -1108,7 +1108,11 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        let underscore = match attr.len() {
+            0 => "_".to_owned(),
+            _ => "".to_owned(),
+        };
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, {underscore}attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st)?;
