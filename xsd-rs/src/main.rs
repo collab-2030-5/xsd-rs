@@ -1214,7 +1214,7 @@ fn write_base_enum_impl(
                         child.name.to_upper_camel_case()
                     )?;
                 }
-                writeln!(w, "_ => return Err(crate::ReadError::UnknownXsiType),")
+                writeln!(w, "_ => Err(crate::ReadError::UnknownXsiType),")
             })?;
             writeln!(w, "}}")
         })?;
