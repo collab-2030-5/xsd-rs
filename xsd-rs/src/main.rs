@@ -244,7 +244,7 @@ fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalErr
         })?;
         writeln!(w, "}}")?;
         writeln!(w)?;
-        writeln!(w, "pub(crate) fn to_hex(&self) -> String {{")?;
+        writeln!(w, "pub(crate) fn hex_value(&self) -> String {{")?;
         indent(w, |w| {
             writeln!(
                 w,
@@ -459,7 +459,7 @@ impl AttributeTransform {
                 format!("to_hex({}.inner.as_slice())", name)
             }
             Self::HexBitfield(_) => {
-                format!("{}.to_hex()", name)
+                format!("{}.hex_value()", name)
             }
             Self::Duration(x) => match x.as_ref() {
                 NumericDuration::Seconds(_) => {
@@ -588,7 +588,7 @@ impl ElementTransform {
             ElementTransform::HexBitField(_) => {
                 writeln!(
                     w,
-                    "write_simple_tag(writer, \"{}\", &{}.to_hex())?;",
+                    "write_simple_tag(writer, \"{}\", &{}.hex_value())?;",
                     xsd_name, rust_name
                 )
             }
