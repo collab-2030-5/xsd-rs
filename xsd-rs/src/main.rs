@@ -1101,7 +1101,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 
     writeln!(w, "impl {} {{", st.name.to_upper_camel_case())?;
     indent(w, |w| {
-        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st)?;
@@ -1189,7 +1189,7 @@ fn write_base_enum_impl(
         })?;
         writeln!(w, "}}")?;
         writeln!(w)?;
-        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &Vec<xml::attribute::OwnedAttribute>, parent_tag: &str) -> core::result::Result<Self, crate::ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, crate::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "match crate::find_xsi_type(attrs)? {{")?;
             indent(w, |w| {
