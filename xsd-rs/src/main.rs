@@ -566,7 +566,7 @@ impl ElementTransform {
             ElementTransform::HexBytes => {
                 writeln!(
                     w,
-                    "write_hex_tag(writer, \"{}\", &{})?;",
+                    "write_hex_tag(writer, \"{}\", {})?;",
                     xsd_name, rust_name
                 )
             }
@@ -642,6 +642,10 @@ where
     match &elem.multiplicity {
         ElemMultiplicity::Single => {
             let name = format!("self.{}", get_rust_field_name(&elem.name));
+            let name = match transform {
+                ElementTransform::HexBytes => format!("&{name}"),
+                _ => name,
+            };
             transform.write_value(w, &name, &elem.name)?;
         }
         ElemMultiplicity::Vec => {
