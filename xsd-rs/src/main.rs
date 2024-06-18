@@ -1140,7 +1140,10 @@ fn write_base_enum_def(
     config: &BaseTypeConfig,
 ) -> std::io::Result<()> {
     let base_name = st.name.to_upper_camel_case();
-    writeln!(w, "#[derive(serde::Serialize, serde::Deserialize)]")?;
+    writeln!(
+        w,
+        "#[derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)]"
+    )?;
     writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(w, "pub enum {} {{", base_name)?;
     indent(w, |w| {
