@@ -221,7 +221,7 @@ fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalErr
     indent(w, |w| {
         writeln!(
             w,
-            "pub(crate) fn from_hex(hex: &str) -> Result<Self, crate::ReadError> {{"
+            "pub fn from_hex(hex: &str) -> Result<Self, crate::ReadError> {{"
         )?;
         indent(w, |w| {
             writeln!(
@@ -232,9 +232,10 @@ fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalErr
             writeln!(w)?;
             writeln!(w, "let mut value: Self = Default::default();")?;
             writeln!(w)?;
+            let len = bf.bytes.len();
             for (num, byte) in bf.bytes.iter().enumerate() {
                 for (mask, bit) in byte.iter() {
-                    writeln!(w, "if bytes[{}] & 0b{:08b} != 0 {{", num, mask)?;
+                    writeln!(w, "if bytes[{}] & 0b{:08b} != 0 {{", (len - num - 1), mask)?;
                     indent(w, |w| writeln!(w, "value.{} = true;", bit.name))?;
                     writeln!(w, "}}")?;
                 }
@@ -244,7 +245,7 @@ fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalErr
         })?;
         writeln!(w, "}}")?;
         writeln!(w)?;
-        writeln!(w, "pub(crate) fn hex_value(&self) -> String {{")?;
+        writeln!(w, "pub fn hex_value(&self) -> String {{")?;
         indent(w, |w| {
             writeln!(
                 w,
@@ -253,10 +254,13 @@ fn write_bit_field_file(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalErr
                 bf.bytes.len()
             )?;
             writeln!(w)?;
+            let len = bf.bytes.len();
             for (num, byte) in bf.bytes.iter().enumerate() {
                 for (mask, bit) in byte.iter() {
                     writeln!(w, "if self.{} {{", bit.name)?;
-                    indent(w, |w| writeln!(w, "bytes[{}] |= 0b{:08b};", num, mask))?;
+                    indent(w, |w| {
+                        writeln!(w, "bytes[{}] |= 0b{:08b};", (len - num - 1), mask)
+                    })?;
                     writeln!(w, "}}")?;
                 }
             }
