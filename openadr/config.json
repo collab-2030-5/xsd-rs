@@ -1,15 +1,15 @@
 {
   "schemas": [
-    "openadr/xsd/oadr_20b.xsd",
-    "openadr/xsd/oadr_ei_20b.xsd",
-    "openadr/xsd/oadr_emix_20b.xsd",
-    "openadr/xsd/oadr_gml_20b.xsd",
-    "openadr/xsd/oadr_ISO_ISO3AlphaCurrencyCode_20100407.xsd",
-    "openadr/xsd/oadr_power_20b.xsd",
-    "openadr/xsd/oadr_pyld_20b.xsd",
-    "openadr/xsd/oadr_siscale_20b.xsd",
-    "openadr/xsd/oadr_strm_20b.xsd",
-    "openadr/xsd/oadr_xcal_20b.xsd"
+    "openadr/xsd/2.0b/oadr_20b.xsd",
+    "openadr/xsd/2.0b/oadr_ei_20b.xsd",
+    "openadr/xsd/2.0b/oadr_emix_20b.xsd",
+    "openadr/xsd/2.0b/oadr_gml_20b.xsd",
+    "openadr/xsd/2.0b/oadr_ISO_ISO3AlphaCurrencyCode_20100407.xsd",
+    "openadr/xsd/2.0b/oadr_power_20b.xsd",
+    "openadr/xsd/2.0b/oadr_pyld_20b.xsd",
+    "openadr/xsd/2.0b/oadr_siscale_20b.xsd",
+    "openadr/xsd/2.0b/oadr_strm_20b.xsd",
+    "openadr/xsd/2.0b/oadr_xcal_20b.xsd"
   ],
   "base_types": {
     "whitelist": {}
