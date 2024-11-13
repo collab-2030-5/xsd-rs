@@ -71,7 +71,7 @@ impl xsd_api::WriteXml for EnergyApparentType {
 impl EnergyApparentType {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
-        attrs: &Vec<xml::attribute::OwnedAttribute>,
+        attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
     ) -> core::result::Result<Self, xsd_api::ReadError>
     where
