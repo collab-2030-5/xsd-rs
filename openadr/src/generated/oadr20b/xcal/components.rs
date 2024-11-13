@@ -49,7 +49,7 @@ impl xsd_api::WriteXml for Components {
 impl Components {
     pub(crate) fn read<R>(
         reader: &mut xml::reader::EventReader<R>,
-        attrs: &[xml::attribute::OwnedAttribute],
+        _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
     ) -> core::result::Result<Self, xsd_api::ReadError>
     where
