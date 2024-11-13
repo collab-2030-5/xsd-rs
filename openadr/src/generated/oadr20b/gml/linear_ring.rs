@@ -72,12 +72,6 @@ impl LinearRing {
         // one variable for each attribute and element
         let mut gml_pos_list: xsd_util::SetOnce<f64> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

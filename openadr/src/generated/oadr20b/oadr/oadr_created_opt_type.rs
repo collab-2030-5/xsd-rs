@@ -85,6 +85,7 @@ impl OadrCreatedOptType {
         let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
+        #[allow(clippy::single_match)]
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
                 "schemaVersion" => ei_schema_version.set(attr.value.clone())?,

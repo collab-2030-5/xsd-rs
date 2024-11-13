@@ -74,12 +74,6 @@ impl Intervals {
         // one variable for each attribute and element
         let mut ei_interval: Vec<crate::oadr20a::ei::IntervalType> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

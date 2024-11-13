@@ -128,6 +128,7 @@ impl OadrCreateOptType {
         let mut oadr_oadr_device_class: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
 
+        #[allow(clippy::single_match)]
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
                 "schemaVersion" => ei_schema_version.set(attr.value.clone())?,

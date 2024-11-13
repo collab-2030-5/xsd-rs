@@ -89,12 +89,6 @@ impl StreamBaseType {
         let mut strm_intervals: xsd_util::SetOnce<crate::oadr20a::strm::Intervals> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

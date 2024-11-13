@@ -74,12 +74,6 @@ impl OadrProfiles {
         // one variable for each attribute and element
         let mut oadr_profile: Vec<crate::oadr20b::oadr::OadrProfile> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

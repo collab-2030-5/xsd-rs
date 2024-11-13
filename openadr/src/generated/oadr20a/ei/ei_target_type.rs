@@ -89,12 +89,6 @@ impl EiTargetType {
         let mut ei_ven_id: Vec<String> = Default::default();
         let mut ei_party_id: Vec<String> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

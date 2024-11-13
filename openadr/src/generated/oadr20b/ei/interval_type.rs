@@ -91,12 +91,6 @@ impl IntervalType {
         let mut strm_stream_payload_base: Vec<crate::oadr20b::strm::StreamPayloadBaseType> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

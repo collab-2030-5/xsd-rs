@@ -87,12 +87,6 @@ impl PulseCountType {
         let mut item_units: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_pulse_factor: xsd_util::SetOnce<f32> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

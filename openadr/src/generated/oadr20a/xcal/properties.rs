@@ -100,12 +100,6 @@ impl Properties {
         let mut ei_x_ei_recovery: xsd_util::SetOnce<crate::oadr20a::xcal::DurationPropType> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

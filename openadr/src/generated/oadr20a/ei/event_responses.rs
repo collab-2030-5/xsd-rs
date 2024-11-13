@@ -74,12 +74,6 @@ impl EventResponses {
         // one variable for each attribute and element
         let mut event_response: Vec<crate::oadr20a::ei::EventResponse> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

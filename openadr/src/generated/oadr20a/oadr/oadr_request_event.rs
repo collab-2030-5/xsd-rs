@@ -74,12 +74,6 @@ impl OadrRequestEvent {
         let mut pyld_ei_request_event: xsd_util::SetOnce<crate::oadr20a::pyld::EiRequestEvent> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

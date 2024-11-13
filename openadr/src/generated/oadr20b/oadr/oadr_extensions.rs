@@ -74,12 +74,6 @@ impl OadrExtensions {
         // one variable for each attribute and element
         let mut oadr_extension: Vec<crate::oadr20b::oadr::OadrExtension> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

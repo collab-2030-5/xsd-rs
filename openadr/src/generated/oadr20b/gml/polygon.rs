@@ -81,6 +81,7 @@ impl Polygon {
         let mut exterior: xsd_util::SetOnce<crate::oadr20b::gml::Exterior> = Default::default();
         let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
+        #[allow(clippy::single_match)]
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
                 "id" => gml_id.set(attr.value.clone())?,

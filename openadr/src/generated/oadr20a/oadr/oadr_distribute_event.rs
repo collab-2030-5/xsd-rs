@@ -86,12 +86,6 @@ impl OadrDistributeEvent {
         let mut ei_vtn_id: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_event: Vec<crate::oadr20a::oadr::OadrEvent> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

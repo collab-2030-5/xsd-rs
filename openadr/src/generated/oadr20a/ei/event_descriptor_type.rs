@@ -110,12 +110,6 @@ impl EventDescriptorType {
         let mut test_event: xsd_util::SetOnce<String> = Default::default();
         let mut vtn_comment: xsd_util::SetOnce<String> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

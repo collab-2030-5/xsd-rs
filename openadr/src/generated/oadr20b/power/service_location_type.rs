@@ -79,12 +79,6 @@ impl ServiceLocationType {
         let mut gml_feature_collection: xsd_util::SetOnce<crate::oadr20b::gml::FeatureCollection> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

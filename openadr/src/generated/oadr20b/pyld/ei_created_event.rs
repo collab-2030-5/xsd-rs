@@ -83,12 +83,6 @@ impl EiCreatedEvent {
             Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

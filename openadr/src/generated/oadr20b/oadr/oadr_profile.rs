@@ -81,12 +81,6 @@ impl OadrProfile {
         let mut oadr_oadr_transports: xsd_util::SetOnce<crate::oadr20b::oadr::OadrTransports> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

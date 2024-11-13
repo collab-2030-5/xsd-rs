@@ -83,12 +83,6 @@ impl SpecifierPayloadType {
             Default::default();
         let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {
@@ -197,33 +191,6 @@ impl SpecifierPayloadType {
                             )?,
                         ))?
                     }
-                    "powerApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
-                            crate::oadr20b::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
-                            crate::oadr20b::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
-                            crate::oadr20b::power::PowerRealType::read(
-                                reader,
-                                &attributes,
-                                "powerReal",
-                            )?,
-                        ))?
-                    }
                     "energyApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
                             crate::oadr20b::power::EnergyApparentType::read(
@@ -248,6 +215,33 @@ impl SpecifierPayloadType {
                                 reader,
                                 &attributes,
                                 "energyReal",
+                            )?,
+                        ))?
+                    }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
                             )?,
                         ))?
                     }

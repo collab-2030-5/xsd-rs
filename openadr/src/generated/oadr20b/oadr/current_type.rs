@@ -83,12 +83,6 @@ impl CurrentType {
         let mut scale_si_scale_code: xsd_util::SetOnce<crate::oadr20b::scale::SiScaleCodeType> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

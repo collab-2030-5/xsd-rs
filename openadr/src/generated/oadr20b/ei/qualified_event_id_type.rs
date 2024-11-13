@@ -80,12 +80,6 @@ impl QualifiedEventIdType {
         let mut ei_event_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_modification_number: xsd_util::SetOnce<u32> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

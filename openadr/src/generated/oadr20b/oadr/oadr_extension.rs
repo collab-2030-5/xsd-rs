@@ -81,12 +81,6 @@ impl OadrExtension {
         let mut oadr_extension_name: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

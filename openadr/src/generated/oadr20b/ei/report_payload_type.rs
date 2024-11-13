@@ -89,12 +89,6 @@ impl ReportPayloadType {
         let mut ei_payload_base: xsd_util::SetOnce<crate::oadr20b::ei::PayloadBaseType> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

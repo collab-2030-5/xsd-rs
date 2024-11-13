@@ -74,12 +74,6 @@ impl AvailableType {
         let mut xcal_properties: xsd_util::SetOnce<crate::oadr20b::xcal::Properties> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

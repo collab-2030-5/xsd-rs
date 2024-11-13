@@ -82,6 +82,7 @@ impl OadrSignedObject {
             crate::oadr20b::oadr::OadrSignedObjectChoice,
         > = Default::default();
 
+        #[allow(clippy::single_match)]
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
                 "Id" => id.set(attr.value.clone())?,

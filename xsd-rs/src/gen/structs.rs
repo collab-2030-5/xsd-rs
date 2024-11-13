@@ -194,6 +194,13 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
 }
 
 fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Result<()> {
+    if attrs.len() == 0 {
+        return Ok(());
+    }
+
+    if attrs.len() == 1 {
+        writeln!(w, "#[allow(clippy::single_match)]")?;
+    }
     writeln!(w, "for attr in attrs.iter() {{")?;
     indent(w, |w| {
         writeln!(w, "match attr.name.local_name.as_str() {{")?;

@@ -74,12 +74,6 @@ impl SignalPayloadType {
         let mut ei_payload_float: xsd_util::SetOnce<crate::oadr20a::ei::PayloadFloat> =
             Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

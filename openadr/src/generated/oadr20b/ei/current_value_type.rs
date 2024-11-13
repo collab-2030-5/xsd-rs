@@ -74,12 +74,6 @@ impl CurrentValueType {
             crate::oadr20b::ei::CurrentValueTypeChoice,
         > = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {

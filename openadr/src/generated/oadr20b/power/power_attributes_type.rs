@@ -78,12 +78,6 @@ impl PowerAttributesType {
         let mut voltage: xsd_util::SetOnce<f64> = Default::default();
         let mut ac: xsd_util::SetOnce<bool> = Default::default();
 
-        for attr in attrs.iter() {
-            match attr.name.local_name.as_str() {
-                _ => {} // ignore unknown attributes
-            };
-        }
-
         loop {
             match reader.next()? {
                 xml::reader::XmlEvent::EndElement { name } => {
