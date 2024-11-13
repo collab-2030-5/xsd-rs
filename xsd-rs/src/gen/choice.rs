@@ -40,7 +40,7 @@ fn write_impl(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::Error> 
     indent(w, |w| {
         write_serializer(w, choice)?;
         writeln!(w)?;
-        write_deserializer(w, choice)?;
+        // write_deserializer(w, choice)?;
         Ok(())
     })?;
     writeln!(w, "}}")?;
@@ -77,10 +77,11 @@ fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::E
 }
 
 fn write_deserializer(w: &mut dyn Write, _choice: &Choice) -> Result<(), std::io::Error> {
-    writeln!(w, "pub(crate) fn read<R>(_reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
-    indent(w, |w| {
-        writeln!(w, "unimplemented!()")?;
-        Ok(())
-    })?;
-    writeln!(w, "}}")
+    // writeln!(w, "pub(crate) fn read<R>(_reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
+    // indent(w, |w| {
+    //     writeln!(w, "unimplemented!()")?;
+    //     Ok(())
+    // })?;
+    // writeln!(w, "}}")
+    Ok(())
 }
