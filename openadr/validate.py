@@ -9,8 +9,8 @@ if len(sys.argv) != 2:
     exit(0)
 
 path = sys.argv[1]
-file = open('openadr/xsd/pristine/oadr_20b.xsd').read()
-schema = xmlschema.XMLSchema(file, base_url='openadr/xsd/pristine/')
+file = open('openadr/xsd/2.0b/pristine/oadr_20b.xsd').read()
+schema = xmlschema.XMLSchema(file, base_url='openadr/xsd/2.0b/pristine/')
 
 for filename in glob.iglob(path + '**/*.xml', recursive=True):
     try:
