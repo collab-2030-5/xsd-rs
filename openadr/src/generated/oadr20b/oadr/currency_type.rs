@@ -3,10 +3,10 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CurrencyType {
-    pub item_description: crate::oadr::CurrencyItemDescriptionType,
+    pub item_description: crate::oadr20b::oadr::CurrencyItemDescriptionType,
     /// ISO enumeration of currency types, such as USD
-    pub item_units: crate::clm5_iso42173a::Iso3AlphaCurrencyCodeContentType,
-    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
+    pub item_units: crate::oadr20b::clm5_iso42173a::Iso3AlphaCurrencyCodeContentType,
+    pub scale_si_scale_code: crate::oadr20b::scale::SiScaleCodeType,
 }
 
 impl CurrencyType {
@@ -75,12 +75,13 @@ impl CurrencyType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: xsd_util::SetOnce<crate::oadr::CurrencyItemDescriptionType> =
-            Default::default();
-        let mut item_units: xsd_util::SetOnce<
-            crate::clm5_iso42173a::Iso3AlphaCurrencyCodeContentType,
+        let mut item_description: xsd_util::SetOnce<
+            crate::oadr20b::oadr::CurrencyItemDescriptionType,
         > = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
+        let mut item_units: xsd_util::SetOnce<
+            crate::oadr20b::clm5_iso42173a::Iso3AlphaCurrencyCodeContentType,
+        > = Default::default();
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::oadr20b::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {

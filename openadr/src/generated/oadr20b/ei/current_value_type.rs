@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CurrentValueType {
-    pub current_value_type_choice: crate::ei::CurrentValueTypeChoice,
+    pub current_value_type_choice: crate::oadr20b::ei::CurrentValueTypeChoice,
 }
 
 impl CurrentValueType {
@@ -70,8 +70,9 @@ impl CurrentValueType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut current_value_type_choice: xsd_util::SetOnce<crate::ei::CurrentValueTypeChoice> =
-            Default::default();
+        let mut current_value_type_choice: xsd_util::SetOnce<
+            crate::oadr20b::ei::CurrentValueTypeChoice,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,8 +95,12 @@ impl CurrentValueType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "payloadFloat" => current_value_type_choice.set(
-                        crate::ei::CurrentValueTypeChoice::EiPayloadFloat(
-                            crate::ei::PayloadFloatType::read(reader, &attributes, "payloadFloat")?,
+                        crate::oadr20b::ei::CurrentValueTypeChoice::EiPayloadFloat(
+                            crate::oadr20b::ei::PayloadFloatType::read(
+                                reader,
+                                &attributes,
+                                "payloadFloat",
+                            )?,
                         ),
                     )?,
                     name => {

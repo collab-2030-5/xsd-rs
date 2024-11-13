@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrTransport {
-    pub oadr_oadr_transport_name: crate::oadr::OadrTransportType,
+    pub oadr_oadr_transport_name: crate::oadr20b::oadr::OadrTransportType,
 }
 
 impl OadrTransport {
@@ -74,8 +74,9 @@ impl OadrTransport {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_transport_name: xsd_util::SetOnce<crate::oadr::OadrTransportType> =
-            Default::default();
+        let mut oadr_oadr_transport_name: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrTransportType,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {

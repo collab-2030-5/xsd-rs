@@ -3,14 +3,14 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiTargetType {
-    pub power_aggregated_pnode: Vec<crate::power::AggregatedPnodeType>,
-    pub power_end_device_asset: Vec<crate::power::EndDeviceAssetType>,
-    pub power_meter_asset: Vec<crate::power::MeterAssetType>,
-    pub power_pnode: Vec<crate::power::PnodeType>,
-    pub emix_service_area: Vec<crate::emix::ServiceAreaType>,
-    pub power_service_delivery_point: Vec<crate::power::ServiceDeliveryPointType>,
-    pub power_service_location: Vec<crate::power::ServiceLocationType>,
-    pub power_transport_interface: Vec<crate::power::TransportInterfaceType>,
+    pub power_aggregated_pnode: Vec<crate::oadr20b::power::AggregatedPnodeType>,
+    pub power_end_device_asset: Vec<crate::oadr20b::power::EndDeviceAssetType>,
+    pub power_meter_asset: Vec<crate::oadr20b::power::MeterAssetType>,
+    pub power_pnode: Vec<crate::oadr20b::power::PnodeType>,
+    pub emix_service_area: Vec<crate::oadr20b::emix::ServiceAreaType>,
+    pub power_service_delivery_point: Vec<crate::oadr20b::power::ServiceDeliveryPointType>,
+    pub power_service_location: Vec<crate::oadr20b::power::ServiceLocationType>,
+    pub power_transport_interface: Vec<crate::oadr20b::power::TransportInterfaceType>,
     pub ei_group_id: Vec<String>,
     pub ei_group_name: Vec<String>,
     pub ei_resource_id: Vec<String>,
@@ -120,15 +120,18 @@ impl EiTargetType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut power_aggregated_pnode: Vec<crate::power::AggregatedPnodeType> = Default::default();
-        let mut power_end_device_asset: Vec<crate::power::EndDeviceAssetType> = Default::default();
-        let mut power_meter_asset: Vec<crate::power::MeterAssetType> = Default::default();
-        let mut power_pnode: Vec<crate::power::PnodeType> = Default::default();
-        let mut emix_service_area: Vec<crate::emix::ServiceAreaType> = Default::default();
-        let mut power_service_delivery_point: Vec<crate::power::ServiceDeliveryPointType> =
+        let mut power_aggregated_pnode: Vec<crate::oadr20b::power::AggregatedPnodeType> =
             Default::default();
-        let mut power_service_location: Vec<crate::power::ServiceLocationType> = Default::default();
-        let mut power_transport_interface: Vec<crate::power::TransportInterfaceType> =
+        let mut power_end_device_asset: Vec<crate::oadr20b::power::EndDeviceAssetType> =
+            Default::default();
+        let mut power_meter_asset: Vec<crate::oadr20b::power::MeterAssetType> = Default::default();
+        let mut power_pnode: Vec<crate::oadr20b::power::PnodeType> = Default::default();
+        let mut emix_service_area: Vec<crate::oadr20b::emix::ServiceAreaType> = Default::default();
+        let mut power_service_delivery_point: Vec<crate::oadr20b::power::ServiceDeliveryPointType> =
+            Default::default();
+        let mut power_service_location: Vec<crate::oadr20b::power::ServiceLocationType> =
+            Default::default();
+        let mut power_transport_interface: Vec<crate::oadr20b::power::TransportInterfaceType> =
             Default::default();
         let mut ei_group_id: Vec<String> = Default::default();
         let mut ei_group_name: Vec<String> = Default::default();
@@ -156,56 +159,60 @@ impl EiTargetType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "aggregatedPnode" => {
-                        power_aggregated_pnode.push(crate::power::AggregatedPnodeType::read(
+                    "aggregatedPnode" => power_aggregated_pnode.push(
+                        crate::oadr20b::power::AggregatedPnodeType::read(
                             reader,
                             &attributes,
                             "aggregatedPnode",
-                        )?)
-                    }
-                    "endDeviceAsset" => {
-                        power_end_device_asset.push(crate::power::EndDeviceAssetType::read(
+                        )?,
+                    ),
+                    "endDeviceAsset" => power_end_device_asset.push(
+                        crate::oadr20b::power::EndDeviceAssetType::read(
                             reader,
                             &attributes,
                             "endDeviceAsset",
+                        )?,
+                    ),
+                    "meterAsset" => {
+                        power_meter_asset.push(crate::oadr20b::power::MeterAssetType::read(
+                            reader,
+                            &attributes,
+                            "meterAsset",
                         )?)
                     }
-                    "meterAsset" => power_meter_asset.push(crate::power::MeterAssetType::read(
-                        reader,
-                        &attributes,
-                        "meterAsset",
-                    )?),
-                    "pnode" => power_pnode.push(crate::power::PnodeType::read(
+                    "pnode" => power_pnode.push(crate::oadr20b::power::PnodeType::read(
                         reader,
                         &attributes,
                         "pnode",
                     )?),
-                    "serviceArea" => emix_service_area.push(crate::emix::ServiceAreaType::read(
-                        reader,
-                        &attributes,
-                        "serviceArea",
-                    )?),
+                    "serviceArea" => {
+                        emix_service_area.push(crate::oadr20b::emix::ServiceAreaType::read(
+                            reader,
+                            &attributes,
+                            "serviceArea",
+                        )?)
+                    }
                     "serviceDeliveryPoint" => power_service_delivery_point.push(
-                        crate::power::ServiceDeliveryPointType::read(
+                        crate::oadr20b::power::ServiceDeliveryPointType::read(
                             reader,
                             &attributes,
                             "serviceDeliveryPoint",
                         )?,
                     ),
-                    "serviceLocation" => {
-                        power_service_location.push(crate::power::ServiceLocationType::read(
+                    "serviceLocation" => power_service_location.push(
+                        crate::oadr20b::power::ServiceLocationType::read(
                             reader,
                             &attributes,
                             "serviceLocation",
-                        )?)
-                    }
-                    "transportInterface" => {
-                        power_transport_interface.push(crate::power::TransportInterfaceType::read(
+                        )?,
+                    ),
+                    "transportInterface" => power_transport_interface.push(
+                        crate::oadr20b::power::TransportInterfaceType::read(
                             reader,
                             &attributes,
                             "transportInterface",
-                        )?)
-                    }
+                        )?,
+                    ),
                     "groupID" => ei_group_id.push(xsd_util::read_string(reader, "groupID")?),
                     "groupName" => ei_group_name.push(xsd_util::read_string(reader, "groupName")?),
                     "resourceID" => {

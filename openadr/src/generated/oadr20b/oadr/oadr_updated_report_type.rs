@@ -3,8 +3,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrUpdatedReportType {
-    pub ei_ei_response: crate::ei::EiResponseType,
-    pub oadr_oadr_cancel_report: Option<crate::oadr::OadrCancelReportType>,
+    pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
+    pub oadr_oadr_cancel_report: Option<crate::oadr20b::oadr::OadrCancelReportType>,
     pub ei_ven_id: Option<String>,
     pub ei_schema_version: Option<String>,
 }
@@ -86,9 +86,11 @@ impl OadrUpdatedReportType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
-        let mut oadr_oadr_cancel_report: xsd_util::SetOnce<crate::oadr::OadrCancelReportType> =
+        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
             Default::default();
+        let mut oadr_oadr_cancel_report: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrCancelReportType,
+        > = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -113,18 +115,20 @@ impl OadrUpdatedReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "eiResponse",
-                    )?)?,
-                    "oadrCancelReport" => {
-                        oadr_oadr_cancel_report.set(crate::oadr::OadrCancelReportType::read(
+                    "eiResponse" => {
+                        ei_ei_response.set(crate::oadr20b::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?
+                    }
+                    "oadrCancelReport" => oadr_oadr_cancel_report.set(
+                        crate::oadr20b::oadr::OadrCancelReportType::read(
                             reader,
                             &attributes,
                             "oadrCancelReport",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(

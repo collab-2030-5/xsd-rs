@@ -2,9 +2,9 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EnergyItemType {
-    EnergyApparent(crate::power::EnergyApparentType),
-    EnergyReactive(crate::power::EnergyReactiveType),
-    EnergyReal(crate::power::EnergyRealType),
+    EnergyApparent(crate::oadr20b::power::EnergyApparentType),
+    EnergyReactive(crate::oadr20b::power::EnergyReactiveType),
+    EnergyReal(crate::oadr20b::power::EnergyRealType),
 }
 
 impl EnergyItemType {

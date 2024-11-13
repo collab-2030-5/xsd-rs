@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrProfiles {
-    pub oadr_profile: Vec<crate::oadr::OadrProfile>,
+    pub oadr_profile: Vec<crate::oadr20b::oadr::OadrProfile>,
 }
 
 impl OadrProfiles {
@@ -72,7 +72,7 @@ impl OadrProfiles {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_profile: Vec<crate::oadr::OadrProfile> = Default::default();
+        let mut oadr_profile: Vec<crate::oadr20b::oadr::OadrProfile> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,7 +94,7 @@ impl OadrProfiles {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrProfile" => oadr_profile.push(crate::oadr::OadrProfile::read(
+                    "oadrProfile" => oadr_profile.push(crate::oadr20b::oadr::OadrProfile::read(
                         reader,
                         &attributes,
                         "oadrProfile",

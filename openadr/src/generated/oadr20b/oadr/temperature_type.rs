@@ -5,8 +5,8 @@ use xml::writer::*;
 pub struct TemperatureType {
     pub item_description: String,
     /// Temperature in Celsius or Fahrenheit
-    pub item_units: crate::oadr::TemperatureUnitType,
-    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
+    pub item_units: crate::oadr20b::oadr::TemperatureUnitType,
+    pub scale_si_scale_code: crate::oadr20b::scale::SiScaleCodeType,
 }
 
 impl TemperatureType {
@@ -80,9 +80,9 @@ impl TemperatureType {
     {
         // one variable for each attribute and element
         let mut item_description: xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: xsd_util::SetOnce<crate::oadr::TemperatureUnitType> =
+        let mut item_units: xsd_util::SetOnce<crate::oadr20b::oadr::TemperatureUnitType> =
             Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::oadr20b::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {

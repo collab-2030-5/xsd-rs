@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrUpdateReportType {
     pub pyld_request_id: String,
-    pub oadr_oadr_report: Vec<crate::oadr::OadrReportType>,
+    pub oadr_oadr_report: Vec<crate::oadr20b::oadr::OadrReportType>,
     pub ei_ven_id: Option<String>,
     pub ei_schema_version: Option<String>,
 }
@@ -86,7 +86,7 @@ impl OadrUpdateReportType {
     {
         // one variable for each attribute and element
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_report: Vec<crate::oadr::OadrReportType> = Default::default();
+        let mut oadr_oadr_report: Vec<crate::oadr20b::oadr::OadrReportType> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -114,11 +114,13 @@ impl OadrUpdateReportType {
                     "requestID" => {
                         pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "oadrReport" => oadr_oadr_report.push(crate::oadr::OadrReportType::read(
-                        reader,
-                        &attributes,
-                        "oadrReport",
-                    )?),
+                    "oadrReport" => {
+                        oadr_oadr_report.push(crate::oadr20b::oadr::OadrReportType::read(
+                            reader,
+                            &attributes,
+                            "oadrReport",
+                        )?)
+                    }
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(

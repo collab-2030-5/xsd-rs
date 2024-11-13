@@ -4,9 +4,9 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiEventSignalsType {
     /// Interval data for an event
-    pub ei_ei_event_signal: Vec<crate::ei::EiEventSignalType>,
+    pub ei_ei_event_signal: Vec<crate::oadr20b::ei::EiEventSignalType>,
     /// Interval data for a baseline
-    pub ei_ei_event_baseline: Option<crate::ei::EiEventBaselineType>,
+    pub ei_ei_event_baseline: Option<crate::oadr20b::ei::EiEventBaselineType>,
 }
 
 impl EiEventSignalsType {
@@ -78,8 +78,8 @@ impl EiEventSignalsType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_event_signal: Vec<crate::ei::EiEventSignalType> = Default::default();
-        let mut ei_ei_event_baseline: xsd_util::SetOnce<crate::ei::EiEventBaselineType> =
+        let mut ei_ei_event_signal: Vec<crate::oadr20b::ei::EiEventSignalType> = Default::default();
+        let mut ei_ei_event_baseline: xsd_util::SetOnce<crate::oadr20b::ei::EiEventBaselineType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -102,13 +102,15 @@ impl EiEventSignalsType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiEventSignal" => ei_ei_event_signal.push(crate::ei::EiEventSignalType::read(
-                        reader,
-                        &attributes,
-                        "eiEventSignal",
-                    )?),
+                    "eiEventSignal" => {
+                        ei_ei_event_signal.push(crate::oadr20b::ei::EiEventSignalType::read(
+                            reader,
+                            &attributes,
+                            "eiEventSignal",
+                        )?)
+                    }
                     "eiEventBaseline" => {
-                        ei_ei_event_baseline.set(crate::ei::EiEventBaselineType::read(
+                        ei_ei_event_baseline.set(crate::oadr20b::ei::EiEventBaselineType::read(
                             reader,
                             &attributes,
                             "eiEventBaseline",

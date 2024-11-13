@@ -4,7 +4,7 @@ use xml::writer::*;
 /// A customer ServiceLocation has one or more ServiceDeliveryPoint(s), which in turn relate to Meters. The location may be a point or a polygon, depending on the specific circumstances. For distribution, the ServiceLocation is typically the location of the utility customer's premise.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceLocationType {
-    pub gml_feature_collection: crate::gml::FeatureCollection,
+    pub gml_feature_collection: crate::oadr20b::gml::FeatureCollection,
 }
 
 impl ServiceLocationType {
@@ -76,7 +76,7 @@ impl ServiceLocationType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_feature_collection: xsd_util::SetOnce<crate::gml::FeatureCollection> =
+        let mut gml_feature_collection: xsd_util::SetOnce<crate::oadr20b::gml::FeatureCollection> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -100,7 +100,7 @@ impl ServiceLocationType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "FeatureCollection" => {
-                        gml_feature_collection.set(crate::gml::FeatureCollection::read(
+                        gml_feature_collection.set(crate::oadr20b::gml::FeatureCollection::read(
                             reader,
                             &attributes,
                             "FeatureCollection",

@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VavailabilityType {
-    pub components: crate::xcal::ArrayOfVavailabilityContainedComponents,
+    pub components: crate::oadr20b::xcal::ArrayOfVavailabilityContainedComponents,
 }
 
 impl VavailabilityType {
@@ -72,7 +72,7 @@ impl VavailabilityType {
     {
         // one variable for each attribute and element
         let mut components: xsd_util::SetOnce<
-            crate::xcal::ArrayOfVavailabilityContainedComponents,
+            crate::oadr20b::xcal::ArrayOfVavailabilityContainedComponents,
         > = Default::default();
 
         for attr in attrs.iter() {
@@ -96,7 +96,7 @@ impl VavailabilityType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "components" => components.set(
-                        crate::xcal::ArrayOfVavailabilityContainedComponents::read(
+                        crate::oadr20b::xcal::ArrayOfVavailabilityContainedComponents::read(
                             reader,
                             &attributes,
                             "components",

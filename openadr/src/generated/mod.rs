@@ -1,3 +1,2 @@
-mod oadr20b;
-
-pub use oadr20b::*;
+pub mod oadr20a;
+pub mod oadr20b;

@@ -3,10 +3,10 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiEventType {
-    pub ei_event_descriptor: crate::ei::EventDescriptorType,
-    pub ei_ei_active_period: crate::ei::EiActivePeriodType,
-    pub ei_ei_event_signals: crate::ei::EiEventSignalsType,
-    pub ei_ei_target: crate::ei::EiTargetType,
+    pub ei_event_descriptor: crate::oadr20b::ei::EventDescriptorType,
+    pub ei_ei_active_period: crate::oadr20b::ei::EiActivePeriodType,
+    pub ei_ei_event_signals: crate::oadr20b::ei::EiEventSignalsType,
+    pub ei_ei_target: crate::oadr20b::ei::EiTargetType,
 }
 
 impl EiEventType {
@@ -80,13 +80,14 @@ impl EiEventType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_event_descriptor: xsd_util::SetOnce<crate::ei::EventDescriptorType> =
+        let mut ei_event_descriptor: xsd_util::SetOnce<crate::oadr20b::ei::EventDescriptorType> =
             Default::default();
-        let mut ei_ei_active_period: xsd_util::SetOnce<crate::ei::EiActivePeriodType> =
+        let mut ei_ei_active_period: xsd_util::SetOnce<crate::oadr20b::ei::EiActivePeriodType> =
             Default::default();
-        let mut ei_ei_event_signals: xsd_util::SetOnce<crate::ei::EiEventSignalsType> =
+        let mut ei_ei_event_signals: xsd_util::SetOnce<crate::oadr20b::ei::EiEventSignalsType> =
             Default::default();
-        let mut ei_ei_target: xsd_util::SetOnce<crate::ei::EiTargetType> = Default::default();
+        let mut ei_ei_target: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -109,19 +110,27 @@ impl EiEventType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "eventDescriptor" => {
-                        ei_event_descriptor.set(crate::ei::EventDescriptorType::read(
+                        ei_event_descriptor.set(crate::oadr20b::ei::EventDescriptorType::read(
                             reader,
                             &attributes,
                             "eventDescriptor",
                         )?)?
                     }
-                    "eiActivePeriod" => ei_ei_active_period.set(
-                        crate::ei::EiActivePeriodType::read(reader, &attributes, "eiActivePeriod")?,
-                    )?,
-                    "eiEventSignals" => ei_ei_event_signals.set(
-                        crate::ei::EiEventSignalsType::read(reader, &attributes, "eiEventSignals")?,
-                    )?,
-                    "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                    "eiActivePeriod" => {
+                        ei_ei_active_period.set(crate::oadr20b::ei::EiActivePeriodType::read(
+                            reader,
+                            &attributes,
+                            "eiActivePeriod",
+                        )?)?
+                    }
+                    "eiEventSignals" => {
+                        ei_ei_event_signals.set(crate::oadr20b::ei::EiEventSignalsType::read(
+                            reader,
+                            &attributes,
+                            "eiEventSignals",
+                        )?)?
+                    }
+                    "eiTarget" => ei_ei_target.set(crate::oadr20b::ei::EiTargetType::read(
                         reader,
                         &attributes,
                         "eiTarget",

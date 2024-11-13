@@ -5,8 +5,8 @@ use xml::writer::*;
 pub struct PowerApparentType {
     pub item_description: String,
     pub item_units: String,
-    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
-    pub power_power_attributes: crate::power::PowerAttributesType,
+    pub scale_si_scale_code: crate::oadr20b::scale::SiScaleCodeType,
+    pub power_power_attributes: crate::oadr20b::power::PowerAttributesType,
 }
 
 impl PowerApparentType {
@@ -87,10 +87,11 @@ impl PowerApparentType {
         // one variable for each attribute and element
         let mut item_description: xsd_util::SetOnce<String> = Default::default();
         let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::oadr20b::scale::SiScaleCodeType> =
             Default::default();
-        let mut power_power_attributes: xsd_util::SetOnce<crate::power::PowerAttributesType> =
-            Default::default();
+        let mut power_power_attributes: xsd_util::SetOnce<
+            crate::oadr20b::power::PowerAttributesType,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -118,13 +119,13 @@ impl PowerApparentType {
                     "itemUnits" => item_units.set(xsd_util::read_string(reader, "itemUnits")?)?,
                     "siScaleCode" => scale_si_scale_code
                         .set(xsd_util::read_string_enum(reader, "siScaleCode")?)?,
-                    "powerAttributes" => {
-                        power_power_attributes.set(crate::power::PowerAttributesType::read(
+                    "powerAttributes" => power_power_attributes.set(
+                        crate::oadr20b::power::PowerAttributesType::read(
                             reader,
                             &attributes,
                             "powerAttributes",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

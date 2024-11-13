@@ -3,10 +3,10 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrLoadControlStateType {
-    pub oadr_capacity: Option<crate::oadr::OadrLoadControlStateTypeType>,
-    pub oadr_level_offset: Option<crate::oadr::OadrLoadControlStateTypeType>,
-    pub oadr_percent_offset: Option<crate::oadr::OadrLoadControlStateTypeType>,
-    pub oadr_set_point: Option<crate::oadr::OadrLoadControlStateTypeType>,
+    pub oadr_capacity: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,
+    pub oadr_level_offset: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,
+    pub oadr_percent_offset: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,
+    pub oadr_set_point: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,
 }
 
 impl OadrLoadControlStateType {
@@ -84,14 +84,18 @@ impl OadrLoadControlStateType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_capacity: xsd_util::SetOnce<crate::oadr::OadrLoadControlStateTypeType> =
-            Default::default();
-        let mut oadr_level_offset: xsd_util::SetOnce<crate::oadr::OadrLoadControlStateTypeType> =
-            Default::default();
-        let mut oadr_percent_offset: xsd_util::SetOnce<crate::oadr::OadrLoadControlStateTypeType> =
-            Default::default();
-        let mut oadr_set_point: xsd_util::SetOnce<crate::oadr::OadrLoadControlStateTypeType> =
-            Default::default();
+        let mut oadr_capacity: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrLoadControlStateTypeType,
+        > = Default::default();
+        let mut oadr_level_offset: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrLoadControlStateTypeType,
+        > = Default::default();
+        let mut oadr_percent_offset: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrLoadControlStateTypeType,
+        > = Default::default();
+        let mut oadr_set_point: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrLoadControlStateTypeType,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -113,34 +117,34 @@ impl OadrLoadControlStateType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrCapacity" => {
-                        oadr_capacity.set(crate::oadr::OadrLoadControlStateTypeType::read(
+                    "oadrCapacity" => oadr_capacity.set(
+                        crate::oadr20b::oadr::OadrLoadControlStateTypeType::read(
                             reader,
                             &attributes,
                             "oadrCapacity",
-                        )?)?
-                    }
-                    "oadrLevelOffset" => {
-                        oadr_level_offset.set(crate::oadr::OadrLoadControlStateTypeType::read(
+                        )?,
+                    )?,
+                    "oadrLevelOffset" => oadr_level_offset.set(
+                        crate::oadr20b::oadr::OadrLoadControlStateTypeType::read(
                             reader,
                             &attributes,
                             "oadrLevelOffset",
-                        )?)?
-                    }
-                    "oadrPercentOffset" => {
-                        oadr_percent_offset.set(crate::oadr::OadrLoadControlStateTypeType::read(
+                        )?,
+                    )?,
+                    "oadrPercentOffset" => oadr_percent_offset.set(
+                        crate::oadr20b::oadr::OadrLoadControlStateTypeType::read(
                             reader,
                             &attributes,
                             "oadrPercentOffset",
-                        )?)?
-                    }
-                    "oadrSetPoint" => {
-                        oadr_set_point.set(crate::oadr::OadrLoadControlStateTypeType::read(
+                        )?,
+                    )?,
+                    "oadrSetPoint" => oadr_set_point.set(
+                        crate::oadr20b::oadr::OadrLoadControlStateTypeType::read(
                             reader,
                             &attributes,
                             "oadrSetPoint",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Location {
-    pub polygon: crate::gml::Polygon,
+    pub polygon: crate::oadr20b::gml::Polygon,
 }
 
 impl Location {
@@ -71,7 +71,7 @@ impl Location {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut polygon: xsd_util::SetOnce<crate::gml::Polygon> = Default::default();
+        let mut polygon: xsd_util::SetOnce<crate::oadr20b::gml::Polygon> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,9 +93,11 @@ impl Location {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "Polygon" => {
-                        polygon.set(crate::gml::Polygon::read(reader, &attributes, "Polygon")?)?
-                    }
+                    "Polygon" => polygon.set(crate::oadr20b::gml::Polygon::read(
+                        reader,
+                        &attributes,
+                        "Polygon",
+                    )?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

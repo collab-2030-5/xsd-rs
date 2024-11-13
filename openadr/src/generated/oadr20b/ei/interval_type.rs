@@ -3,10 +3,10 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IntervalType {
-    pub xcal_dtstart: Option<crate::xcal::Dtstart>,
-    pub xcal_duration: Option<crate::xcal::DurationPropType>,
-    pub xcal_uid: Option<crate::xcal::Uid>,
-    pub strm_stream_payload_base: Vec<crate::strm::StreamPayloadBaseType>,
+    pub xcal_dtstart: Option<crate::oadr20b::xcal::Dtstart>,
+    pub xcal_duration: Option<crate::oadr20b::xcal::DurationPropType>,
+    pub xcal_uid: Option<crate::oadr20b::xcal::Uid>,
+    pub strm_stream_payload_base: Vec<crate::oadr20b::strm::StreamPayloadBaseType>,
 }
 
 impl IntervalType {
@@ -84,11 +84,11 @@ impl IntervalType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut xcal_uid: xsd_util::SetOnce<crate::xcal::Uid> = Default::default();
-        let mut strm_stream_payload_base: Vec<crate::strm::StreamPayloadBaseType> =
+        let mut xcal_uid: xsd_util::SetOnce<crate::oadr20b::xcal::Uid> = Default::default();
+        let mut strm_stream_payload_base: Vec<crate::oadr20b::strm::StreamPayloadBaseType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -111,20 +111,26 @@ impl IntervalType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::oadr20b::xcal::Dtstart::read(
                         reader,
                         &attributes,
                         "dtstart",
                     )?)?,
-                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
+                    "duration" => {
+                        xcal_duration.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "duration",
+                        )?)?
+                    }
+                    "uid" => xcal_uid.set(crate::oadr20b::xcal::Uid::read(
                         reader,
                         &attributes,
-                        "duration",
+                        "uid",
                     )?)?,
-                    "uid" => xcal_uid.set(crate::xcal::Uid::read(reader, &attributes, "uid")?)?,
                     "oadrReportPayload" => strm_stream_payload_base.push(
-                        crate::strm::StreamPayloadBaseType::OadrReportPayload(
-                            crate::oadr::OadrReportPayloadType::read(
+                        crate::oadr20b::strm::StreamPayloadBaseType::OadrReportPayload(
+                            crate::oadr20b::oadr::OadrReportPayloadType::read(
                                 reader,
                                 &attributes,
                                 "oadrReportPayload",
@@ -132,8 +138,8 @@ impl IntervalType {
                         ),
                     ),
                     "signalPayload" => strm_stream_payload_base.push(
-                        crate::strm::StreamPayloadBaseType::SignalPayload(
-                            crate::ei::SignalPayloadType::read(
+                        crate::oadr20b::strm::StreamPayloadBaseType::SignalPayload(
+                            crate::oadr20b::ei::SignalPayloadType::read(
                                 reader,
                                 &attributes,
                                 "signalPayload",

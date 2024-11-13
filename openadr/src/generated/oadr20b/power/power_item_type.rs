@@ -2,9 +2,9 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PowerItemType {
-    PowerApparent(crate::power::PowerApparentType),
-    PowerReactive(crate::power::PowerReactiveType),
-    PowerReal(crate::power::PowerRealType),
+    PowerApparent(crate::oadr20b::power::PowerApparentType),
+    PowerReactive(crate::oadr20b::power::PowerReactiveType),
+    PowerReal(crate::oadr20b::power::PowerRealType),
 }
 
 impl PowerItemType {

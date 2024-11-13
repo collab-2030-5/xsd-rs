@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrProfile {
     pub oadr_oadr_profile_name: String,
-    pub oadr_oadr_transports: crate::oadr::OadrTransports,
+    pub oadr_oadr_transports: crate::oadr20b::oadr::OadrTransports,
 }
 
 impl OadrProfile {
@@ -78,7 +78,7 @@ impl OadrProfile {
     {
         // one variable for each attribute and element
         let mut oadr_oadr_profile_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_transports: xsd_util::SetOnce<crate::oadr::OadrTransports> =
+        let mut oadr_oadr_transports: xsd_util::SetOnce<crate::oadr20b::oadr::OadrTransports> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -103,9 +103,13 @@ impl OadrProfile {
                 } => match name.local_name.as_str() {
                     "oadrProfileName" => oadr_oadr_profile_name
                         .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
-                    "oadrTransports" => oadr_oadr_transports.set(
-                        crate::oadr::OadrTransports::read(reader, &attributes, "oadrTransports")?,
-                    )?,
+                    "oadrTransports" => {
+                        oadr_oadr_transports.set(crate::oadr20b::oadr::OadrTransports::read(
+                            reader,
+                            &attributes,
+                            "oadrTransports",
+                        )?)?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

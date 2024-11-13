@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Intervals {
-    pub ei_interval: Vec<crate::ei::IntervalType>,
+    pub ei_interval: Vec<crate::oadr20b::ei::IntervalType>,
 }
 
 impl Intervals {
@@ -72,7 +72,7 @@ impl Intervals {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_interval: Vec<crate::ei::IntervalType> = Default::default();
+        let mut ei_interval: Vec<crate::oadr20b::ei::IntervalType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,7 +94,7 @@ impl Intervals {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "interval" => ei_interval.push(crate::ei::IntervalType::read(
+                    "interval" => ei_interval.push(crate::oadr20b::ei::IntervalType::read(
                         reader,
                         &attributes,
                         "interval",

@@ -3,11 +3,11 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrDistributeEventType {
-    pub ei_ei_response: Option<crate::ei::EiResponseType>,
+    pub ei_ei_response: Option<crate::oadr20b::ei::EiResponseType>,
     pub pyld_request_id: String,
     pub ei_vtn_id: String,
     /// An object containing a demand response event
-    pub oadr_event: Vec<crate::oadr::OadrEvent>,
+    pub oadr_event: Vec<crate::oadr20b::oadr::OadrEvent>,
     pub ei_schema_version: Option<String>,
 }
 
@@ -88,10 +88,11 @@ impl OadrDistributeEventType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
+        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
+            Default::default();
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_vtn_id: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_event: Vec<crate::oadr::OadrEvent> = Default::default();
+        let mut oadr_event: Vec<crate::oadr20b::oadr::OadrEvent> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
@@ -115,16 +116,18 @@ impl OadrDistributeEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "eiResponse",
-                    )?)?,
+                    "eiResponse" => {
+                        ei_ei_response.set(crate::oadr20b::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?
+                    }
                     "requestID" => {
                         pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
                     "vtnID" => ei_vtn_id.set(xsd_util::read_string(reader, "vtnID")?)?,
-                    "oadrEvent" => oadr_event.push(crate::oadr::OadrEvent::read(
+                    "oadrEvent" => oadr_event.push(crate::oadr20b::oadr::OadrEvent::read(
                         reader,
                         &attributes,
                         "oadrEvent",

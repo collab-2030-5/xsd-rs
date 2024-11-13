@@ -4,9 +4,9 @@ use xml::writer::*;
 /// abstract base for communication of schedules for signals and observations
 #[derive(Debug, Clone, PartialEq)]
 pub struct StreamBaseType {
-    pub xcal_dtstart: Option<crate::xcal::Dtstart>,
-    pub xcal_duration: Option<crate::xcal::DurationPropType>,
-    pub strm_intervals: Option<crate::strm::Intervals>,
+    pub xcal_dtstart: Option<crate::oadr20b::xcal::Dtstart>,
+    pub xcal_duration: Option<crate::oadr20b::xcal::DurationPropType>,
+    pub strm_intervals: Option<crate::oadr20b::strm::Intervals>,
 }
 
 impl StreamBaseType {
@@ -81,10 +81,11 @@ impl StreamBaseType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -106,17 +107,19 @@ impl StreamBaseType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::oadr20b::xcal::Dtstart::read(
                         reader,
                         &attributes,
                         "dtstart",
                     )?)?,
-                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "duration",
-                    )?)?,
-                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "duration" => {
+                        xcal_duration.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "duration",
+                        )?)?
+                    }
+                    "intervals" => strm_intervals.set(crate::oadr20b::strm::Intervals::read(
                         reader,
                         &attributes,
                         "intervals",

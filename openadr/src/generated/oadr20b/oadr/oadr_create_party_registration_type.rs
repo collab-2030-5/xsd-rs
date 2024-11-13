@@ -8,7 +8,7 @@ pub struct OadrCreatePartyRegistrationType {
     pub ei_registration_id: Option<String>,
     pub ei_ven_id: Option<String>,
     pub oadr_oadr_profile_name: String,
-    pub oadr_oadr_transport_name: crate::oadr::OadrTransportType,
+    pub oadr_oadr_transport_name: crate::oadr20b::oadr::OadrTransportType,
     /// Address of this VEN. Not required if http pull model
     pub oadr_oadr_transport_address: Option<String>,
     /// ReportOnlyDeviceFlag - True or False
@@ -131,8 +131,9 @@ impl OadrCreatePartyRegistrationType {
         let mut ei_registration_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_profile_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_transport_name: xsd_util::SetOnce<crate::oadr::OadrTransportType> =
-            Default::default();
+        let mut oadr_oadr_transport_name: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrTransportType,
+        > = Default::default();
         let mut oadr_oadr_transport_address: xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_report_only: xsd_util::SetOnce<bool> = Default::default();
         let mut oadr_oadr_xml_signature: xsd_util::SetOnce<bool> = Default::default();

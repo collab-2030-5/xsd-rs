@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Exterior {
-    pub linear_ring: crate::gml::LinearRing,
+    pub linear_ring: crate::oadr20b::gml::LinearRing,
 }
 
 impl Exterior {
@@ -71,7 +71,8 @@ impl Exterior {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut linear_ring: xsd_util::SetOnce<crate::gml::LinearRing> = Default::default();
+        let mut linear_ring: xsd_util::SetOnce<crate::oadr20b::gml::LinearRing> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,7 +94,7 @@ impl Exterior {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "LinearRing" => linear_ring.set(crate::gml::LinearRing::read(
+                    "LinearRing" => linear_ring.set(crate::oadr20b::gml::LinearRing::read(
                         reader,
                         &attributes,
                         "LinearRing",

@@ -5,7 +5,7 @@ use xml::writer::*;
 pub struct EnergyRealType {
     pub item_description: String,
     pub item_units: String,
-    pub scale_si_scale_code: crate::scale::SiScaleCodeType,
+    pub scale_si_scale_code: crate::oadr20b::scale::SiScaleCodeType,
 }
 
 impl EnergyRealType {
@@ -80,7 +80,7 @@ impl EnergyRealType {
         // one variable for each attribute and element
         let mut item_description: xsd_util::SetOnce<String> = Default::default();
         let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut scale_si_scale_code: xsd_util::SetOnce<crate::scale::SiScaleCodeType> =
+        let mut scale_si_scale_code: xsd_util::SetOnce<crate::oadr20b::scale::SiScaleCodeType> =
             Default::default();
 
         for attr in attrs.iter() {

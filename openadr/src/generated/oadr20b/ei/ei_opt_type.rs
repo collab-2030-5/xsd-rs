@@ -5,11 +5,11 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiOptType {
     pub ei_opt_id: String,
-    pub ei_opt_type: crate::ei::OptTypeType,
+    pub ei_opt_type: crate::oadr20b::ei::OptTypeType,
     pub ei_opt_reason: String,
     pub emix_market_context: Option<String>,
     pub ei_ven_id: String,
-    pub xcal_vavailability: Option<crate::xcal::VavailabilityType>,
+    pub xcal_vavailability: Option<crate::oadr20b::xcal::VavailabilityType>,
     pub ei_created_date_time: String,
     pub ei_schema_version: Option<String>,
 }
@@ -99,11 +99,12 @@ impl EiOptType {
     {
         // one variable for each attribute and element
         let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
+        let mut ei_opt_type: xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
+            Default::default();
         let mut ei_opt_reason: xsd_util::SetOnce<String> = Default::default();
         let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_vavailability: xsd_util::SetOnce<crate::xcal::VavailabilityType> =
+        let mut xcal_vavailability: xsd_util::SetOnce<crate::oadr20b::xcal::VavailabilityType> =
             Default::default();
         let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
@@ -138,9 +139,13 @@ impl EiOptType {
                         emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
                     }
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
-                    "vavailability" => xcal_vavailability.set(
-                        crate::xcal::VavailabilityType::read(reader, &attributes, "vavailability")?,
-                    )?,
+                    "vavailability" => {
+                        xcal_vavailability.set(crate::oadr20b::xcal::VavailabilityType::read(
+                            reader,
+                            &attributes,
+                            "vavailability",
+                        )?)?
+                    }
                     "createdDateTime" => ei_created_date_time
                         .set(xsd_util::read_string(reader, "createdDateTime")?)?,
                     name => {

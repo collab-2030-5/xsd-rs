@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayOfVavailabilityContainedComponents {
-    pub xcal_available: Vec<crate::xcal::AvailableType>,
+    pub xcal_available: Vec<crate::oadr20b::xcal::AvailableType>,
 }
 
 impl ArrayOfVavailabilityContainedComponents {
@@ -77,7 +77,7 @@ impl ArrayOfVavailabilityContainedComponents {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_available: Vec<crate::xcal::AvailableType> = Default::default();
+        let mut xcal_available: Vec<crate::oadr20b::xcal::AvailableType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -99,7 +99,7 @@ impl ArrayOfVavailabilityContainedComponents {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "available" => xcal_available.push(crate::xcal::AvailableType::read(
+                    "available" => xcal_available.push(crate::oadr20b::xcal::AvailableType::read(
                         reader,
                         &attributes,
                         "available",

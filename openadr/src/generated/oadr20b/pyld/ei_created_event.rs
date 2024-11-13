@@ -3,8 +3,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiCreatedEvent {
-    pub ei_ei_response: crate::ei::EiResponseType,
-    pub ei_event_responses: Option<crate::ei::EventResponses>,
+    pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
+    pub ei_event_responses: Option<crate::oadr20b::ei::EventResponses>,
     pub ei_ven_id: String,
 }
 
@@ -77,8 +77,9 @@ impl EiCreatedEvent {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
-        let mut ei_event_responses: xsd_util::SetOnce<crate::ei::EventResponses> =
+        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
+            Default::default();
+        let mut ei_event_responses: xsd_util::SetOnce<crate::oadr20b::ei::EventResponses> =
             Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
 
@@ -101,25 +102,29 @@ impl EiCreatedEvent {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => {
-                    match name.local_name.as_str() {
-                        "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
+                } => match name.local_name.as_str() {
+                    "eiResponse" => {
+                        ei_ei_response.set(crate::oadr20b::ei::EiResponseType::read(
                             reader,
                             &attributes,
                             "eiResponse",
-                        )?)?,
-                        "eventResponses" => ei_event_responses.set(
-                            crate::ei::EventResponses::read(reader, &attributes, "eventResponses")?,
-                        )?,
-                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
-                        name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
-                            ))
-                        }
+                        )?)?
                     }
-                }
+                    "eventResponses" => {
+                        ei_event_responses.set(crate::oadr20b::ei::EventResponses::read(
+                            reader,
+                            &attributes,
+                            "eventResponses",
+                        )?)?
+                    }
+                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    name => {
+                        return Err(xsd_api::ReadError::UnexpectedToken(
+                            xsd_api::ParentToken(parent_tag.to_owned()),
+                            xsd_api::ChildToken(name.to_owned()),
+                        ))
+                    }
+                },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(xsd_api::ReadError::UnexpectedEvent)

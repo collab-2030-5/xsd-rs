@@ -113,6 +113,7 @@ impl AnyType {
             AnyType::Simple(_element) => TypeId {
                 name: "".to_owned(),
                 ns: "".to_owned(),
+                ns_root: "".to_owned(),
             },
             AnyType::Struct(element) => element.id.clone(),
             AnyType::Choice(element) => element.id.clone(),

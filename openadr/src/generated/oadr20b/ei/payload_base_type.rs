@@ -2,8 +2,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PayloadBaseType {
-    OadrPayloadResourceStatus(crate::oadr::OadrPayloadResourceStatusType),
-    PayloadFloat(crate::ei::PayloadFloatType),
+    OadrPayloadResourceStatus(crate::oadr20b::oadr::OadrPayloadResourceStatusType),
+    PayloadFloat(crate::oadr20b::ei::PayloadFloatType),
 }
 
 impl PayloadBaseType {

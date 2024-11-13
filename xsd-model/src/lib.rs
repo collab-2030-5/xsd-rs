@@ -30,6 +30,7 @@ use std::str::FromStr;
 pub struct TypeId {
     /// Shorthand name for the namespace where the type resides
     pub ns: String,
+    pub ns_root: String,
     /// The name of the type without the namespace
     pub name: String,
 }
@@ -41,31 +42,33 @@ impl Display for TypeId {
 }
 
 impl TypeId {
-    pub fn parse(type_name: &str, fallback_ns: &str) -> Self {
+    pub fn parse(type_name: &str, fallback_ns: &str, ns_root: &str) -> Self {
         match type_name.split_once(':') {
             None => Self {
                 ns: fallback_ns.to_owned(),
+                ns_root: ns_root.to_owned(),
                 name: type_name.to_owned(),
             },
             Some((ns, name)) => Self {
                 ns: ns.to_owned(),
+                ns_root: ns_root.to_owned(),
                 name: name.to_owned(),
             },
         }
     }
 
-    pub fn parse_choice(type_name: &str, fallback_ns: &str) -> Self {
+    pub fn parse_choice(type_name: &str, fallback_ns: &str, ns_root: &str) -> Self {
         if !type_name.ends_with("Choice") {
             tracing::warn!("Appending Choic to type {}", type_name);
-            Self::parse(&format!("{}Choice", type_name), fallback_ns)
+            Self::parse(&format!("{}Choice", type_name), fallback_ns, ns_root)
         } else {
-            Self::parse(type_name, fallback_ns)
+            Self::parse(type_name, fallback_ns, ns_root)
         }
     }
 
-    pub fn parse_enum(type_name: &str, fallback_ns: &str) -> Self {
+    pub fn parse_enum(type_name: &str, fallback_ns: &str, ns_root: &str) -> Self {
         tracing::warn!("enum type {}", type_name);
-        Self::parse(&format!("{}", type_name), fallback_ns)
+        Self::parse(&format!("{}", type_name), fallback_ns, ns_root)
     }
 
     pub fn field_name(&self) -> String {

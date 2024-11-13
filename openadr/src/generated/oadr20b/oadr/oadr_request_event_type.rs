@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrRequestEventType {
-    pub pyld_ei_request_event: crate::pyld::EiRequestEvent,
+    pub pyld_ei_request_event: crate::oadr20b::pyld::EiRequestEvent,
     pub ei_schema_version: Option<String>,
 }
 
@@ -78,7 +78,7 @@ impl OadrRequestEventType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut pyld_ei_request_event: xsd_util::SetOnce<crate::pyld::EiRequestEvent> =
+        let mut pyld_ei_request_event: xsd_util::SetOnce<crate::oadr20b::pyld::EiRequestEvent> =
             Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -103,9 +103,13 @@ impl OadrRequestEventType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiRequestEvent" => pyld_ei_request_event.set(
-                        crate::pyld::EiRequestEvent::read(reader, &attributes, "eiRequestEvent")?,
-                    )?,
+                    "eiRequestEvent" => {
+                        pyld_ei_request_event.set(crate::oadr20b::pyld::EiRequestEvent::read(
+                            reader,
+                            &attributes,
+                            "eiRequestEvent",
+                        )?)?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

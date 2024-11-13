@@ -5,7 +5,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrReportRequestType {
     pub ei_report_request_id: String,
-    pub ei_report_specifier: crate::ei::ReportSpecifierType,
+    pub ei_report_specifier: crate::oadr20b::ei::ReportSpecifierType,
 }
 
 impl OadrReportRequestType {
@@ -79,7 +79,7 @@ impl OadrReportRequestType {
     {
         // one variable for each attribute and element
         let mut ei_report_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_report_specifier: xsd_util::SetOnce<crate::ei::ReportSpecifierType> =
+        let mut ei_report_specifier: xsd_util::SetOnce<crate::oadr20b::ei::ReportSpecifierType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -105,7 +105,7 @@ impl OadrReportRequestType {
                     "reportRequestID" => ei_report_request_id
                         .set(xsd_util::read_string(reader, "reportRequestID")?)?,
                     "reportSpecifier" => {
-                        ei_report_specifier.set(crate::ei::ReportSpecifierType::read(
+                        ei_report_specifier.set(crate::oadr20b::ei::ReportSpecifierType::read(
                             reader,
                             &attributes,
                             "reportSpecifier",

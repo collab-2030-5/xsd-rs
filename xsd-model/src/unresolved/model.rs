@@ -32,11 +32,12 @@ pub struct UnresolvedModel {
 
 pub(crate) struct Settings<'a> {
     pub(crate) namespace: &'a str,
+    pub(crate) namespace_root: &'a str,
 }
 
 impl UnresolvedModel {
     /// parser and XSD file and merge it into the unresolved xsd-model
-    pub fn merge_xsd(&mut self, path: &Path) {
+    pub fn merge_xsd(&mut self, path: &Path, namespace_root: &str) {
         let data = std::fs::read_to_string(path).unwrap();
         let xsd = parser::parse(&data).unwrap();
 
@@ -49,7 +50,10 @@ impl UnresolvedModel {
 
         tracing::info!("target namespace: {}", ns_name);
 
-        let settings = Settings { namespace: ns_name };
+        let settings = Settings {
+            namespace: ns_name,
+            namespace_root: namespace_root,
+        };
 
         for namespace in xsd.namespaces {
             if let Some(name) = namespace.name() {
@@ -75,7 +79,11 @@ impl UnresolvedModel {
     }
 
     fn merge_struct(&mut self, st: &Struct, settings: &Settings) {
-        let type_id = TypeId::parse(st.name.as_str(), settings.namespace);
+        let type_id = TypeId::parse(
+            st.name.as_str(),
+            settings.namespace,
+            settings.namespace_root,
+        );
         let base_type = extract_base_type(st, settings);
         let fields = self.extract_fields(&st.fields.borrow(), settings);
 
@@ -130,7 +138,11 @@ impl UnresolvedModel {
                 let field = UnresolvedField {
                     comment: field.comment.clone(),
                     name: field.name.clone(),
-                    field_type: TypeId::parse(&field.type_name, settings.namespace),
+                    field_type: TypeId::parse(
+                        &field.type_name,
+                        settings.namespace,
+                        settings.namespace_root,
+                    ),
                     info,
                     default_ns: settings.namespace.to_owned(),
                 };
@@ -170,8 +182,9 @@ impl UnresolvedModel {
     }
 
     fn merge_tuple_struct(&mut self, ts: &TupleStruct, settings: &Settings) {
-        let type_id = TypeId::parse(&ts.name, settings.namespace);
-        let base_type_id = TypeId::parse(&ts.type_name, settings.namespace);
+        let type_id = TypeId::parse(&ts.name, settings.namespace, settings.namespace_root);
+        let base_type_id =
+            TypeId::parse(&ts.type_name, settings.namespace, settings.namespace_root);
 
         if !ts.subtypes.is_empty() {
             let span = tracing::info_span!("recurse", "TupleStruct({})", type_id);
@@ -204,11 +217,15 @@ impl UnresolvedModel {
     }
 
     fn merge_alias(&mut self, x: &Alias, settings: &Settings) {
-        let target = TypeId::parse(&x.original, settings.namespace);
-        let alias = TypeId::parse(&x.name, settings.namespace);
+        let target = TypeId::parse(&x.original, settings.namespace, settings.namespace_root);
+        let alias = TypeId::parse(&x.name, settings.namespace, settings.namespace_root);
 
         if let Some(substitution_group) = &x.substitution_group {
-            let substitution_group_type_id = TypeId::parse(substitution_group, settings.namespace);
+            let substitution_group_type_id = TypeId::parse(
+                substitution_group,
+                settings.namespace,
+                settings.namespace_root,
+            );
             // tracing::info!(
             //     "Adding {} to substitution group {}",
             //     target.name,
@@ -545,7 +562,7 @@ fn convert_restricted_enum(en: &Enum, settings: &Settings) -> Enumeration {
     }
 
     Enumeration {
-        type_id: TypeId::parse_enum(&en.name, settings.namespace),
+        type_id: TypeId::parse_enum(&en.name, settings.namespace, settings.namespace_root),
         comment: en.comment.clone(),
         variants,
     }
@@ -562,13 +579,13 @@ fn convert_choice_enum(en: &Enum, settings: &Settings) -> UnresolvedChoice {
         let variant = UnresolvedChoiceVariant {
             comment: v.comment.clone(),
             element_name: v.name.clone(),
-            type_id: TypeId::parse(type_name, settings.namespace),
+            type_id: TypeId::parse(type_name, settings.namespace, settings.namespace_root),
         };
 
         variants.push(variant);
     }
     UnresolvedChoice {
-        type_id: TypeId::parse_choice(&en.name, settings.namespace),
+        type_id: TypeId::parse_choice(&en.name, settings.namespace, settings.namespace_root),
         comment: en.comment.clone(),
         variants,
     }
@@ -583,13 +600,13 @@ fn convert_union_enum(en: &Enum, settings: &Settings) -> UnresolvedUnion {
             .expect("union case must include a type name");
 
         variants.push(UnresolvedUnionVariant {
-            name: TypeId::parse(&v.name, settings.namespace),
+            name: TypeId::parse(&v.name, settings.namespace, settings.namespace_root),
             comment: v.comment.clone(),
-            type_name: TypeId::parse(&type_name, settings.namespace),
+            type_name: TypeId::parse(&type_name, settings.namespace, settings.namespace_root),
         });
     }
     UnresolvedUnion {
-        type_id: TypeId::parse(&en.name, settings.namespace),
+        type_id: TypeId::parse(&en.name, settings.namespace, settings.namespace_root),
         comment: en.comment.clone(),
         variants,
     }
@@ -611,7 +628,11 @@ fn extract_base_type(x: &Struct, settings: &Settings) -> Option<TypeId> {
 
     match base_types.as_slice() {
         [] => None,
-        [x] => Some(TypeId::parse(x.as_str(), settings.namespace)),
+        [x] => Some(TypeId::parse(
+            x.as_str(),
+            settings.namespace,
+            settings.namespace_root,
+        )),
         _ => panic!("Unexpected number of base types: {:#?}", base_types),
     }
 }

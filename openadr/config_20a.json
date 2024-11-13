@@ -1,0 +1,18 @@
+{
+  "schemas": [
+    "openadr/xsd/2.0a/oadr_20a.xsd",
+    "openadr/xsd/2.0a/oadr_ei_20a.xsd",
+    "openadr/xsd/2.0a/oadr_emix_20a.xsd",
+    "openadr/xsd/2.0a/oadr_pyld_20a.xsd",
+    "openadr/xsd/2.0a/oadr_strm_20a.xsd",
+    "openadr/xsd/2.0a/oadr_xcal_20a.xsd"
+  ],
+  "base_types": {
+    "whitelist": {}
+  },
+  "mappings": {
+    "type_mappings": {},
+    "field_mappings": [],
+    "types": {}
+  }
+}

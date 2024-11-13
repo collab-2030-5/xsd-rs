@@ -3,8 +3,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrEvent {
-    pub ei_ei_event: crate::ei::EiEventType,
-    pub oadr_oadr_response_required: crate::oadr::ResponseRequiredType,
+    pub ei_ei_event: crate::oadr20b::ei::EiEventType,
+    pub oadr_oadr_response_required: crate::oadr20b::oadr::ResponseRequiredType,
 }
 
 impl OadrEvent {
@@ -77,9 +77,11 @@ impl OadrEvent {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_event: xsd_util::SetOnce<crate::ei::EiEventType> = Default::default();
-        let mut oadr_oadr_response_required: xsd_util::SetOnce<crate::oadr::ResponseRequiredType> =
+        let mut ei_ei_event: xsd_util::SetOnce<crate::oadr20b::ei::EiEventType> =
             Default::default();
+        let mut oadr_oadr_response_required: xsd_util::SetOnce<
+            crate::oadr20b::oadr::ResponseRequiredType,
+        > = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -101,7 +103,7 @@ impl OadrEvent {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiEvent" => ei_ei_event.set(crate::ei::EiEventType::read(
+                    "eiEvent" => ei_ei_event.set(crate::oadr20b::ei::EiEventType::read(
                         reader,
                         &attributes,
                         "eiEvent",

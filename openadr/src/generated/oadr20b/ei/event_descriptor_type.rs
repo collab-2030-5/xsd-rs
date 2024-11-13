@@ -11,10 +11,10 @@ pub struct EventDescriptorType {
     pub modification_reason: Option<String>,
     /// The priority of the event in relation to other events (The lower the number higher the priority. A value of zero (0) indicates no priority, which is the lowest priority by default).
     pub priority: Option<u32>,
-    pub ei_market_context: crate::ei::EiMarketContext,
+    pub ei_market_context: crate::oadr20b::ei::EiMarketContext,
     pub ei_created_date_time: String,
     /// An indication of the event state: far, near, active, canceled, completed
-    pub ei_event_status: crate::ei::EventStatusEnumeratedType,
+    pub ei_event_status: crate::oadr20b::ei::EventStatusEnumeratedType,
     /// Anything other than false indicates a test event
     pub test_event: Option<String>,
     /// Any text
@@ -118,10 +118,10 @@ impl EventDescriptorType {
         let mut modification_date_time: xsd_util::SetOnce<String> = Default::default();
         let mut modification_reason: xsd_util::SetOnce<String> = Default::default();
         let mut priority: xsd_util::SetOnce<u32> = Default::default();
-        let mut ei_market_context: xsd_util::SetOnce<crate::ei::EiMarketContext> =
+        let mut ei_market_context: xsd_util::SetOnce<crate::oadr20b::ei::EiMarketContext> =
             Default::default();
         let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_event_status: xsd_util::SetOnce<crate::ei::EventStatusEnumeratedType> =
+        let mut ei_event_status: xsd_util::SetOnce<crate::oadr20b::ei::EventStatusEnumeratedType> =
             Default::default();
         let mut test_event: xsd_util::SetOnce<String> = Default::default();
         let mut vtn_comment: xsd_util::SetOnce<String> = Default::default();
@@ -157,9 +157,13 @@ impl EventDescriptorType {
                     "priority" => {
                         priority.set(xsd_util::read_type_from_string(reader, "priority")?)?
                     }
-                    "eiMarketContext" => ei_market_context.set(
-                        crate::ei::EiMarketContext::read(reader, &attributes, "eiMarketContext")?,
-                    )?,
+                    "eiMarketContext" => {
+                        ei_market_context.set(crate::oadr20b::ei::EiMarketContext::read(
+                            reader,
+                            &attributes,
+                            "eiMarketContext",
+                        )?)?
+                    }
                     "createdDateTime" => ei_created_date_time
                         .set(xsd_util::read_string(reader, "createdDateTime")?)?,
                     "eventStatus" => {

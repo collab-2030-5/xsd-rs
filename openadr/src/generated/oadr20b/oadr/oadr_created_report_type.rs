@@ -3,9 +3,9 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrCreatedReportType {
-    pub ei_ei_response: crate::ei::EiResponseType,
+    pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
     /// List of periodic reports that have not yet been delivered
-    pub oadr_oadr_pending_reports: crate::oadr::OadrPendingReportsType,
+    pub oadr_oadr_pending_reports: crate::oadr20b::oadr::OadrPendingReportsType,
     pub ei_ven_id: Option<String>,
     pub ei_schema_version: Option<String>,
 }
@@ -90,9 +90,11 @@ impl OadrCreatedReportType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
-        let mut oadr_oadr_pending_reports: xsd_util::SetOnce<crate::oadr::OadrPendingReportsType> =
+        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
             Default::default();
+        let mut oadr_oadr_pending_reports: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrPendingReportsType,
+        > = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -117,18 +119,20 @@ impl OadrCreatedReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "eiResponse",
-                    )?)?,
-                    "oadrPendingReports" => {
-                        oadr_oadr_pending_reports.set(crate::oadr::OadrPendingReportsType::read(
+                    "eiResponse" => {
+                        ei_ei_response.set(crate::oadr20b::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?
+                    }
+                    "oadrPendingReports" => oadr_oadr_pending_reports.set(
+                        crate::oadr20b::oadr::OadrPendingReportsType::read(
                             reader,
                             &attributes,
                             "oadrPendingReports",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(

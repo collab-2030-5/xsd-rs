@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrPayload {
-    pub oadr_oadr_signed_object: crate::oadr::OadrSignedObject,
+    pub oadr_oadr_signed_object: crate::oadr20b::oadr::OadrSignedObject,
 }
 
 impl OadrPayload {
@@ -75,7 +75,7 @@ impl OadrPayload {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_signed_object: xsd_util::SetOnce<crate::oadr::OadrSignedObject> =
+        let mut oadr_oadr_signed_object: xsd_util::SetOnce<crate::oadr20b::oadr::OadrSignedObject> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -98,13 +98,13 @@ impl OadrPayload {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrSignedObject" => {
-                        oadr_oadr_signed_object.set(crate::oadr::OadrSignedObject::read(
+                    "oadrSignedObject" => oadr_oadr_signed_object.set(
+                        crate::oadr20b::oadr::OadrSignedObject::read(
                             reader,
                             &attributes,
                             "oadrSignedObject",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

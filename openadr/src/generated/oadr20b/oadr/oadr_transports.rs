@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrTransports {
-    pub oadr_transport: Vec<crate::oadr::OadrTransport>,
+    pub oadr_transport: Vec<crate::oadr20b::oadr::OadrTransport>,
 }
 
 impl OadrTransports {
@@ -72,7 +72,7 @@ impl OadrTransports {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_transport: Vec<crate::oadr::OadrTransport> = Default::default();
+        let mut oadr_transport: Vec<crate::oadr20b::oadr::OadrTransport> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -94,11 +94,13 @@ impl OadrTransports {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrTransport" => oadr_transport.push(crate::oadr::OadrTransport::read(
-                        reader,
-                        &attributes,
-                        "oadrTransport",
-                    )?),
+                    "oadrTransport" => {
+                        oadr_transport.push(crate::oadr20b::oadr::OadrTransport::read(
+                            reader,
+                            &attributes,
+                            "oadrTransport",
+                        )?)
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

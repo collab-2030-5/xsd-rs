@@ -4,7 +4,7 @@ use xml::writer::*;
 /// The Service Area is the geographic region that is affected by the EMIX market condition
 #[derive(Debug, Clone, PartialEq)]
 pub struct ServiceAreaType {
-    pub gml_feature_collection: crate::gml::FeatureCollection,
+    pub gml_feature_collection: crate::oadr20b::gml::FeatureCollection,
 }
 
 impl ServiceAreaType {
@@ -76,7 +76,7 @@ impl ServiceAreaType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut gml_feature_collection: xsd_util::SetOnce<crate::gml::FeatureCollection> =
+        let mut gml_feature_collection: xsd_util::SetOnce<crate::oadr20b::gml::FeatureCollection> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -100,7 +100,7 @@ impl ServiceAreaType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "FeatureCollection" => {
-                        gml_feature_collection.set(crate::gml::FeatureCollection::read(
+                        gml_feature_collection.set(crate::oadr20b::gml::FeatureCollection::read(
                             reader,
                             &attributes,
                             "FeatureCollection",

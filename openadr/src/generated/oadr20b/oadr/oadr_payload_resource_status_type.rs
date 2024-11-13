@@ -7,7 +7,7 @@ pub struct OadrPayloadResourceStatusType {
     pub oadr_online: bool,
     /// If true then the control of the load has been manually overridden
     pub oadr_manual_override: bool,
-    pub oadr_oadr_load_control_state: Option<crate::oadr::OadrLoadControlStateType>,
+    pub oadr_oadr_load_control_state: Option<crate::oadr20b::oadr::OadrLoadControlStateType>,
 }
 
 impl OadrPayloadResourceStatusType {
@@ -85,7 +85,7 @@ impl OadrPayloadResourceStatusType {
         let mut oadr_online: xsd_util::SetOnce<bool> = Default::default();
         let mut oadr_manual_override: xsd_util::SetOnce<bool> = Default::default();
         let mut oadr_oadr_load_control_state: xsd_util::SetOnce<
-            crate::oadr::OadrLoadControlStateType,
+            crate::oadr20b::oadr::OadrLoadControlStateType,
         > = Default::default();
 
         for attr in attrs.iter() {
@@ -115,7 +115,7 @@ impl OadrPayloadResourceStatusType {
                         xsd_util::read_type_from_string(reader, "oadrManualOverride")?,
                     )?,
                     "oadrLoadControlState" => oadr_oadr_load_control_state.set(
-                        crate::oadr::OadrLoadControlStateType::read(
+                        crate::oadr20b::oadr::OadrLoadControlStateType::read(
                             reader,
                             &attributes,
                             "oadrLoadControlState",

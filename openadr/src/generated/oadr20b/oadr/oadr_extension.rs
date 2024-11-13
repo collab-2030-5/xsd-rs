@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrExtension {
     pub oadr_extension_name: String,
-    pub oadr_oadr_info: Vec<crate::oadr::OadrInfo>,
+    pub oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo>,
 }
 
 impl OadrExtension {
@@ -79,7 +79,7 @@ impl OadrExtension {
     {
         // one variable for each attribute and element
         let mut oadr_extension_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_info: Vec<crate::oadr::OadrInfo> = Default::default();
+        let mut oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -103,7 +103,7 @@ impl OadrExtension {
                 } => match name.local_name.as_str() {
                     "oadrExtensionName" => oadr_extension_name
                         .set(xsd_util::read_string(reader, "oadrExtensionName")?)?,
-                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
+                    "oadrInfo" => oadr_oadr_info.push(crate::oadr20b::oadr::OadrInfo::read(
                         reader,
                         &attributes,
                         "oadrInfo",

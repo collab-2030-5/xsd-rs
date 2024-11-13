@@ -3,16 +3,16 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiEventBaselineType {
-    pub xcal_dtstart: crate::xcal::Dtstart,
-    pub xcal_duration: crate::xcal::DurationPropType,
-    pub strm_intervals: crate::strm::Intervals,
+    pub xcal_dtstart: crate::oadr20b::xcal::Dtstart,
+    pub xcal_duration: crate::oadr20b::xcal::DurationPropType,
+    pub strm_intervals: crate::oadr20b::strm::Intervals,
     /// Unique ID for a specific baseline
     pub baseline_id: String,
     pub ei_resource_id: Vec<String>,
     /// Descriptive name for baseline
     pub baseline_name: String,
     /// This is the unit of the signal.
-    pub emix_item_base: Option<crate::emix::ItemBaseType>,
+    pub emix_item_base: Option<crate::oadr20b::emix::ItemBaseType>,
 }
 
 impl EiEventBaselineType {
@@ -92,14 +92,16 @@ impl EiEventBaselineType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+            Default::default();
         let mut baseline_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_resource_id: Vec<String> = Default::default();
         let mut baseline_name: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<crate::emix::ItemBaseType> = Default::default();
+        let mut emix_item_base: xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -121,17 +123,19 @@ impl EiEventBaselineType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::oadr20b::xcal::Dtstart::read(
                         reader,
                         &attributes,
                         "dtstart",
                     )?)?,
-                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "duration",
-                    )?)?,
-                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "duration" => {
+                        xcal_duration.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "duration",
+                        )?)?
+                    }
+                    "intervals" => strm_intervals.set(crate::oadr20b::strm::Intervals::read(
                         reader,
                         &attributes,
                         "intervals",
@@ -145,69 +149,102 @@ impl EiEventBaselineType {
                     "baselineName" => {
                         baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
                     }
-                    "Therm" => emix_item_base.set(crate::emix::ItemBaseType::Therm(
-                        crate::oadr::ThermType::read(reader, &attributes, "Therm")?,
+                    "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
+                        crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
                     ))?,
-                    "currency" => emix_item_base.set(crate::emix::ItemBaseType::Currency(
-                        crate::oadr::CurrencyType::read(reader, &attributes, "currency")?,
-                    ))?,
+                    "currency" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Currency(
+                            crate::oadr20b::oadr::CurrencyType::read(
+                                reader,
+                                &attributes,
+                                "currency",
+                            )?,
+                        ))?
+                    }
                     "currencyPerKW" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerKw(
-                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerKW")?,
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::CurrencyPerKw(
+                            crate::oadr20b::oadr::CurrencyType::read(
+                                reader,
+                                &attributes,
+                                "currencyPerKW",
+                            )?,
                         ))?
                     }
                     "currencyPerKWh" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerKWh(
-                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerKWh")?,
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::CurrencyPerKWh(
+                            crate::oadr20b::oadr::CurrencyType::read(
+                                reader,
+                                &attributes,
+                                "currencyPerKWh",
+                            )?,
                         ))?
                     }
                     "currencyPerThm" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::CurrencyPerThm(
-                            crate::oadr::CurrencyType::read(reader, &attributes, "currencyPerThm")?,
-                        ))?
-                    }
-                    "current" => emix_item_base.set(crate::emix::ItemBaseType::Current(
-                        crate::oadr::CurrentType::read(reader, &attributes, "current")?,
-                    ))?,
-                    "customUnit" => emix_item_base.set(crate::emix::ItemBaseType::CustomUnit(
-                        crate::oadr::BaseUnitType::read(reader, &attributes, "customUnit")?,
-                    ))?,
-                    "frequency" => emix_item_base.set(crate::emix::ItemBaseType::Frequency(
-                        crate::oadr::FrequencyType::read(reader, &attributes, "frequency")?,
-                    ))?,
-                    "pulseCount" => emix_item_base.set(crate::emix::ItemBaseType::PulseCount(
-                        crate::oadr::PulseCountType::read(reader, &attributes, "pulseCount")?,
-                    ))?,
-                    "temperature" => emix_item_base.set(crate::emix::ItemBaseType::Temperature(
-                        crate::oadr::TemperatureType::read(reader, &attributes, "temperature")?,
-                    ))?,
-                    "voltage" => emix_item_base.set(crate::emix::ItemBaseType::Voltage(
-                        crate::power::VoltageType::read(reader, &attributes, "voltage")?,
-                    ))?,
-                    "powerApparent" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PowerApparent(
-                            crate::power::PowerApparentType::read(
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::CurrencyPerThm(
+                            crate::oadr20b::oadr::CurrencyType::read(
                                 reader,
                                 &attributes,
-                                "powerApparent",
+                                "currencyPerThm",
                             )?,
                         ))?
                     }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::PowerReactive(
-                            crate::power::PowerReactiveType::read(
+                    "current" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Current(
+                            crate::oadr20b::oadr::CurrentType::read(
                                 reader,
                                 &attributes,
-                                "powerReactive",
+                                "current",
                             )?,
                         ))?
                     }
-                    "powerReal" => emix_item_base.set(crate::emix::ItemBaseType::PowerReal(
-                        crate::power::PowerRealType::read(reader, &attributes, "powerReal")?,
-                    ))?,
+                    "customUnit" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::CustomUnit(
+                            crate::oadr20b::oadr::BaseUnitType::read(
+                                reader,
+                                &attributes,
+                                "customUnit",
+                            )?,
+                        ))?
+                    }
+                    "frequency" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Frequency(
+                            crate::oadr20b::oadr::FrequencyType::read(
+                                reader,
+                                &attributes,
+                                "frequency",
+                            )?,
+                        ))?
+                    }
+                    "pulseCount" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PulseCount(
+                            crate::oadr20b::oadr::PulseCountType::read(
+                                reader,
+                                &attributes,
+                                "pulseCount",
+                            )?,
+                        ))?
+                    }
+                    "temperature" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Temperature(
+                            crate::oadr20b::oadr::TemperatureType::read(
+                                reader,
+                                &attributes,
+                                "temperature",
+                            )?,
+                        ))?
+                    }
+                    "voltage" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Voltage(
+                            crate::oadr20b::power::VoltageType::read(
+                                reader,
+                                &attributes,
+                                "voltage",
+                            )?,
+                        ))?
+                    }
                     "energyApparent" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::EnergyApparent(
-                            crate::power::EnergyApparentType::read(
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
+                            crate::oadr20b::power::EnergyApparentType::read(
                                 reader,
                                 &attributes,
                                 "energyApparent",
@@ -215,17 +252,50 @@ impl EiEventBaselineType {
                         ))?
                     }
                     "energyReactive" => {
-                        emix_item_base.set(crate::emix::ItemBaseType::EnergyReactive(
-                            crate::power::EnergyReactiveType::read(
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReactive(
+                            crate::oadr20b::power::EnergyReactiveType::read(
                                 reader,
                                 &attributes,
                                 "energyReactive",
                             )?,
                         ))?
                     }
-                    "energyReal" => emix_item_base.set(crate::emix::ItemBaseType::EnergyReal(
-                        crate::power::EnergyRealType::read(reader, &attributes, "energyReal")?,
-                    ))?,
+                    "energyReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReal(
+                            crate::oadr20b::power::EnergyRealType::read(
+                                reader,
+                                &attributes,
+                                "energyReal",
+                            )?,
+                        ))?
+                    }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
+                            )?,
+                        ))?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

@@ -82,7 +82,8 @@ impl RustType for SimpleType {
 
 pub(crate) fn fully_qualified_name(id: &TypeId) -> String {
     format!(
-        "crate::{}::{}",
+        "crate::{}{}::{}",
+        id.ns_root,
         id.ns.to_snake_case(),
         id.name.to_upper_camel_case()
     )

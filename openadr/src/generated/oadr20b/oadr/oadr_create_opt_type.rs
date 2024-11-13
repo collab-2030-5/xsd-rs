@@ -4,17 +4,17 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrCreateOptType {
     pub ei_opt_id: String,
-    pub ei_opt_type: crate::ei::OptTypeType,
+    pub ei_opt_type: crate::oadr20b::ei::OptTypeType,
     pub ei_opt_reason: String,
     pub emix_market_context: Option<String>,
     pub ei_ven_id: String,
-    pub xcal_vavailability: Option<crate::xcal::VavailabilityType>,
+    pub xcal_vavailability: Option<crate::oadr20b::xcal::VavailabilityType>,
     pub ei_created_date_time: String,
     pub ei_schema_version: Option<String>,
     pub pyld_request_id: String,
-    pub ei_qualified_event_id: Option<crate::ei::QualifiedEventIdType>,
-    pub ei_ei_target: crate::ei::EiTargetType,
-    pub oadr_oadr_device_class: Option<crate::ei::EiTargetType>,
+    pub ei_qualified_event_id: Option<crate::oadr20b::ei::QualifiedEventIdType>,
+    pub ei_ei_target: crate::oadr20b::ei::EiTargetType,
+    pub oadr_oadr_device_class: Option<crate::oadr20b::ei::EiTargetType>,
 }
 
 impl OadrCreateOptType {
@@ -111,19 +111,21 @@ impl OadrCreateOptType {
     {
         // one variable for each attribute and element
         let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
+        let mut ei_opt_type: xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
+            Default::default();
         let mut ei_opt_reason: xsd_util::SetOnce<String> = Default::default();
         let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_vavailability: xsd_util::SetOnce<crate::xcal::VavailabilityType> =
+        let mut xcal_vavailability: xsd_util::SetOnce<crate::oadr20b::xcal::VavailabilityType> =
             Default::default();
         let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::ei::QualifiedEventIdType> =
+        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::oadr20b::ei::QualifiedEventIdType> =
             Default::default();
-        let mut ei_ei_target: xsd_util::SetOnce<crate::ei::EiTargetType> = Default::default();
-        let mut oadr_oadr_device_class: xsd_util::SetOnce<crate::ei::EiTargetType> =
+        let mut ei_ei_target: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
+            Default::default();
+        let mut oadr_oadr_device_class: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -156,29 +158,37 @@ impl OadrCreateOptType {
                         emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
                     }
                     "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
-                    "vavailability" => xcal_vavailability.set(
-                        crate::xcal::VavailabilityType::read(reader, &attributes, "vavailability")?,
-                    )?,
+                    "vavailability" => {
+                        xcal_vavailability.set(crate::oadr20b::xcal::VavailabilityType::read(
+                            reader,
+                            &attributes,
+                            "vavailability",
+                        )?)?
+                    }
                     "createdDateTime" => ei_created_date_time
                         .set(xsd_util::read_string(reader, "createdDateTime")?)?,
                     "requestID" => {
                         pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "qualifiedEventID" => {
-                        ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
+                    "qualifiedEventID" => ei_qualified_event_id.set(
+                        crate::oadr20b::ei::QualifiedEventIdType::read(
                             reader,
                             &attributes,
                             "qualifiedEventID",
-                        )?)?
-                    }
-                    "eiTarget" => ei_ei_target.set(crate::ei::EiTargetType::read(
+                        )?,
+                    )?,
+                    "eiTarget" => ei_ei_target.set(crate::oadr20b::ei::EiTargetType::read(
                         reader,
                         &attributes,
                         "eiTarget",
                     )?)?,
-                    "oadrDeviceClass" => oadr_oadr_device_class.set(
-                        crate::ei::EiTargetType::read(reader, &attributes, "oadrDeviceClass")?,
-                    )?,
+                    "oadrDeviceClass" => {
+                        oadr_oadr_device_class.set(crate::oadr20b::ei::EiTargetType::read(
+                            reader,
+                            &attributes,
+                            "oadrDeviceClass",
+                        )?)?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

@@ -1,4 +1,4 @@
-use crate::ei::{CurrentValueType, CurrentValueTypeChoice, PayloadFloatType};
+use crate::oadr20b::ei::{CurrentValueType, CurrentValueTypeChoice, PayloadFloatType};
 use xsd_api::{WriteConfig, WriteXml};
 
 #[test]

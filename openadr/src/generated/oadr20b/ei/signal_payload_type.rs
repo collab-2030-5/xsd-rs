@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SignalPayloadType {
-    pub ei_payload_base: crate::ei::PayloadBaseType,
+    pub ei_payload_base: crate::oadr20b::ei::PayloadBaseType,
 }
 
 impl SignalPayloadType {
@@ -70,7 +70,8 @@ impl SignalPayloadType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_payload_base: xsd_util::SetOnce<crate::ei::PayloadBaseType> = Default::default();
+        let mut ei_payload_base: xsd_util::SetOnce<crate::oadr20b::ei::PayloadBaseType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,8 +94,8 @@ impl SignalPayloadType {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
                     "oadrPayloadResourceStatus" => ei_payload_base.set(
-                        crate::ei::PayloadBaseType::OadrPayloadResourceStatus(
-                            crate::oadr::OadrPayloadResourceStatusType::read(
+                        crate::oadr20b::ei::PayloadBaseType::OadrPayloadResourceStatus(
+                            crate::oadr20b::oadr::OadrPayloadResourceStatusType::read(
                                 reader,
                                 &attributes,
                                 "oadrPayloadResourceStatus",
@@ -102,8 +103,12 @@ impl SignalPayloadType {
                         ),
                     )?,
                     "payloadFloat" => {
-                        ei_payload_base.set(crate::ei::PayloadBaseType::PayloadFloat(
-                            crate::ei::PayloadFloatType::read(reader, &attributes, "payloadFloat")?,
+                        ei_payload_base.set(crate::oadr20b::ei::PayloadBaseType::PayloadFloat(
+                            crate::oadr20b::ei::PayloadFloatType::read(
+                                reader,
+                                &attributes,
+                                "payloadFloat",
+                            )?,
                         ))?
                     }
                     name => {

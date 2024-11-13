@@ -3,8 +3,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrService {
-    pub oadr_oadr_service_name: crate::oadr::OadrServiceNameType,
-    pub oadr_oadr_info: Vec<crate::oadr::OadrInfo>,
+    pub oadr_oadr_service_name: crate::oadr20b::oadr::OadrServiceNameType,
+    pub oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo>,
 }
 
 impl OadrService {
@@ -78,9 +78,10 @@ impl OadrService {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_service_name: xsd_util::SetOnce<crate::oadr::OadrServiceNameType> =
-            Default::default();
-        let mut oadr_oadr_info: Vec<crate::oadr::OadrInfo> = Default::default();
+        let mut oadr_oadr_service_name: xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrServiceNameType,
+        > = Default::default();
+        let mut oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -104,7 +105,7 @@ impl OadrService {
                 } => match name.local_name.as_str() {
                     "oadrServiceName" => oadr_oadr_service_name
                         .set(xsd_util::read_string_enum(reader, "oadrServiceName")?)?,
-                    "oadrInfo" => oadr_oadr_info.push(crate::oadr::OadrInfo::read(
+                    "oadrInfo" => oadr_oadr_info.push(crate::oadr20b::oadr::OadrInfo::read(
                         reader,
                         &attributes,
                         "oadrInfo",

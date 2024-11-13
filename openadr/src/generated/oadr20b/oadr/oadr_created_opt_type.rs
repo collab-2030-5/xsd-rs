@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrCreatedOptType {
-    pub ei_ei_response: crate::ei::EiResponseType,
+    pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
     pub ei_opt_id: String,
     pub ei_schema_version: Option<String>,
 }
@@ -80,7 +80,8 @@ impl OadrCreatedOptType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::ei::EiResponseType> = Default::default();
+        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
+            Default::default();
         let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
 
@@ -105,11 +106,13 @@ impl OadrCreatedOptType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eiResponse" => ei_ei_response.set(crate::ei::EiResponseType::read(
-                        reader,
-                        &attributes,
-                        "eiResponse",
-                    )?)?,
+                    "eiResponse" => {
+                        ei_ei_response.set(crate::oadr20b::ei::EiResponseType::read(
+                            reader,
+                            &attributes,
+                            "eiResponse",
+                        )?)?
+                    }
                     "optID" => ei_opt_id.set(xsd_util::read_string(reader, "optID")?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(

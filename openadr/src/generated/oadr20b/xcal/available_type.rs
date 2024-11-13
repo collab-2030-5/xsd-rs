@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct AvailableType {
-    pub xcal_properties: crate::xcal::Properties,
+    pub xcal_properties: crate::oadr20b::xcal::Properties,
 }
 
 impl AvailableType {
@@ -71,7 +71,8 @@ impl AvailableType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_properties: xsd_util::SetOnce<crate::xcal::Properties> = Default::default();
+        let mut xcal_properties: xsd_util::SetOnce<crate::oadr20b::xcal::Properties> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,7 +94,7 @@ impl AvailableType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "properties" => xcal_properties.set(crate::xcal::Properties::read(
+                    "properties" => xcal_properties.set(crate::oadr20b::xcal::Properties::read(
                         reader,
                         &attributes,
                         "properties",

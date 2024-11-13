@@ -1,4 +1,4 @@
-use openadr_xml::oadr::OadrPayload;
+use openadr_xml::oadr20b::oadr::OadrPayload;
 use std::error::Error;
 use std::fmt::Debug;
 use std::io::{BufRead, BufReader};

@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tolerance {
-    pub tolerate: crate::xcal::Tolerate,
+    pub tolerate: crate::oadr20b::xcal::Tolerate,
 }
 
 impl Tolerance {
@@ -71,7 +71,7 @@ impl Tolerance {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut tolerate: xsd_util::SetOnce<crate::xcal::Tolerate> = Default::default();
+        let mut tolerate: xsd_util::SetOnce<crate::oadr20b::xcal::Tolerate> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -93,7 +93,7 @@ impl Tolerance {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "tolerate" => tolerate.set(crate::xcal::Tolerate::read(
+                    "tolerate" => tolerate.set(crate::oadr20b::xcal::Tolerate::read(
                         reader,
                         &attributes,
                         "tolerate",

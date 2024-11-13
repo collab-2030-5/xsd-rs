@@ -3,13 +3,13 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrReportType {
-    pub xcal_dtstart: Option<crate::xcal::Dtstart>,
-    pub xcal_duration: Option<crate::xcal::DurationPropType>,
-    pub strm_intervals: Option<crate::strm::Intervals>,
+    pub xcal_dtstart: Option<crate::oadr20b::xcal::Dtstart>,
+    pub xcal_duration: Option<crate::oadr20b::xcal::DurationPropType>,
+    pub strm_intervals: Option<crate::oadr20b::strm::Intervals>,
     /// reference ID to this report.
     pub ei_ei_report_id: Option<String>,
     /// Define data points the implementation is capable of reporting on. Only used in Metadata report
-    pub oadr_oadr_report_description: Vec<crate::oadr::OadrReportDescriptionType>,
+    pub oadr_oadr_report_description: Vec<crate::oadr20b::oadr::OadrReportDescriptionType>,
     /// Reference to the oadrCreateReport request that defined this report.
     pub ei_report_request_id: String,
     /// Reference to Metadata report from which this report was derived.
@@ -115,12 +115,13 @@ impl OadrReportType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut strm_intervals: xsd_util::SetOnce<crate::strm::Intervals> = Default::default();
+        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+            Default::default();
         let mut ei_ei_report_id: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_report_description: Vec<crate::oadr::OadrReportDescriptionType> =
+        let mut oadr_oadr_report_description: Vec<crate::oadr20b::oadr::OadrReportDescriptionType> =
             Default::default();
         let mut ei_report_request_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_report_specifier_id: xsd_util::SetOnce<String> = Default::default();
@@ -147,17 +148,19 @@ impl OadrReportType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::oadr20b::xcal::Dtstart::read(
                         reader,
                         &attributes,
                         "dtstart",
                     )?)?,
-                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "duration",
-                    )?)?,
-                    "intervals" => strm_intervals.set(crate::strm::Intervals::read(
+                    "duration" => {
+                        xcal_duration.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "duration",
+                        )?)?
+                    }
+                    "intervals" => strm_intervals.set(crate::oadr20b::strm::Intervals::read(
                         reader,
                         &attributes,
                         "intervals",
@@ -166,7 +169,7 @@ impl OadrReportType {
                         ei_ei_report_id.set(xsd_util::read_string(reader, "eiReportID")?)?
                     }
                     "oadrReportDescription" => oadr_oadr_report_description.push(
-                        crate::oadr::OadrReportDescriptionType::read(
+                        crate::oadr20b::oadr::OadrReportDescriptionType::read(
                             reader,
                             &attributes,
                             "oadrReportDescription",

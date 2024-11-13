@@ -4,7 +4,7 @@ use xml::writer::*;
 /// Collection of Responses. When a service operation regards multiple referenceable items, each referenced item may have its own response. Always accompanied by an overall Response Type.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayofResponses {
-    pub response: Vec<crate::ei::EiResponseType>,
+    pub response: Vec<crate::oadr20b::ei::EiResponseType>,
 }
 
 impl ArrayofResponses {
@@ -73,7 +73,7 @@ impl ArrayofResponses {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut response: Vec<crate::ei::EiResponseType> = Default::default();
+        let mut response: Vec<crate::oadr20b::ei::EiResponseType> = Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -95,7 +95,7 @@ impl ArrayofResponses {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "response" => response.push(crate::ei::EiResponseType::read(
+                    "response" => response.push(crate::oadr20b::ei::EiResponseType::read(
                         reader,
                         &attributes,
                         "response",

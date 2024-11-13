@@ -6,8 +6,8 @@ pub struct EventResponse {
     pub ei_response_code: String,
     pub ei_response_description: Option<String>,
     pub pyld_request_id: String,
-    pub ei_qualified_event_id: crate::ei::QualifiedEventIdType,
-    pub ei_opt_type: crate::ei::OptTypeType,
+    pub ei_qualified_event_id: crate::oadr20b::ei::QualifiedEventIdType,
+    pub ei_opt_type: crate::oadr20b::ei::OptTypeType,
 }
 
 impl EventResponse {
@@ -84,9 +84,10 @@ impl EventResponse {
         let mut ei_response_code: xsd_util::SetOnce<String> = Default::default();
         let mut ei_response_description: xsd_util::SetOnce<String> = Default::default();
         let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::ei::QualifiedEventIdType> =
+        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::oadr20b::ei::QualifiedEventIdType> =
             Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::ei::OptTypeType> = Default::default();
+        let mut ei_opt_type: xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -116,13 +117,13 @@ impl EventResponse {
                     "requestID" => {
                         pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
                     }
-                    "qualifiedEventID" => {
-                        ei_qualified_event_id.set(crate::ei::QualifiedEventIdType::read(
+                    "qualifiedEventID" => ei_qualified_event_id.set(
+                        crate::oadr20b::ei::QualifiedEventIdType::read(
                             reader,
                             &attributes,
                             "qualifiedEventID",
-                        )?)?
-                    }
+                        )?,
+                    )?,
                     "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(

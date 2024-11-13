@@ -2,7 +2,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CurrentValueTypeChoice {
-    EiPayloadFloat(crate::ei::PayloadFloatType),
+    EiPayloadFloat(crate::oadr20b::ei::PayloadFloatType),
 }
 
 impl CurrentValueTypeChoice {

@@ -3,13 +3,13 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Properties {
-    pub xcal_dtstart: crate::xcal::Dtstart,
-    pub xcal_duration: crate::xcal::DurationPropType,
+    pub xcal_dtstart: crate::oadr20b::xcal::Dtstart,
+    pub xcal_duration: crate::oadr20b::xcal::DurationPropType,
     /// Set randomization period for start of event
-    pub tolerance: Option<crate::xcal::Tolerance>,
-    pub ei_x_ei_notification: Option<crate::xcal::DurationPropType>,
-    pub ei_x_ei_ramp_up: Option<crate::xcal::DurationPropType>,
-    pub ei_x_ei_recovery: Option<crate::xcal::DurationPropType>,
+    pub tolerance: Option<crate::oadr20b::xcal::Tolerance>,
+    pub ei_x_ei_notification: Option<crate::oadr20b::xcal::DurationPropType>,
+    pub ei_x_ei_ramp_up: Option<crate::oadr20b::xcal::DurationPropType>,
+    pub ei_x_ei_recovery: Option<crate::oadr20b::xcal::DurationPropType>,
 }
 
 impl Properties {
@@ -91,15 +91,15 @@ impl Properties {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
+        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut tolerance: xsd_util::SetOnce<crate::xcal::Tolerance> = Default::default();
-        let mut ei_x_ei_notification: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut tolerance: xsd_util::SetOnce<crate::oadr20b::xcal::Tolerance> = Default::default();
+        let mut ei_x_ei_notification: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut ei_x_ei_ramp_up: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut ei_x_ei_ramp_up: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut ei_x_ei_recovery: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut ei_x_ei_recovery: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
 
         for attr in attrs.iter() {
@@ -122,38 +122,44 @@ impl Properties {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "dtstart" => xcal_dtstart.set(crate::xcal::Dtstart::read(
+                    "dtstart" => xcal_dtstart.set(crate::oadr20b::xcal::Dtstart::read(
                         reader,
                         &attributes,
                         "dtstart",
                     )?)?,
-                    "duration" => xcal_duration.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "duration",
-                    )?)?,
-                    "tolerance" => tolerance.set(crate::xcal::Tolerance::read(
+                    "duration" => {
+                        xcal_duration.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "duration",
+                        )?)?
+                    }
+                    "tolerance" => tolerance.set(crate::oadr20b::xcal::Tolerance::read(
                         reader,
                         &attributes,
                         "tolerance",
                     )?)?,
                     "x-eiNotification" => {
-                        ei_x_ei_notification.set(crate::xcal::DurationPropType::read(
+                        ei_x_ei_notification.set(crate::oadr20b::xcal::DurationPropType::read(
                             reader,
                             &attributes,
                             "x-eiNotification",
                         )?)?
                     }
-                    "x-eiRampUp" => ei_x_ei_ramp_up.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "x-eiRampUp",
-                    )?)?,
-                    "x-eiRecovery" => ei_x_ei_recovery.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "x-eiRecovery",
-                    )?)?,
+                    "x-eiRampUp" => {
+                        ei_x_ei_ramp_up.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "x-eiRampUp",
+                        )?)?
+                    }
+                    "x-eiRecovery" => {
+                        ei_x_ei_recovery.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "x-eiRecovery",
+                        )?)?
+                    }
                     name => {
                         return Err(xsd_api::ReadError::UnexpectedToken(
                             xsd_api::ParentToken(parent_tag.to_owned()),

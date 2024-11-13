@@ -6,12 +6,12 @@ use xml::writer::*;
 pub struct ReportSpecifierType {
     pub ei_report_specifier_id: String,
     /// How frequently the [measurement] is to be recorded.
-    pub xcal_granularity: crate::xcal::DurationPropType,
+    pub xcal_granularity: crate::oadr20b::xcal::DurationPropType,
     /// Report back with the Report-To-Date for each passing of this Duration.
-    pub report_back_duration: crate::xcal::DurationPropType,
+    pub report_back_duration: crate::oadr20b::xcal::DurationPropType,
     /// This is the overall period of reporting.
-    pub report_interval: Option<crate::xcal::WsCalendarIntervalType>,
-    pub ei_specifier_payload: Vec<crate::ei::SpecifierPayloadType>,
+    pub report_interval: Option<crate::oadr20b::xcal::WsCalendarIntervalType>,
+    pub ei_specifier_payload: Vec<crate::oadr20b::ei::SpecifierPayloadType>,
 }
 
 impl ReportSpecifierType {
@@ -93,13 +93,14 @@ impl ReportSpecifierType {
     {
         // one variable for each attribute and element
         let mut ei_report_specifier_id: xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_granularity: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut xcal_granularity: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut report_back_duration: xsd_util::SetOnce<crate::xcal::DurationPropType> =
+        let mut report_back_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut report_interval: xsd_util::SetOnce<crate::xcal::WsCalendarIntervalType> =
+        let mut report_interval: xsd_util::SetOnce<crate::oadr20b::xcal::WsCalendarIntervalType> =
             Default::default();
-        let mut ei_specifier_payload: Vec<crate::ei::SpecifierPayloadType> = Default::default();
+        let mut ei_specifier_payload: Vec<crate::oadr20b::ei::SpecifierPayloadType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -123,27 +124,29 @@ impl ReportSpecifierType {
                 } => match name.local_name.as_str() {
                     "reportSpecifierID" => ei_report_specifier_id
                         .set(xsd_util::read_string(reader, "reportSpecifierID")?)?,
-                    "granularity" => xcal_granularity.set(crate::xcal::DurationPropType::read(
-                        reader,
-                        &attributes,
-                        "granularity",
-                    )?)?,
+                    "granularity" => {
+                        xcal_granularity.set(crate::oadr20b::xcal::DurationPropType::read(
+                            reader,
+                            &attributes,
+                            "granularity",
+                        )?)?
+                    }
                     "reportBackDuration" => {
-                        report_back_duration.set(crate::xcal::DurationPropType::read(
+                        report_back_duration.set(crate::oadr20b::xcal::DurationPropType::read(
                             reader,
                             &attributes,
                             "reportBackDuration",
                         )?)?
                     }
                     "reportInterval" => {
-                        report_interval.set(crate::xcal::WsCalendarIntervalType::read(
+                        report_interval.set(crate::oadr20b::xcal::WsCalendarIntervalType::read(
                             reader,
                             &attributes,
                             "reportInterval",
                         )?)?
                     }
                     "specifierPayload" => {
-                        ei_specifier_payload.push(crate::ei::SpecifierPayloadType::read(
+                        ei_specifier_payload.push(crate::oadr20b::ei::SpecifierPayloadType::read(
                             reader,
                             &attributes,
                             "specifierPayload",

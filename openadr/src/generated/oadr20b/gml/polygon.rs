@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polygon {
-    pub exterior: crate::gml::Exterior,
+    pub exterior: crate::oadr20b::gml::Exterior,
     pub gml_id: Option<String>,
 }
 
@@ -78,7 +78,7 @@ impl Polygon {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut exterior: xsd_util::SetOnce<crate::gml::Exterior> = Default::default();
+        let mut exterior: xsd_util::SetOnce<crate::oadr20b::gml::Exterior> = Default::default();
         let mut gml_id: xsd_util::SetOnce<String> = Default::default();
 
         for attr in attrs.iter() {
@@ -102,7 +102,7 @@ impl Polygon {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "exterior" => exterior.set(crate::gml::Exterior::read(
+                    "exterior" => exterior.set(crate::oadr20b::gml::Exterior::read(
                         reader,
                         &attributes,
                         "exterior",

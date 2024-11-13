@@ -3,8 +3,8 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EiActivePeriodType {
-    pub xcal_properties: crate::xcal::Properties,
-    pub xcal_components: crate::xcal::Components,
+    pub xcal_properties: crate::oadr20b::xcal::Properties,
+    pub xcal_components: crate::oadr20b::xcal::Components,
 }
 
 impl EiActivePeriodType {
@@ -74,8 +74,10 @@ impl EiActivePeriodType {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_properties: xsd_util::SetOnce<crate::xcal::Properties> = Default::default();
-        let mut xcal_components: xsd_util::SetOnce<crate::xcal::Components> = Default::default();
+        let mut xcal_properties: xsd_util::SetOnce<crate::oadr20b::xcal::Properties> =
+            Default::default();
+        let mut xcal_components: xsd_util::SetOnce<crate::oadr20b::xcal::Components> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -97,12 +99,12 @@ impl EiActivePeriodType {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "properties" => xcal_properties.set(crate::xcal::Properties::read(
+                    "properties" => xcal_properties.set(crate::oadr20b::xcal::Properties::read(
                         reader,
                         &attributes,
                         "properties",
                     )?)?,
-                    "components" => xcal_components.set(crate::xcal::Components::read(
+                    "components" => xcal_components.set(crate::oadr20b::xcal::Components::read(
                         reader,
                         &attributes,
                         "components",

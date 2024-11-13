@@ -9,7 +9,7 @@ pub struct ReportPayloadType {
     pub ei_confidence: Option<u32>,
     /// Accuracy in same units as interval payload value
     pub ei_accuracy: Option<f32>,
-    pub ei_payload_base: crate::ei::PayloadBaseType,
+    pub ei_payload_base: crate::oadr20b::ei::PayloadBaseType,
 }
 
 impl ReportPayloadType {
@@ -86,7 +86,8 @@ impl ReportPayloadType {
         let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
         let mut ei_confidence: xsd_util::SetOnce<u32> = Default::default();
         let mut ei_accuracy: xsd_util::SetOnce<f32> = Default::default();
-        let mut ei_payload_base: xsd_util::SetOnce<crate::ei::PayloadBaseType> = Default::default();
+        let mut ei_payload_base: xsd_util::SetOnce<crate::oadr20b::ei::PayloadBaseType> =
+            Default::default();
 
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
@@ -116,8 +117,8 @@ impl ReportPayloadType {
                         ei_accuracy.set(xsd_util::read_type_from_string(reader, "accuracy")?)?
                     }
                     "oadrPayloadResourceStatus" => ei_payload_base.set(
-                        crate::ei::PayloadBaseType::OadrPayloadResourceStatus(
-                            crate::oadr::OadrPayloadResourceStatusType::read(
+                        crate::oadr20b::ei::PayloadBaseType::OadrPayloadResourceStatus(
+                            crate::oadr20b::oadr::OadrPayloadResourceStatusType::read(
                                 reader,
                                 &attributes,
                                 "oadrPayloadResourceStatus",
@@ -125,8 +126,12 @@ impl ReportPayloadType {
                         ),
                     )?,
                     "payloadFloat" => {
-                        ei_payload_base.set(crate::ei::PayloadBaseType::PayloadFloat(
-                            crate::ei::PayloadFloatType::read(reader, &attributes, "payloadFloat")?,
+                        ei_payload_base.set(crate::oadr20b::ei::PayloadBaseType::PayloadFloat(
+                            crate::oadr20b::ei::PayloadFloatType::read(
+                                reader,
+                                &attributes,
+                                "payloadFloat",
+                            )?,
                         ))?
                     }
                     name => {

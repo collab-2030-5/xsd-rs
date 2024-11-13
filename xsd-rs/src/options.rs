@@ -58,6 +58,9 @@ pub(crate) struct GenerateOptions {
     /// Enable debug level logging
     #[arg(short = 'd', long = "debug", default_value_t = false)]
     pub(crate) debug: bool,
+
+    #[arg(short = 'n', long = "nsroot", default_value = "")]
+    pub(crate) namespace_root: String,
 }
 
 impl Options {

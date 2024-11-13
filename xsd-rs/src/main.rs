@@ -52,14 +52,14 @@ fn generate(options: &GenerateOptions) -> Result<(), FatalError> {
             for xsd in schemas {
                 // let xsd = parent_dir.join(schema);
                 tracing::info!("merging {}", xsd.display());
-                model.merge_xsd(&xsd);
+                model.merge_xsd(&xsd, &options.namespace_root);
             }
         }
 
         // process any manually specified schemas
         for xsd in options.inputs.iter() {
             tracing::info!("merging {}", xsd.display());
-            model.merge_xsd(xsd);
+            model.merge_xsd(xsd, &options.namespace_root);
         }
         model
     };
