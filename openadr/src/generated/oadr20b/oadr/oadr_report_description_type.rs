@@ -23,20 +23,28 @@ impl OadrReportDescriptionType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
         if let Some(elem) = &self.ei_report_subject {
             elem.write_with_name(writer, "ei:reportSubject", false, false)?;
         }
         if let Some(elem) = &self.ei_report_data_source {
             elem.write_with_name(writer, "ei:reportDataSource", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:reportType", self.ei_report_type.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:reportType",
+            self.ei_report_type.as_str(),
+        )?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:readingType",
+            self.ei_reading_type.as_str(),
+        )?;
         if let Some(elem) = &self.emix_market_context {
-            xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
         }
         if let Some(elem) = &self.oadr_oadr_sampling_rate {
             elem.write_with_name(writer, "oadr:oadrSamplingRate", false, false)?;
@@ -71,12 +79,12 @@ impl OadrReportDescriptionType {
     }
 }
 
-impl xsd_api::WriteXml for OadrReportDescriptionType {
+impl crate::xsd_util::WriteXml for OadrReportDescriptionType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -91,22 +99,22 @@ impl OadrReportDescriptionType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_report_subject: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
+        let mut ei_r_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_subject: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
-        let mut ei_report_data_source: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
+        let mut ei_report_data_source: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
-        let mut ei_report_type: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
+        let mut ei_report_type: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_sampling_rate: xsd_util::SetOnce<
+        let mut ei_reading_type: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_market_context: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_sampling_rate: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrSamplingRateType,
         > = Default::default();
 
@@ -118,13 +126,13 @@ impl OadrReportDescriptionType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "rID" => ei_r_id.set(crate::xsd_util::read_string(reader, "rID")?)?,
                     "reportSubject" => {
                         ei_report_subject.set(crate::oadr20b::ei::EiTargetType::read(
                             reader,
@@ -140,7 +148,7 @@ impl OadrReportDescriptionType {
                         )?)?
                     }
                     "reportType" => {
-                        ei_report_type.set(xsd_util::read_string(reader, "reportType")?)?
+                        ei_report_type.set(crate::xsd_util::read_string(reader, "reportType")?)?
                     }
                     "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
                         crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
@@ -235,33 +243,6 @@ impl OadrReportDescriptionType {
                             )?,
                         ))?
                     }
-                    "powerApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
-                            crate::oadr20b::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
-                            crate::oadr20b::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
-                            crate::oadr20b::power::PowerRealType::read(
-                                reader,
-                                &attributes,
-                                "powerReal",
-                            )?,
-                        ))?
-                    }
                     "energyApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
                             crate::oadr20b::power::EnergyApparentType::read(
@@ -289,12 +270,38 @@ impl OadrReportDescriptionType {
                             )?,
                         ))?
                     }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
+                            )?,
+                        ))?
+                    }
                     "readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
+                        ei_reading_type.set(crate::xsd_util::read_string(reader, "readingType")?)?
                     }
-                    "marketContext" => {
-                        emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
-                    }
+                    "marketContext" => emix_market_context
+                        .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
                     "oadrSamplingRate" => oadr_oadr_sampling_rate.set(
                         crate::oadr20b::oadr::OadrSamplingRateType::read(
                             reader,
@@ -303,24 +310,24 @@ impl OadrReportDescriptionType {
                         )?,
                     )?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -344,17 +351,17 @@ impl OadrReportDescriptionType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrReportDescription")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrReportDescription")?;
         OadrReportDescriptionType::read(reader, &attr, "oadrReportDescription")
     }
 }
 
-impl xsd_api::ReadXml for OadrReportDescriptionType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrReportDescriptionType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -364,7 +371,7 @@ impl xsd_api::ReadXml for OadrReportDescriptionType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

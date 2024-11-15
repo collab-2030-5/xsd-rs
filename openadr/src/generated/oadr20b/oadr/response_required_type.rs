@@ -7,7 +7,7 @@ pub enum ResponseRequiredType {
     Never,
 }
 
-impl xsd_util::StringEnumeration for ResponseRequiredType {
+impl crate::xsd_util::StringEnumeration for ResponseRequiredType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "always" => Some(Self::Always),

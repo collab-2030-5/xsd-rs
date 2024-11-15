@@ -5,7 +5,7 @@ pub enum EventFilterType {
     All,
 }
 
-impl xsd_util::StringEnumeration for EventFilterType {
+impl crate::xsd_util::StringEnumeration for EventFilterType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "all" => Some(Self::All),

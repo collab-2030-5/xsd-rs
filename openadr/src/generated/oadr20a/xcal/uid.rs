@@ -14,7 +14,7 @@ impl Uid {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "xcal:text", self.xcal_text.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "xcal:text", self.xcal_text.as_str())?;
         Ok(())
     }
 
@@ -45,12 +45,12 @@ impl Uid {
     }
 }
 
-impl xsd_api::WriteXml for Uid {
+impl crate::xsd_util::WriteXml for Uid {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -65,12 +65,12 @@ impl Uid {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_text: xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_text: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
             match reader.next()? {
@@ -80,32 +80,32 @@ impl Uid {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "text" => xcal_text.set(xsd_util::read_string(reader, "text")?)?,
+                        "text" => xcal_text.set(crate::xsd_util::read_string(reader, "text")?)?,
                         name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
                             ))
                         }
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -122,17 +122,17 @@ impl Uid {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "uid")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "uid")?;
         Uid::read(reader, &attr, "uid")
     }
 }
 
-impl xsd_api::ReadXml for Uid {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for Uid {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -142,7 +142,7 @@ impl xsd_api::ReadXml for Uid {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

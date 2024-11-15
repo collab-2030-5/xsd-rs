@@ -21,28 +21,28 @@ impl EventDescriptorType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:eventID", self.ei_event_id.as_str())?;
-        xsd_util::write_element_using_to_string(
+        crate::xsd_util::write_simple_element(writer, "ei:eventID", self.ei_event_id.as_str())?;
+        crate::xsd_util::write_element_using_to_string(
             writer,
             "ei:modificationNumber",
             self.ei_modification_number,
         )?;
         if let Some(elem) = &self.priority {
-            xsd_util::write_element_using_to_string(writer, "ei:priority", elem)?;
+            crate::xsd_util::write_element_using_to_string(writer, "ei:priority", elem)?;
         }
         self.ei_market_context
             .write_with_name(writer, "ei:eiMarketContext", false, false)?;
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "ei:createdDateTime",
             self.created_date_time.as_str(),
         )?;
-        xsd_util::write_string_enumeration(writer, "ei:eventStatus", self.ei_event_status)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:eventStatus", self.ei_event_status)?;
         if let Some(elem) = &self.test_event {
-            xsd_util::write_simple_element(writer, "ei:testEvent", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:testEvent", elem.as_str())?;
         }
         if let Some(elem) = &self.vtn_comment {
-            xsd_util::write_simple_element(writer, "ei:vtnComment", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:vtnComment", elem.as_str())?;
         }
         Ok(())
     }
@@ -74,12 +74,12 @@ impl EventDescriptorType {
     }
 }
 
-impl xsd_api::WriteXml for EventDescriptorType {
+impl crate::xsd_util::WriteXml for EventDescriptorType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -94,21 +94,22 @@ impl EventDescriptorType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_event_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_modification_number: xsd_util::SetOnce<u32> = Default::default();
-        let mut priority: xsd_util::SetOnce<u32> = Default::default();
-        let mut ei_market_context: xsd_util::SetOnce<crate::oadr20a::ei::EiMarketContext> =
+        let mut ei_event_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_modification_number: crate::xsd_util::SetOnce<u32> = Default::default();
+        let mut priority: crate::xsd_util::SetOnce<u32> = Default::default();
+        let mut ei_market_context: crate::xsd_util::SetOnce<crate::oadr20a::ei::EiMarketContext> =
             Default::default();
-        let mut created_date_time: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_event_status: xsd_util::SetOnce<crate::oadr20a::ei::EventStatusEnumeratedType> =
-            Default::default();
-        let mut test_event: xsd_util::SetOnce<String> = Default::default();
-        let mut vtn_comment: xsd_util::SetOnce<String> = Default::default();
+        let mut created_date_time: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_event_status: crate::xsd_util::SetOnce<
+            crate::oadr20a::ei::EventStatusEnumeratedType,
+        > = Default::default();
+        let mut test_event: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut vtn_comment: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
             match reader.next()? {
@@ -118,18 +119,20 @@ impl EventDescriptorType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "eventID" => ei_event_id.set(xsd_util::read_string(reader, "eventID")?)?,
+                    "eventID" => {
+                        ei_event_id.set(crate::xsd_util::read_string(reader, "eventID")?)?
+                    }
                     "modificationNumber" => ei_modification_number.set(
-                        xsd_util::read_type_from_string(reader, "modificationNumber")?,
+                        crate::xsd_util::read_type_from_string(reader, "modificationNumber")?,
                     )?,
                     "priority" => {
-                        priority.set(xsd_util::read_type_from_string(reader, "priority")?)?
+                        priority.set(crate::xsd_util::read_type_from_string(reader, "priority")?)?
                     }
                     "eiMarketContext" => {
                         ei_market_context.set(crate::oadr20a::ei::EiMarketContext::read(
@@ -138,35 +141,35 @@ impl EventDescriptorType {
                             "eiMarketContext",
                         )?)?
                     }
-                    "createdDateTime" => {
-                        created_date_time.set(xsd_util::read_string(reader, "createdDateTime")?)?
+                    "createdDateTime" => created_date_time
+                        .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
+                    "eventStatus" => ei_event_status
+                        .set(crate::xsd_util::read_string_enum(reader, "eventStatus")?)?,
+                    "testEvent" => {
+                        test_event.set(crate::xsd_util::read_string(reader, "testEvent")?)?
                     }
-                    "eventStatus" => {
-                        ei_event_status.set(xsd_util::read_string_enum(reader, "eventStatus")?)?
-                    }
-                    "testEvent" => test_event.set(xsd_util::read_string(reader, "testEvent")?)?,
                     "vtnComment" => {
-                        vtn_comment.set(xsd_util::read_string(reader, "vtnComment")?)?
+                        vtn_comment.set(crate::xsd_util::read_string(reader, "vtnComment")?)?
                     }
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -190,17 +193,17 @@ impl EventDescriptorType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eventDescriptor")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "eventDescriptor")?;
         EventDescriptorType::read(reader, &attr, "eventDescriptor")
     }
 }
 
-impl xsd_api::ReadXml for EventDescriptorType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EventDescriptorType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -210,7 +213,7 @@ impl xsd_api::ReadXml for EventDescriptorType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

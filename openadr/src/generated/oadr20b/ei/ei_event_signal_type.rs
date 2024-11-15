@@ -29,9 +29,13 @@ impl EiEventSignalType {
         if let Some(elem) = &self.ei_ei_target {
             elem.write_with_name(writer, "ei:eiTarget", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:signalName", self.ei_signal_name.as_str())?;
-        xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
-        xsd_util::write_simple_element(writer, "ei:signalID", self.signal_id.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:signalName",
+            self.ei_signal_name.as_str(),
+        )?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
+        crate::xsd_util::write_simple_element(writer, "ei:signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
@@ -68,12 +72,12 @@ impl EiEventSignalType {
     }
 }
 
-impl xsd_api::WriteXml for EiEventSignalType {
+impl crate::xsd_util::WriteXml for EiEventSignalType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -88,22 +92,23 @@ impl EiEventSignalType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+        let mut strm_intervals: crate::xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
             Default::default();
-        let mut ei_ei_target: xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
+        let mut ei_ei_target: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
-        let mut ei_signal_name: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_signal_type: xsd_util::SetOnce<crate::oadr20b::ei::SignalTypeEnumeratedType> =
+        let mut ei_signal_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_signal_type: crate::xsd_util::SetOnce<
+            crate::oadr20b::ei::SignalTypeEnumeratedType,
+        > = Default::default();
+        let mut signal_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
-        let mut signal_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
-            Default::default();
-        let mut ei_current_value: xsd_util::SetOnce<crate::oadr20b::ei::CurrentValueType> =
+        let mut ei_current_value: crate::xsd_util::SetOnce<crate::oadr20b::ei::CurrentValueType> =
             Default::default();
 
         loop {
@@ -114,7 +119,7 @@ impl EiEventSignalType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
@@ -131,12 +136,13 @@ impl EiEventSignalType {
                         "eiTarget",
                     )?)?,
                     "signalName" => {
-                        ei_signal_name.set(xsd_util::read_string(reader, "signalName")?)?
+                        ei_signal_name.set(crate::xsd_util::read_string(reader, "signalName")?)?
                     }
-                    "signalType" => {
-                        ei_signal_type.set(xsd_util::read_string_enum(reader, "signalType")?)?
+                    "signalType" => ei_signal_type
+                        .set(crate::xsd_util::read_string_enum(reader, "signalType")?)?,
+                    "signalID" => {
+                        signal_id.set(crate::xsd_util::read_string(reader, "signalID")?)?
                     }
-                    "signalID" => signal_id.set(xsd_util::read_string(reader, "signalID")?)?,
                     "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
                         crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
                     ))?,
@@ -230,33 +236,6 @@ impl EiEventSignalType {
                             )?,
                         ))?
                     }
-                    "powerApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
-                            crate::oadr20b::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
-                            crate::oadr20b::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
-                            crate::oadr20b::power::PowerRealType::read(
-                                reader,
-                                &attributes,
-                                "powerReal",
-                            )?,
-                        ))?
-                    }
                     "energyApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
                             crate::oadr20b::power::EnergyApparentType::read(
@@ -284,6 +263,33 @@ impl EiEventSignalType {
                             )?,
                         ))?
                     }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
+                            )?,
+                        ))?
+                    }
                     "currentValue" => {
                         ei_current_value.set(crate::oadr20b::ei::CurrentValueType::read(
                             reader,
@@ -292,24 +298,24 @@ impl EiEventSignalType {
                         )?)?
                     }
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -332,17 +338,17 @@ impl EiEventSignalType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiEventSignal")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "eiEventSignal")?;
         EiEventSignalType::read(reader, &attr, "eiEventSignal")
     }
 }
 
-impl xsd_api::ReadXml for EiEventSignalType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EiEventSignalType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -352,7 +358,7 @@ impl xsd_api::ReadXml for EiEventSignalType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

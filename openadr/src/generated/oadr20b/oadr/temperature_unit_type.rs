@@ -6,7 +6,7 @@ pub enum TemperatureUnitType {
     Fahrenheit,
 }
 
-impl xsd_util::StringEnumeration for TemperatureUnitType {
+impl crate::xsd_util::StringEnumeration for TemperatureUnitType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "celsius" => Some(Self::Celsius),

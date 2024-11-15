@@ -17,13 +17,13 @@ impl PulseCountType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "oadr:itemDescription",
             self.item_description.as_str(),
         )?;
-        xsd_util::write_simple_element(writer, "oadr:itemUnits", self.item_units.as_str())?;
-        xsd_util::write_element_using_to_string(
+        crate::xsd_util::write_simple_element(writer, "oadr:itemUnits", self.item_units.as_str())?;
+        crate::xsd_util::write_element_using_to_string(
             writer,
             "oadr:pulseFactor",
             self.oadr_pulse_factor,
@@ -58,12 +58,12 @@ impl PulseCountType {
     }
 }
 
-impl xsd_api::WriteXml for PulseCountType {
+impl crate::xsd_util::WriteXml for PulseCountType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -78,14 +78,14 @@ impl PulseCountType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut item_description: xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_pulse_factor: xsd_util::SetOnce<f32> = Default::default();
+        let mut item_description: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut item_units: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_pulse_factor: crate::xsd_util::SetOnce<f32> = Default::default();
 
         loop {
             match reader.next()? {
@@ -95,38 +95,39 @@ impl PulseCountType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
                         "itemDescription" => item_description
-                            .set(xsd_util::read_string(reader, "itemDescription")?)?,
+                            .set(crate::xsd_util::read_string(reader, "itemDescription")?)?,
                         "itemUnits" => {
-                            item_units.set(xsd_util::read_string(reader, "itemUnits")?)?
+                            item_units.set(crate::xsd_util::read_string(reader, "itemUnits")?)?
                         }
-                        "pulseFactor" => oadr_pulse_factor
-                            .set(xsd_util::read_type_from_string(reader, "pulseFactor")?)?,
+                        "pulseFactor" => oadr_pulse_factor.set(
+                            crate::xsd_util::read_type_from_string(reader, "pulseFactor")?,
+                        )?,
                         name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
                             ))
                         }
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -145,17 +146,17 @@ impl PulseCountType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "pulseCount")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "pulseCount")?;
         PulseCountType::read(reader, &attr, "pulseCount")
     }
 }
 
-impl xsd_api::ReadXml for PulseCountType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for PulseCountType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -165,7 +166,7 @@ impl xsd_api::ReadXml for PulseCountType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

@@ -30,41 +30,49 @@ impl OadrCreatePartyRegistrationType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "pyld:requestID",
+            self.pyld_request_id.as_str(),
+        )?;
         if let Some(elem) = &self.ei_registration_id {
-            xsd_util::write_simple_element(writer, "ei:registrationID", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:registrationID", elem.as_str())?;
         }
         if let Some(elem) = &self.ei_ven_id {
-            xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
         }
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "oadr:oadrProfileName",
             self.oadr_oadr_profile_name.as_str(),
         )?;
-        xsd_util::write_string_enumeration(
+        crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrTransportName",
             self.oadr_oadr_transport_name,
         )?;
         if let Some(elem) = &self.oadr_oadr_transport_address {
-            xsd_util::write_simple_element(writer, "oadr:oadrTransportAddress", elem.as_str())?;
+            crate::xsd_util::write_simple_element(
+                writer,
+                "oadr:oadrTransportAddress",
+                elem.as_str(),
+            )?;
         }
-        xsd_util::write_element_using_to_string(
+        crate::xsd_util::write_element_using_to_string(
             writer,
             "oadr:oadrReportOnly",
             self.oadr_oadr_report_only,
         )?;
-        xsd_util::write_element_using_to_string(
+        crate::xsd_util::write_element_using_to_string(
             writer,
             "oadr:oadrXmlSignature",
             self.oadr_oadr_xml_signature,
         )?;
         if let Some(elem) = &self.oadr_oadr_ven_name {
-            xsd_util::write_simple_element(writer, "oadr:oadrVenName", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "oadr:oadrVenName", elem.as_str())?;
         }
         if let Some(elem) = &self.oadr_oadr_http_pull_model {
-            xsd_util::write_element_using_to_string(writer, "oadr:oadrHttpPullModel", elem)?;
+            crate::xsd_util::write_element_using_to_string(writer, "oadr:oadrHttpPullModel", elem)?;
         }
         Ok(())
     }
@@ -102,12 +110,12 @@ impl OadrCreatePartyRegistrationType {
     }
 }
 
-impl xsd_api::WriteXml for OadrCreatePartyRegistrationType {
+impl crate::xsd_util::WriteXml for OadrCreatePartyRegistrationType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -122,24 +130,24 @@ impl OadrCreatePartyRegistrationType {
         reader: &mut xml::reader::EventReader<R>,
         attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_registration_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_profile_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_transport_name: xsd_util::SetOnce<
+        let mut pyld_request_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_registration_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_profile_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_transport_name: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrTransportType,
         > = Default::default();
-        let mut oadr_oadr_transport_address: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_report_only: xsd_util::SetOnce<bool> = Default::default();
-        let mut oadr_oadr_xml_signature: xsd_util::SetOnce<bool> = Default::default();
-        let mut oadr_oadr_ven_name: xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_http_pull_model: xsd_util::SetOnce<bool> = Default::default();
-        let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_transport_address: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_report_only: crate::xsd_util::SetOnce<bool> = Default::default();
+        let mut oadr_oadr_xml_signature: crate::xsd_util::SetOnce<bool> = Default::default();
+        let mut oadr_oadr_ven_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_http_pull_model: crate::xsd_util::SetOnce<bool> = Default::default();
+        let mut ei_schema_version: crate::xsd_util::SetOnce<String> = Default::default();
 
         #[allow(clippy::single_match)]
         for attr in attrs.iter() {
@@ -157,53 +165,55 @@ impl OadrCreatePartyRegistrationType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "requestID" => {
-                            pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
-                        }
+                        "requestID" => pyld_request_id
+                            .set(crate::xsd_util::read_string(reader, "requestID")?)?,
                         "registrationID" => ei_registration_id
-                            .set(xsd_util::read_string(reader, "registrationID")?)?,
-                        "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                            .set(crate::xsd_util::read_string(reader, "registrationID")?)?,
+                        "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
                         "oadrProfileName" => oadr_oadr_profile_name
-                            .set(xsd_util::read_string(reader, "oadrProfileName")?)?,
-                        "oadrTransportName" => oadr_oadr_transport_name
-                            .set(xsd_util::read_string_enum(reader, "oadrTransportName")?)?,
-                        "oadrTransportAddress" => oadr_oadr_transport_address
-                            .set(xsd_util::read_string(reader, "oadrTransportAddress")?)?,
-                        "oadrReportOnly" => oadr_oadr_report_only
-                            .set(xsd_util::read_type_from_string(reader, "oadrReportOnly")?)?,
-                        "oadrXmlSignature" => oadr_oadr_xml_signature
-                            .set(xsd_util::read_type_from_string(reader, "oadrXmlSignature")?)?,
-                        "oadrVenName" => {
-                            oadr_oadr_ven_name.set(xsd_util::read_string(reader, "oadrVenName")?)?
-                        }
+                            .set(crate::xsd_util::read_string(reader, "oadrProfileName")?)?,
+                        "oadrTransportName" => oadr_oadr_transport_name.set(
+                            crate::xsd_util::read_string_enum(reader, "oadrTransportName")?,
+                        )?,
+                        "oadrTransportAddress" => oadr_oadr_transport_address.set(
+                            crate::xsd_util::read_string(reader, "oadrTransportAddress")?,
+                        )?,
+                        "oadrReportOnly" => oadr_oadr_report_only.set(
+                            crate::xsd_util::read_type_from_string(reader, "oadrReportOnly")?,
+                        )?,
+                        "oadrXmlSignature" => oadr_oadr_xml_signature.set(
+                            crate::xsd_util::read_type_from_string(reader, "oadrXmlSignature")?,
+                        )?,
+                        "oadrVenName" => oadr_oadr_ven_name
+                            .set(crate::xsd_util::read_string(reader, "oadrVenName")?)?,
                         "oadrHttpPullModel" => oadr_oadr_http_pull_model.set(
-                            xsd_util::read_type_from_string(reader, "oadrHttpPullModel")?,
+                            crate::xsd_util::read_type_from_string(reader, "oadrHttpPullModel")?,
                         )?,
                         name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
                             ))
                         }
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -230,17 +240,17 @@ impl OadrCreatePartyRegistrationType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCreatePartyRegistration")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrCreatePartyRegistration")?;
         OadrCreatePartyRegistrationType::read(reader, &attr, "oadrCreatePartyRegistration")
     }
 }
 
-impl xsd_api::ReadXml for OadrCreatePartyRegistrationType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrCreatePartyRegistrationType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -250,7 +260,7 @@ impl xsd_api::ReadXml for OadrCreatePartyRegistrationType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

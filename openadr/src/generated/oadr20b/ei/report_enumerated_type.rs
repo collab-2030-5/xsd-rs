@@ -51,7 +51,7 @@ pub enum ReportEnumeratedType {
     XResourceStatus,
 }
 
-impl xsd_util::StringEnumeration for ReportEnumeratedType {
+impl crate::xsd_util::StringEnumeration for ReportEnumeratedType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "reading" => Some(Self::Reading),

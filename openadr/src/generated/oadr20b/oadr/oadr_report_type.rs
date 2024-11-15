@@ -37,25 +37,25 @@ impl OadrReportType {
             elem.write_with_name(writer, "strm:intervals", false, false)?;
         }
         if let Some(elem) = &self.ei_ei_report_id {
-            xsd_util::write_simple_element(writer, "ei:eiReportID", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:eiReportID", elem.as_str())?;
         }
         for item in &self.oadr_oadr_report_description {
             item.write_with_name(writer, "oadr:oadrReportDescription", false, false)?;
         }
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "ei:reportRequestID",
             self.ei_report_request_id.as_str(),
         )?;
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "ei:reportSpecifierID",
             self.ei_report_specifier_id.as_str(),
         )?;
         if let Some(elem) = &self.ei_report_name {
-            xsd_util::write_simple_element(writer, "ei:reportName", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:reportName", elem.as_str())?;
         }
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "ei:createdDateTime",
             self.ei_created_date_time.as_str(),
@@ -90,12 +90,12 @@ impl OadrReportType {
     }
 }
 
-impl xsd_api::WriteXml for OadrReportType {
+impl crate::xsd_util::WriteXml for OadrReportType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -110,23 +110,24 @@ impl OadrReportType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
+        let mut xcal_dtstart: crate::xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> =
             Default::default();
-        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+        let mut xcal_duration: crate::xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut ei_ei_report_id: xsd_util::SetOnce<String> = Default::default();
+        let mut strm_intervals: crate::xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+            Default::default();
+        let mut ei_ei_report_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_report_description: Vec<crate::oadr20b::oadr::OadrReportDescriptionType> =
             Default::default();
-        let mut ei_report_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_report_specifier_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_report_name: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_request_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_specifier_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_created_date_time: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
             match reader.next()? {
@@ -136,7 +137,7 @@ impl OadrReportType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
@@ -160,7 +161,7 @@ impl OadrReportType {
                         "intervals",
                     )?)?,
                     "eiReportID" => {
-                        ei_ei_report_id.set(xsd_util::read_string(reader, "eiReportID")?)?
+                        ei_ei_report_id.set(crate::xsd_util::read_string(reader, "eiReportID")?)?
                     }
                     "oadrReportDescription" => oadr_oadr_report_description.push(
                         crate::oadr20b::oadr::OadrReportDescriptionType::read(
@@ -170,33 +171,33 @@ impl OadrReportType {
                         )?,
                     ),
                     "reportRequestID" => ei_report_request_id
-                        .set(xsd_util::read_string(reader, "reportRequestID")?)?,
+                        .set(crate::xsd_util::read_string(reader, "reportRequestID")?)?,
                     "reportSpecifierID" => ei_report_specifier_id
-                        .set(xsd_util::read_string(reader, "reportSpecifierID")?)?,
+                        .set(crate::xsd_util::read_string(reader, "reportSpecifierID")?)?,
                     "reportName" => {
-                        ei_report_name.set(xsd_util::read_string(reader, "reportName")?)?
+                        ei_report_name.set(crate::xsd_util::read_string(reader, "reportName")?)?
                     }
                     "createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "createdDateTime")?)?,
+                        .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -221,17 +222,17 @@ impl OadrReportType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrReport")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrReport")?;
         OadrReportType::read(reader, &attr, "oadrReport")
     }
 }
 
-impl xsd_api::ReadXml for OadrReportType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrReportType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -241,7 +242,7 @@ impl xsd_api::ReadXml for OadrReportType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

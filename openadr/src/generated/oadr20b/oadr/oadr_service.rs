@@ -15,7 +15,7 @@ impl OadrService {
     where
         W: std::io::Write,
     {
-        xsd_util::write_string_enumeration(
+        crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrServiceName",
             self.oadr_oadr_service_name,
@@ -53,12 +53,12 @@ impl OadrService {
     }
 }
 
-impl xsd_api::WriteXml for OadrService {
+impl crate::xsd_util::WriteXml for OadrService {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -73,12 +73,12 @@ impl OadrService {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_service_name: xsd_util::SetOnce<
+        let mut oadr_oadr_service_name: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrServiceNameType,
         > = Default::default();
         let mut oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo> = Default::default();
@@ -91,38 +91,39 @@ impl OadrService {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrServiceName" => oadr_oadr_service_name
-                        .set(xsd_util::read_string_enum(reader, "oadrServiceName")?)?,
+                    "oadrServiceName" => oadr_oadr_service_name.set(
+                        crate::xsd_util::read_string_enum(reader, "oadrServiceName")?,
+                    )?,
                     "oadrInfo" => oadr_oadr_info.push(crate::oadr20b::oadr::OadrInfo::read(
                         reader,
                         &attributes,
                         "oadrInfo",
                     )?),
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -140,17 +141,17 @@ impl OadrService {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrService")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrService")?;
         OadrService::read(reader, &attr, "oadrService")
     }
 }
 
-impl xsd_api::ReadXml for OadrService {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrService {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -160,7 +161,7 @@ impl xsd_api::ReadXml for OadrService {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

@@ -6,7 +6,7 @@ pub enum OptTypeType {
     OptOut,
 }
 
-impl xsd_util::StringEnumeration for OptTypeType {
+impl crate::xsd_util::StringEnumeration for OptTypeType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "optIn" => Some(Self::OptIn),

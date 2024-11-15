@@ -18,8 +18,12 @@ impl OadrPayloadResourceStatusType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_element_using_to_string(writer, "oadr:oadrOnline", self.oadr_online)?;
-        xsd_util::write_element_using_to_string(
+        crate::xsd_util::write_element_using_to_string(
+            writer,
+            "oadr:oadrOnline",
+            self.oadr_online,
+        )?;
+        crate::xsd_util::write_element_using_to_string(
             writer,
             "oadr:oadrManualOverride",
             self.oadr_manual_override,
@@ -57,12 +61,12 @@ impl OadrPayloadResourceStatusType {
     }
 }
 
-impl xsd_api::WriteXml for OadrPayloadResourceStatusType {
+impl crate::xsd_util::WriteXml for OadrPayloadResourceStatusType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -77,14 +81,14 @@ impl OadrPayloadResourceStatusType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_online: xsd_util::SetOnce<bool> = Default::default();
-        let mut oadr_manual_override: xsd_util::SetOnce<bool> = Default::default();
-        let mut oadr_oadr_load_control_state: xsd_util::SetOnce<
+        let mut oadr_online: crate::xsd_util::SetOnce<bool> = Default::default();
+        let mut oadr_manual_override: crate::xsd_util::SetOnce<bool> = Default::default();
+        let mut oadr_oadr_load_control_state: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrLoadControlStateType,
         > = Default::default();
 
@@ -96,17 +100,18 @@ impl OadrPayloadResourceStatusType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrOnline" => {
-                        oadr_online.set(xsd_util::read_type_from_string(reader, "oadrOnline")?)?
-                    }
+                    "oadrOnline" => oadr_online.set(crate::xsd_util::read_type_from_string(
+                        reader,
+                        "oadrOnline",
+                    )?)?,
                     "oadrManualOverride" => oadr_manual_override.set(
-                        xsd_util::read_type_from_string(reader, "oadrManualOverride")?,
+                        crate::xsd_util::read_type_from_string(reader, "oadrManualOverride")?,
                     )?,
                     "oadrLoadControlState" => oadr_oadr_load_control_state.set(
                         crate::oadr20b::oadr::OadrLoadControlStateType::read(
@@ -116,24 +121,24 @@ impl OadrPayloadResourceStatusType {
                         )?,
                     )?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -152,17 +157,17 @@ impl OadrPayloadResourceStatusType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrPayloadResourceStatus")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrPayloadResourceStatus")?;
         OadrPayloadResourceStatusType::read(reader, &attr, "oadrPayloadResourceStatus")
     }
 }
 
-impl xsd_api::ReadXml for OadrPayloadResourceStatusType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrPayloadResourceStatusType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -172,7 +177,7 @@ impl xsd_api::ReadXml for OadrPayloadResourceStatusType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

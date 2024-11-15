@@ -12,7 +12,7 @@ pub enum OadrServiceNameType {
     OadrPoll,
 }
 
-impl xsd_util::StringEnumeration for OadrServiceNameType {
+impl crate::xsd_util::StringEnumeration for OadrServiceNameType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "EiEvent" => Some(Self::EiEvent),

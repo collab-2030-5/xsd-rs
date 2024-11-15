@@ -14,7 +14,7 @@ pub enum EventStatusEnumeratedType {
     Cancelled,
 }
 
-impl xsd_util::StringEnumeration for EventStatusEnumeratedType {
+impl crate::xsd_util::StringEnumeration for EventStatusEnumeratedType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "none" => Some(Self::None),

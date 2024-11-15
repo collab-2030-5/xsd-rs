@@ -22,17 +22,17 @@ impl EiOptType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:optID", self.ei_opt_id.as_str())?;
-        xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
-        xsd_util::write_simple_element(writer, "ei:optReason", self.ei_opt_reason.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:optID", self.ei_opt_id.as_str())?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
+        crate::xsd_util::write_simple_element(writer, "ei:optReason", self.ei_opt_reason.as_str())?;
         if let Some(elem) = &self.emix_market_context {
-            xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
         }
-        xsd_util::write_simple_element(writer, "ei:venID", self.ei_ven_id.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:venID", self.ei_ven_id.as_str())?;
         if let Some(elem) = &self.xcal_vavailability {
             elem.write_with_name(writer, "xcal:vavailability", false, false)?;
         }
-        xsd_util::write_simple_element(
+        crate::xsd_util::write_simple_element(
             writer,
             "ei:createdDateTime",
             self.ei_created_date_time.as_str(),
@@ -73,12 +73,12 @@ impl EiOptType {
     }
 }
 
-impl xsd_api::WriteXml for EiOptType {
+impl crate::xsd_util::WriteXml for EiOptType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -93,21 +93,22 @@ impl EiOptType {
         reader: &mut xml::reader::EventReader<R>,
         attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_opt_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
+        let mut ei_opt_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_opt_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
             Default::default();
-        let mut ei_opt_reason: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_market_context: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut xcal_vavailability: xsd_util::SetOnce<crate::oadr20b::xcal::VavailabilityType> =
-            Default::default();
-        let mut ei_created_date_time: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_opt_reason: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_market_context: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut xcal_vavailability: crate::xsd_util::SetOnce<
+            crate::oadr20b::xcal::VavailabilityType,
+        > = Default::default();
+        let mut ei_created_date_time: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_schema_version: crate::xsd_util::SetOnce<String> = Default::default();
 
         #[allow(clippy::single_match)]
         for attr in attrs.iter() {
@@ -125,21 +126,22 @@ impl EiOptType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "optID" => ei_opt_id.set(xsd_util::read_string(reader, "optID")?)?,
-                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
+                    "optID" => ei_opt_id.set(crate::xsd_util::read_string(reader, "optID")?)?,
+                    "optType" => {
+                        ei_opt_type.set(crate::xsd_util::read_string_enum(reader, "optType")?)?
+                    }
                     "optReason" => {
-                        ei_opt_reason.set(xsd_util::read_string(reader, "optReason")?)?
+                        ei_opt_reason.set(crate::xsd_util::read_string(reader, "optReason")?)?
                     }
-                    "marketContext" => {
-                        emix_market_context.set(xsd_util::read_string(reader, "marketContext")?)?
-                    }
-                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "marketContext" => emix_market_context
+                        .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
+                    "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
                     "vavailability" => {
                         xcal_vavailability.set(crate::oadr20b::xcal::VavailabilityType::read(
                             reader,
@@ -148,26 +150,26 @@ impl EiOptType {
                         )?)?
                     }
                     "createdDateTime" => ei_created_date_time
-                        .set(xsd_util::read_string(reader, "createdDateTime")?)?,
+                        .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -191,17 +193,17 @@ impl EiOptType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "EiOptType")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "EiOptType")?;
         EiOptType::read(reader, &attr, "EiOptType")
     }
 }
 
-impl xsd_api::ReadXml for EiOptType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EiOptType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -211,7 +213,7 @@ impl xsd_api::ReadXml for EiOptType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

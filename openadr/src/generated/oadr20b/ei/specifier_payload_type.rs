@@ -18,11 +18,15 @@ impl SpecifierPayloadType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:rID", self.ei_r_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
-        xsd_util::write_simple_element(writer, "ei:readingType", self.ei_reading_type.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:readingType",
+            self.ei_reading_type.as_str(),
+        )?;
         Ok(())
     }
 
@@ -53,12 +57,12 @@ impl SpecifierPayloadType {
     }
 }
 
-impl xsd_api::WriteXml for SpecifierPayloadType {
+impl crate::xsd_util::WriteXml for SpecifierPayloadType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -73,15 +77,15 @@ impl SpecifierPayloadType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_r_id: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
+        let mut ei_r_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
-        let mut ei_reading_type: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_reading_type: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
             match reader.next()? {
@@ -91,13 +95,13 @@ impl SpecifierPayloadType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "rID" => ei_r_id.set(xsd_util::read_string(reader, "rID")?)?,
+                    "rID" => ei_r_id.set(crate::xsd_util::read_string(reader, "rID")?)?,
                     "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
                         crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
                     ))?,
@@ -191,33 +195,6 @@ impl SpecifierPayloadType {
                             )?,
                         ))?
                     }
-                    "powerApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
-                            crate::oadr20b::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
-                            crate::oadr20b::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
-                            crate::oadr20b::power::PowerRealType::read(
-                                reader,
-                                &attributes,
-                                "powerReal",
-                            )?,
-                        ))?
-                    }
                     "energyApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
                             crate::oadr20b::power::EnergyApparentType::read(
@@ -245,28 +222,55 @@ impl SpecifierPayloadType {
                             )?,
                         ))?
                     }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
+                            )?,
+                        ))?
+                    }
                     "readingType" => {
-                        ei_reading_type.set(xsd_util::read_string(reader, "readingType")?)?
+                        ei_reading_type.set(crate::xsd_util::read_string(reader, "readingType")?)?
                     }
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -285,17 +289,17 @@ impl SpecifierPayloadType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "specifierPayload")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "specifierPayload")?;
         SpecifierPayloadType::read(reader, &attr, "specifierPayload")
     }
 }
 
-impl xsd_api::ReadXml for SpecifierPayloadType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for SpecifierPayloadType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -305,7 +309,7 @@ impl xsd_api::ReadXml for SpecifierPayloadType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

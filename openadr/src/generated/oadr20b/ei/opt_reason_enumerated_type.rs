@@ -19,7 +19,7 @@ pub enum OptReasonEnumeratedType {
     XSchedule,
 }
 
-impl xsd_util::StringEnumeration for OptReasonEnumeratedType {
+impl crate::xsd_util::StringEnumeration for OptReasonEnumeratedType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "economic" => Some(Self::Economic),

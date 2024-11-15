@@ -364,7 +364,7 @@ pub enum Iso3AlphaCurrencyCodeContentType {
     Zwl,
 }
 
-impl xsd_util::StringEnumeration for Iso3AlphaCurrencyCodeContentType {
+impl crate::xsd_util::StringEnumeration for Iso3AlphaCurrencyCodeContentType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "AED" => Some(Self::Aed),

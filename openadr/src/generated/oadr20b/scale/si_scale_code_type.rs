@@ -25,7 +25,7 @@ pub enum SiScaleCodeType {
     None,
 }
 
-impl xsd_util::StringEnumeration for SiScaleCodeType {
+impl crate::xsd_util::StringEnumeration for SiScaleCodeType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "p" => Some(Self::P),

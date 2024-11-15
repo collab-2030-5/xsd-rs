@@ -8,7 +8,7 @@ pub enum CurrencyItemDescriptionType {
     CurrencyPerKWh,
 }
 
-impl xsd_util::StringEnumeration for CurrencyItemDescriptionType {
+impl crate::xsd_util::StringEnumeration for CurrencyItemDescriptionType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "currency" => Some(Self::Currency),

@@ -16,9 +16,9 @@ impl PowerAttributesType {
     where
         W: std::io::Write,
     {
-        xsd_util::write_element_using_to_string(writer, "power:hertz", self.hertz)?;
-        xsd_util::write_element_using_to_string(writer, "power:voltage", self.voltage)?;
-        xsd_util::write_element_using_to_string(writer, "power:ac", self.ac)?;
+        crate::xsd_util::write_element_using_to_string(writer, "power:hertz", self.hertz)?;
+        crate::xsd_util::write_element_using_to_string(writer, "power:voltage", self.voltage)?;
+        crate::xsd_util::write_element_using_to_string(writer, "power:ac", self.ac)?;
         Ok(())
     }
 
@@ -49,12 +49,12 @@ impl PowerAttributesType {
     }
 }
 
-impl xsd_api::WriteXml for PowerAttributesType {
+impl crate::xsd_util::WriteXml for PowerAttributesType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -69,14 +69,14 @@ impl PowerAttributesType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut hertz: xsd_util::SetOnce<f64> = Default::default();
-        let mut voltage: xsd_util::SetOnce<f64> = Default::default();
-        let mut ac: xsd_util::SetOnce<bool> = Default::default();
+        let mut hertz: crate::xsd_util::SetOnce<f64> = Default::default();
+        let mut voltage: crate::xsd_util::SetOnce<f64> = Default::default();
+        let mut ac: crate::xsd_util::SetOnce<bool> = Default::default();
 
         loop {
             match reader.next()? {
@@ -86,36 +86,37 @@ impl PowerAttributesType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement { name, .. } => {
                     match name.local_name.as_str() {
-                        "hertz" => hertz.set(xsd_util::read_type_from_string(reader, "hertz")?)?,
-                        "voltage" => {
-                            voltage.set(xsd_util::read_type_from_string(reader, "voltage")?)?
+                        "hertz" => {
+                            hertz.set(crate::xsd_util::read_type_from_string(reader, "hertz")?)?
                         }
-                        "ac" => ac.set(xsd_util::read_type_from_string(reader, "ac")?)?,
+                        "voltage" => voltage
+                            .set(crate::xsd_util::read_type_from_string(reader, "voltage")?)?,
+                        "ac" => ac.set(crate::xsd_util::read_type_from_string(reader, "ac")?)?,
                         name => {
-                            return Err(xsd_api::ReadError::UnexpectedToken(
-                                xsd_api::ParentToken(parent_tag.to_owned()),
-                                xsd_api::ChildToken(name.to_owned()),
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
                             ))
                         }
                     }
                 }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -134,17 +135,17 @@ impl PowerAttributesType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "powerAttributes")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "powerAttributes")?;
         PowerAttributesType::read(reader, &attr, "powerAttributes")
     }
 }
 
-impl xsd_api::ReadXml for PowerAttributesType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for PowerAttributesType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -154,7 +155,7 @@ impl xsd_api::ReadXml for PowerAttributesType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

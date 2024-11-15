@@ -20,10 +20,10 @@ impl OadrCanceledPartyRegistrationType {
         self.ei_ei_response
             .write_with_name(writer, "ei:eiResponse", false, false)?;
         if let Some(elem) = &self.ei_registration_id {
-            xsd_util::write_simple_element(writer, "ei:registrationID", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:registrationID", elem.as_str())?;
         }
         if let Some(elem) = &self.ei_ven_id {
-            xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
         }
         Ok(())
     }
@@ -61,12 +61,12 @@ impl OadrCanceledPartyRegistrationType {
     }
 }
 
-impl xsd_api::WriteXml for OadrCanceledPartyRegistrationType {
+impl crate::xsd_util::WriteXml for OadrCanceledPartyRegistrationType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -86,16 +86,16 @@ impl OadrCanceledPartyRegistrationType {
         reader: &mut xml::reader::EventReader<R>,
         attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
+        let mut ei_ei_response: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
             Default::default();
-        let mut ei_registration_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_schema_version: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_registration_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_schema_version: crate::xsd_util::SetOnce<String> = Default::default();
 
         #[allow(clippy::single_match)]
         for attr in attrs.iter() {
@@ -113,7 +113,7 @@ impl OadrCanceledPartyRegistrationType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
@@ -126,29 +126,28 @@ impl OadrCanceledPartyRegistrationType {
                             "eiResponse",
                         )?)?
                     }
-                    "registrationID" => {
-                        ei_registration_id.set(xsd_util::read_string(reader, "registrationID")?)?
-                    }
-                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "registrationID" => ei_registration_id
+                        .set(crate::xsd_util::read_string(reader, "registrationID")?)?,
+                    "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -168,17 +167,17 @@ impl OadrCanceledPartyRegistrationType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "oadrCanceledPartyRegistration")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "oadrCanceledPartyRegistration")?;
         OadrCanceledPartyRegistrationType::read(reader, &attr, "oadrCanceledPartyRegistration")
     }
 }
 
-impl xsd_api::ReadXml for OadrCanceledPartyRegistrationType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for OadrCanceledPartyRegistrationType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -188,7 +187,7 @@ impl xsd_api::ReadXml for OadrCanceledPartyRegistrationType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

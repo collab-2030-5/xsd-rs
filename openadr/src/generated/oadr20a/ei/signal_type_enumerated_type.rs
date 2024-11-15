@@ -19,7 +19,7 @@ pub enum SignalTypeEnumeratedType {
     Setpoint,
 }
 
-impl xsd_util::StringEnumeration for SignalTypeEnumeratedType {
+impl crate::xsd_util::StringEnumeration for SignalTypeEnumeratedType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "delta" => Some(Self::Delta),

@@ -21,7 +21,7 @@ impl EiCreatedEvent {
         if let Some(elem) = &self.ei_event_responses {
             elem.write_with_name(writer, "ei:eventResponses", false, false)?;
         }
-        xsd_util::write_simple_element(writer, "ei:venID", self.ei_ven_id.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:venID", self.ei_ven_id.as_str())?;
         Ok(())
     }
 
@@ -52,12 +52,12 @@ impl EiCreatedEvent {
     }
 }
 
-impl xsd_api::WriteXml for EiCreatedEvent {
+impl crate::xsd_util::WriteXml for EiCreatedEvent {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -72,16 +72,16 @@ impl EiCreatedEvent {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_ei_response: xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
+        let mut ei_ei_response: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiResponseType> =
             Default::default();
-        let mut ei_event_responses: xsd_util::SetOnce<crate::oadr20b::ei::EventResponses> =
+        let mut ei_event_responses: crate::xsd_util::SetOnce<crate::oadr20b::ei::EventResponses> =
             Default::default();
-        let mut ei_ven_id: xsd_util::SetOnce<String> = Default::default();
+        let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
             match reader.next()? {
@@ -91,7 +91,7 @@ impl EiCreatedEvent {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
@@ -111,26 +111,26 @@ impl EiCreatedEvent {
                             "eventResponses",
                         )?)?
                     }
-                    "venID" => ei_ven_id.set(xsd_util::read_string(reader, "venID")?)?,
+                    "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -149,17 +149,17 @@ impl EiCreatedEvent {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiCreatedEvent")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "eiCreatedEvent")?;
         EiCreatedEvent::read(reader, &attr, "eiCreatedEvent")
     }
 }
 
-impl xsd_api::ReadXml for EiCreatedEvent {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EiCreatedEvent {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -169,7 +169,7 @@ impl xsd_api::ReadXml for EiCreatedEvent {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

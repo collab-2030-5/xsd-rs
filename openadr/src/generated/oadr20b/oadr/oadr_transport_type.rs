@@ -6,7 +6,7 @@ pub enum OadrTransportType {
     Xmpp,
 }
 
-impl xsd_util::StringEnumeration for OadrTransportType {
+impl crate::xsd_util::StringEnumeration for OadrTransportType {
     fn find(s: &str) -> Option<Self> {
         match s {
             "simpleHttp" => Some(Self::SimpleHttp),

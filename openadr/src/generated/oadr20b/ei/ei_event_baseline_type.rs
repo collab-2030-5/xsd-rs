@@ -29,11 +29,15 @@ impl EiEventBaselineType {
             .write_with_name(writer, "xcal:duration", false, false)?;
         self.strm_intervals
             .write_with_name(writer, "strm:intervals", false, false)?;
-        xsd_util::write_simple_element(writer, "ei:baselineID", self.baseline_id.as_str())?;
+        crate::xsd_util::write_simple_element(writer, "ei:baselineID", self.baseline_id.as_str())?;
         for item in &self.ei_resource_id {
-            xsd_util::write_simple_element(writer, "ei:resourceID", item.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:resourceID", item.as_str())?;
         }
-        xsd_util::write_simple_element(writer, "ei:baselineName", self.baseline_name.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:baselineName",
+            self.baseline_name.as_str(),
+        )?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
@@ -67,12 +71,12 @@ impl EiEventBaselineType {
     }
 }
 
-impl xsd_api::WriteXml for EiEventBaselineType {
+impl crate::xsd_util::WriteXml for EiEventBaselineType {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -87,20 +91,21 @@ impl EiEventBaselineType {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut xcal_dtstart: xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> = Default::default();
-        let mut xcal_duration: xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
+        let mut xcal_dtstart: crate::xsd_util::SetOnce<crate::oadr20b::xcal::Dtstart> =
             Default::default();
-        let mut strm_intervals: xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+        let mut xcal_duration: crate::xsd_util::SetOnce<crate::oadr20b::xcal::DurationPropType> =
             Default::default();
-        let mut baseline_id: xsd_util::SetOnce<String> = Default::default();
+        let mut strm_intervals: crate::xsd_util::SetOnce<crate::oadr20b::strm::Intervals> =
+            Default::default();
+        let mut baseline_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_resource_id: Vec<String> = Default::default();
-        let mut baseline_name: xsd_util::SetOnce<String> = Default::default();
-        let mut emix_item_base: xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
+        let mut baseline_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
 
         loop {
@@ -111,7 +116,7 @@ impl EiEventBaselineType {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
@@ -135,13 +140,13 @@ impl EiEventBaselineType {
                         "intervals",
                     )?)?,
                     "baselineID" => {
-                        baseline_id.set(xsd_util::read_string(reader, "baselineID")?)?
+                        baseline_id.set(crate::xsd_util::read_string(reader, "baselineID")?)?
                     }
                     "resourceID" => {
-                        ei_resource_id.push(xsd_util::read_string(reader, "resourceID")?)
+                        ei_resource_id.push(crate::xsd_util::read_string(reader, "resourceID")?)
                     }
                     "baselineName" => {
-                        baseline_name.set(xsd_util::read_string(reader, "baselineName")?)?
+                        baseline_name.set(crate::xsd_util::read_string(reader, "baselineName")?)?
                     }
                     "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
                         crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
@@ -236,33 +241,6 @@ impl EiEventBaselineType {
                             )?,
                         ))?
                     }
-                    "powerApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
-                            crate::oadr20b::power::PowerApparentType::read(
-                                reader,
-                                &attributes,
-                                "powerApparent",
-                            )?,
-                        ))?
-                    }
-                    "powerReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
-                            crate::oadr20b::power::PowerReactiveType::read(
-                                reader,
-                                &attributes,
-                                "powerReactive",
-                            )?,
-                        ))?
-                    }
-                    "powerReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
-                            crate::oadr20b::power::PowerRealType::read(
-                                reader,
-                                &attributes,
-                                "powerReal",
-                            )?,
-                        ))?
-                    }
                     "energyApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
                             crate::oadr20b::power::EnergyApparentType::read(
@@ -290,25 +268,52 @@ impl EiEventBaselineType {
                             )?,
                         ))?
                     }
+                    "powerApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
+                            crate::oadr20b::power::PowerApparentType::read(
+                                reader,
+                                &attributes,
+                                "powerApparent",
+                            )?,
+                        ))?
+                    }
+                    "powerReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReactive(
+                            crate::oadr20b::power::PowerReactiveType::read(
+                                reader,
+                                &attributes,
+                                "powerReactive",
+                            )?,
+                        ))?
+                    }
+                    "powerReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerReal(
+                            crate::oadr20b::power::PowerRealType::read(
+                                reader,
+                                &attributes,
+                                "powerReal",
+                            )?,
+                        ))?
+                    }
                     name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
+                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                            crate::xsd_util::ChildToken(name.to_owned()),
                         ))
                     }
                 },
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -331,17 +336,17 @@ impl EiEventBaselineType {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eiEventBaseline")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "eiEventBaseline")?;
         EiEventBaselineType::read(reader, &attr, "eiEventBaseline")
     }
 }
 
-impl xsd_api::ReadXml for EiEventBaselineType {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EiEventBaselineType {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -351,7 +356,7 @@ impl xsd_api::ReadXml for EiEventBaselineType {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,

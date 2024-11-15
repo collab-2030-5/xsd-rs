@@ -18,14 +18,22 @@ impl EventResponse {
     where
         W: std::io::Write,
     {
-        xsd_util::write_simple_element(writer, "ei:responseCode", self.ei_response_code.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "ei:responseCode",
+            self.ei_response_code.as_str(),
+        )?;
         if let Some(elem) = &self.ei_response_description {
-            xsd_util::write_simple_element(writer, "ei:responseDescription", elem.as_str())?;
+            crate::xsd_util::write_simple_element(writer, "ei:responseDescription", elem.as_str())?;
         }
-        xsd_util::write_simple_element(writer, "pyld:requestID", self.pyld_request_id.as_str())?;
+        crate::xsd_util::write_simple_element(
+            writer,
+            "pyld:requestID",
+            self.pyld_request_id.as_str(),
+        )?;
         self.ei_qualified_event_id
             .write_with_name(writer, "ei:qualifiedEventID", false, false)?;
-        xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
         Ok(())
     }
 
@@ -56,12 +64,12 @@ impl EventResponse {
     }
 }
 
-impl xsd_api::WriteXml for EventResponse {
+impl crate::xsd_util::WriteXml for EventResponse {
     fn write<W>(
         &self,
-        config: xsd_api::WriteConfig,
+        config: crate::xsd_util::WriteConfig,
         writer: &mut W,
-    ) -> core::result::Result<(), xsd_api::WriteError>
+    ) -> core::result::Result<(), crate::xsd_util::WriteError>
     where
         W: std::io::Write,
     {
@@ -76,17 +84,18 @@ impl EventResponse {
         reader: &mut xml::reader::EventReader<R>,
         _attrs: &[xml::attribute::OwnedAttribute],
         parent_tag: &str,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut ei_response_code: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_response_description: xsd_util::SetOnce<String> = Default::default();
-        let mut pyld_request_id: xsd_util::SetOnce<String> = Default::default();
-        let mut ei_qualified_event_id: xsd_util::SetOnce<crate::oadr20b::ei::QualifiedEventIdType> =
-            Default::default();
-        let mut ei_opt_type: xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
+        let mut ei_response_code: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_response_description: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut pyld_request_id: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_qualified_event_id: crate::xsd_util::SetOnce<
+            crate::oadr20b::ei::QualifiedEventIdType,
+        > = Default::default();
+        let mut ei_opt_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
             Default::default();
 
         loop {
@@ -97,47 +106,48 @@ impl EventResponse {
                         break;
                     } else {
                         // TODO - make this more specific
-                        return Err(xsd_api::ReadError::UnexpectedEvent);
+                        return Err(crate::xsd_util::ReadError::UnexpectedEvent);
                     }
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "responseCode" => {
-                        ei_response_code.set(xsd_util::read_string(reader, "responseCode")?)?
-                    }
-                    "responseDescription" => ei_response_description
-                        .set(xsd_util::read_string(reader, "responseDescription")?)?,
-                    "requestID" => {
-                        pyld_request_id.set(xsd_util::read_string(reader, "requestID")?)?
-                    }
-                    "qualifiedEventID" => ei_qualified_event_id.set(
-                        crate::oadr20b::ei::QualifiedEventIdType::read(
-                            reader,
-                            &attributes,
-                            "qualifiedEventID",
+                } => {
+                    match name.local_name.as_str() {
+                        "responseCode" => ei_response_code
+                            .set(crate::xsd_util::read_string(reader, "responseCode")?)?,
+                        "responseDescription" => ei_response_description
+                            .set(crate::xsd_util::read_string(reader, "responseDescription")?)?,
+                        "requestID" => pyld_request_id
+                            .set(crate::xsd_util::read_string(reader, "requestID")?)?,
+                        "qualifiedEventID" => ei_qualified_event_id.set(
+                            crate::oadr20b::ei::QualifiedEventIdType::read(
+                                reader,
+                                &attributes,
+                                "qualifiedEventID",
+                            )?,
                         )?,
-                    )?,
-                    "optType" => ei_opt_type.set(xsd_util::read_string_enum(reader, "optType")?)?,
-                    name => {
-                        return Err(xsd_api::ReadError::UnexpectedToken(
-                            xsd_api::ParentToken(parent_tag.to_owned()),
-                            xsd_api::ChildToken(name.to_owned()),
-                        ))
+                        "optType" => ei_opt_type
+                            .set(crate::xsd_util::read_string_enum(reader, "optType")?)?,
+                        name => {
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::EndDocument => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::Characters(_) => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 xml::reader::XmlEvent::ProcessingInstruction { .. } => {
-                    return Err(xsd_api::ReadError::UnexpectedEvent)
+                    return Err(crate::xsd_util::ReadError::UnexpectedEvent)
                 }
                 // ignore these events
                 xml::reader::XmlEvent::CData(_) => {}
@@ -158,17 +168,17 @@ impl EventResponse {
 
     fn read_top_level<R>(
         reader: &mut xml::reader::EventReader<R>,
-    ) -> core::result::Result<Self, xsd_api::ReadError>
+    ) -> core::result::Result<Self, crate::xsd_util::ReadError>
     where
         R: std::io::Read,
     {
-        let attr = xsd_util::read_start_tag(reader, "eventResponse")?;
+        let attr = crate::xsd_util::read_start_tag(reader, "eventResponse")?;
         EventResponse::read(reader, &attr, "eventResponse")
     }
 }
 
-impl xsd_api::ReadXml for EventResponse {
-    fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation>
+impl crate::xsd_util::ReadXml for EventResponse {
+    fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation>
     where
         R: std::io::Read,
     {
@@ -178,7 +188,7 @@ impl xsd_api::ReadXml for EventResponse {
             Ok(x) => Ok(x),
             Err(err) => {
                 let pos = reader.position();
-                Err(xsd_api::ErrorWithLocation {
+                Err(crate::xsd_util::ErrorWithLocation {
                     err,
                     line: pos.row,
                     col: pos.column,
