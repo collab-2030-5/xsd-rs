@@ -90,11 +90,11 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 
     writeln!(
         w,
-        "impl xsd_api::WriteXml for {} {{",
+        "impl crate::xsd_util::WriteXml for {} {{",
         st.id.name.to_upper_camel_case()
     )?;
     indent(w, |w| {
-        writeln!(w, "fn write<W>(&self, config: xsd_api::WriteConfig, writer: &mut W) -> core::result::Result<(), xsd_api::WriteError> where W: std::io::Write {{")?;
+        writeln!(w, "fn write<W>(&self, config: crate::xsd_util::WriteConfig, writer: &mut W) -> core::result::Result<(), crate::xsd_util::WriteError> where W: std::io::Write {{")?;
         indent(w, |w| {
             writeln!(
                 w,
@@ -116,11 +116,11 @@ fn write_serializers(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
 fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     writeln!(
         w,
-        "impl xsd_api::ReadXml for {} {{",
+        "impl crate::xsd_util::ReadXml for {} {{",
         st.id.name.to_upper_camel_case()
     )?;
     indent(w, |w| {
-        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, xsd_api::ErrorWithLocation> where R: std::io::Read {{")?;
+        writeln!(w, "fn read<R>(r: &mut R) -> core::result::Result<Self, crate::xsd_util::ErrorWithLocation> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "let mut reader = xml::reader::EventReader::new(r);")?;
             writeln!(w)?;
@@ -136,7 +136,7 @@ fn write_deserializer_trait_impl(w: &mut dyn Write, st: &Struct) -> std::io::Res
                     writeln!(w, "let pos = reader.position();")?;
                     writeln!(
                         w,
-                        "Err(xsd_api::ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
+                        "Err(crate::xsd_util::ErrorWithLocation {{ err, line: pos.row, col: pos.column }})"
                     )
                 })?;
                 writeln!(w, "}}")
@@ -161,7 +161,7 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
             0 => "_".to_owned(),
             _ => "".to_owned(),
         };
-        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, {underscore}attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "pub(crate) fn read<R>(reader: &mut xml::reader::EventReader<R>, {underscore}attrs: &[xml::attribute::OwnedAttribute], parent_tag: &str) -> core::result::Result<Self, crate::xsd_util::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(w, "// one variable for each attribute and element")?;
             write_struct_cells(w, st)?;
@@ -177,11 +177,11 @@ fn write_deserializer_impl(w: &mut dyn Write, st: &Struct) -> std::io::Result<()
         })?;
         writeln!(w, "}}")?;
         writeln!(w)?;
-        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, xsd_api::ReadError> where R: std::io::Read {{")?;
+        writeln!(w, "fn read_top_level<R>(reader: &mut xml::reader::EventReader<R>) -> core::result::Result<Self, crate::xsd_util::ReadError> where R: std::io::Read {{")?;
         indent(w, |w| {
             writeln!(
                 w,
-                "let attr = xsd_util::read_start_tag(reader, \"{}\")?;",
+                "let attr = crate::xsd_util::read_start_tag(reader, \"{}\")?;",
                 &st.element_name.name
             )?;
             writeln!(
@@ -228,10 +228,12 @@ fn write_attr_parse_loop(w: &mut dyn Write, attrs: &[Attribute]) -> std::io::Res
 fn write_struct_cells(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     for field in st.dedup_fields() {
         let cell_type = match &field.field_type {
-            FieldType::Attribute(_, t) => format!("xsd_util::SetOnce<{}>", t.rust_struct_type()),
+            FieldType::Attribute(_, t) => {
+                format!("crate::xsd_util::SetOnce<{}>", t.rust_struct_type())
+            }
             FieldType::Element(m, t) => match m {
                 ElemMultiplicity::Single | ElemMultiplicity::Optional => {
-                    format!("xsd_util::SetOnce<{}>", t.rust_struct_type())
+                    format!("crate::xsd_util::SetOnce<{}>", t.rust_struct_type())
                 }
                 ElemMultiplicity::Vec => format!("Vec<{}>", t.rust_struct_type()),
             },
@@ -278,7 +280,10 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                 writeln!(w, "}} else {{")?;
                 indent(w, |w| {
                     writeln!(w, "// TODO - make this more specific")?;
-                    writeln!(w, "return Err(xsd_api::ReadError::UnexpectedEvent);")
+                    writeln!(
+                        w,
+                        "return Err(crate::xsd_util::ReadError::UnexpectedEvent);"
+                    )
                 })?;
                 writeln!(w, "}}")
             })?;
@@ -288,7 +293,10 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                 if elems.is_empty() {
                     indent(w, |w| {
                         writeln!(w, "// this struct has no elements")?;
-                        writeln!(w, "return Err(xsd_api::ReadError::UnexpectedEvent);")
+                        writeln!(
+                            w,
+                            "return Err(crate::xsd_util::ReadError::UnexpectedEvent);"
+                        )
                     })
                 } else {
                     writeln!(w, "match name.local_name.as_str() {{")?;
@@ -310,23 +318,23 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                                 writeln!(w, "}}")?;
                             }
                         }
-                        writeln!(w, "name => return Err(xsd_api::ReadError::UnexpectedToken(xsd_api::ParentToken(parent_tag.to_owned()), xsd_api::ChildToken(name.to_owned())))")
+                        writeln!(w, "name => return Err(crate::xsd_util::ReadError::UnexpectedToken(crate::xsd_util::ParentToken(parent_tag.to_owned()), crate::xsd_util::ChildToken(name.to_owned())))")
                     })?;
                     writeln!(w, "}}")
                 }
             })?;
             writeln!(w, "}}")?;
             writeln!(w, "// treat these events as errors")?;
-            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(xsd_api::ReadError::UnexpectedEvent),")?;
+            writeln!(w, "xml::reader::XmlEvent::StartDocument {{ .. }} => return Err(crate::xsd_util::ReadError::UnexpectedEvent),")?;
             writeln!(
                 w,
-                "xml::reader::XmlEvent::EndDocument => return Err(xsd_api::ReadError::UnexpectedEvent),"
+                "xml::reader::XmlEvent::EndDocument => return Err(crate::xsd_util::ReadError::UnexpectedEvent),"
             )?;
             writeln!(
                 w,
-                "xml::reader::XmlEvent::Characters(_) => return Err(xsd_api::ReadError::UnexpectedEvent),"
+                "xml::reader::XmlEvent::Characters(_) => return Err(crate::xsd_util::ReadError::UnexpectedEvent),"
             )?;
-            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(xsd_api::ReadError::UnexpectedEvent),")?;
+            writeln!(w, "xml::reader::XmlEvent::ProcessingInstruction {{ .. }} => return Err(crate::xsd_util::ReadError::UnexpectedEvent),")?;
             writeln!(w, "// ignore these events")?;
             writeln!(w, "xml::reader::XmlEvent::CData(_) => {{}}")?;
             writeln!(w, "xml::reader::XmlEvent::Comment(_) => {{}}")?;

@@ -63,7 +63,7 @@ fn write_to_str(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
 fn write_trait_impl(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
     writeln!(
         w,
-        "impl xsd_util::StringEnumeration for {} {{",
+        "impl crate::xsd_util::StringEnumeration for {} {{",
         en.type_id.name.to_upper_camel_case()
     )?;
     indent(w, |w| {

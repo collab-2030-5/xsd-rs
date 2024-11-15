@@ -1,11 +1,11 @@
 use openadr_xml::oadr20b::oadr::OadrPayload;
+use openadr_xml::xsd_util::{ReadXml, WriteConfig, WriteXml};
 use std::error::Error;
 use std::fmt::Debug;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::{fs, str};
-use xsd_api::*;
 
 fn test_file<T: ReadXml + WriteXml + PartialEq + Debug>(name: &str) -> Result<(), Box<dyn Error>> {
     // the type as read from the 2030.5 sample data

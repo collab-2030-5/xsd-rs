@@ -1,5 +1,5 @@
 use crate::oadr20b::ei::{CurrentValueType, CurrentValueTypeChoice, PayloadFloatType};
-use xsd_api::{WriteConfig, WriteXml};
+use crate::xsd_util::{WriteConfig, WriteXml};
 
 #[test]
 fn test_write_choice() {
