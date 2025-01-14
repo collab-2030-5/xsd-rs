@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::ops::Index;
 
 use super::constants::tag;
 use super::node_parser::parse_node;
@@ -36,18 +37,17 @@ fn simple_type_restriction(node: &Node) -> RsEntity {
     let base = get_base(node);
     let facets = facets(node);
 
-    if is_simple_enumerations(node) {
-        let cases = cases(facets.as_ref());
-        if !cases.is_empty() {
-            return RsEntity::Enum(Enum {
-                name: format!("{}Enum", get_parent_name(node)),
-                cases,
-                type_name: base.to_string(),
-                source: EnumSource::Restriction,
-                ..Default::default()
-            });
-        }
-    };
+    let cases = cases(facets.as_ref());
+
+    if !cases.is_empty() {
+        return RsEntity::Enum(Enum {
+            name: format!("{}Enum", get_parent_name(node)),
+            cases,
+            type_name: base.to_string(),
+            source: EnumSource::Restriction,
+            ..Default::default()
+        });
+    }
 
     RsEntity::TupleStruct(TupleStruct {
         type_name: base.to_string(),
@@ -118,7 +118,12 @@ fn cases(facets: &[Facet]) -> Vec<EnumCase> {
         .filter_map(|f| match &f.facet_type {
             FacetType::Enumeration(value) => Some(EnumCase {
                 comment: f.comment.clone(),
-                name: value.clone(),
+                name: value.chars().next().map_or(value.clone(), |c| {
+                    match c.is_ascii_alphabetic() {
+                        true => value.clone(),
+                        false => format!("E{}", value),
+                    }
+                }),
                 value: value.clone(),
                 type_name: None,
                 type_modifiers: vec![],
