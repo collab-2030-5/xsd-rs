@@ -3,7 +3,7 @@ use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OadrProfile {
-    pub oadr_oadr_profile_name: String,
+    pub oadr_oadr_profile_name: crate::oadr20b::oadr::OadrProfileType,
     pub oadr_oadr_transports: crate::oadr20b::oadr::OadrTransports,
 }
 
@@ -15,10 +15,10 @@ impl OadrProfile {
     where
         W: std::io::Write,
     {
-        crate::xsd_util::write_simple_element(
+        crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrProfileName",
-            self.oadr_oadr_profile_name.as_str(),
+            self.oadr_oadr_profile_name,
         )?;
         self.oadr_oadr_transports
             .write_with_name(writer, "oadr:oadrTransports", false, false)?;
@@ -77,7 +77,9 @@ impl OadrProfile {
         R: std::io::Read,
     {
         // one variable for each attribute and element
-        let mut oadr_oadr_profile_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_profile_name: crate::xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrProfileType,
+        > = Default::default();
         let mut oadr_oadr_transports: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrTransports,
         > = Default::default();
@@ -96,8 +98,9 @@ impl OadrProfile {
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
                 } => match name.local_name.as_str() {
-                    "oadrProfileName" => oadr_oadr_profile_name
-                        .set(crate::xsd_util::read_string(reader, "oadrProfileName")?)?,
+                    "oadrProfileName" => oadr_oadr_profile_name.set(
+                        crate::xsd_util::read_string_enum(reader, "oadrProfileName")?,
+                    )?,
                     "oadrTransports" => {
                         oadr_oadr_transports.set(crate::oadr20b::oadr::OadrTransports::read(
                             reader,

@@ -4,7 +4,7 @@ use xml::writer::*;
 #[derive(Debug, Clone, PartialEq)]
 pub struct PowerRealType {
     pub item_description: String,
-    pub item_units: String,
+    pub item_units: crate::oadr20b::power::ItemUnits,
     pub scale_si_scale_code: crate::oadr20b::scale::SiScaleCodeType,
     pub power_power_attributes: crate::oadr20b::power::PowerAttributesType,
 }
@@ -22,7 +22,7 @@ impl PowerRealType {
             "power:itemDescription",
             self.item_description.as_str(),
         )?;
-        crate::xsd_util::write_simple_element(writer, "power:itemUnits", self.item_units.as_str())?;
+        crate::xsd_util::write_string_enumeration(writer, "power:itemUnits", self.item_units)?;
         crate::xsd_util::write_string_enumeration(
             writer,
             "scale:siScaleCode",
@@ -90,7 +90,8 @@ impl PowerRealType {
     {
         // one variable for each attribute and element
         let mut item_description: crate::xsd_util::SetOnce<String> = Default::default();
-        let mut item_units: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut item_units: crate::xsd_util::SetOnce<crate::oadr20b::power::ItemUnits> =
+            Default::default();
         let mut scale_si_scale_code: crate::xsd_util::SetOnce<
             crate::oadr20b::scale::SiScaleCodeType,
         > = Default::default();
@@ -115,7 +116,7 @@ impl PowerRealType {
                     "itemDescription" => item_description
                         .set(crate::xsd_util::read_string(reader, "itemDescription")?)?,
                     "itemUnits" => {
-                        item_units.set(crate::xsd_util::read_string(reader, "itemUnits")?)?
+                        item_units.set(crate::xsd_util::read_string_enum(reader, "itemUnits")?)?
                     }
                     "siScaleCode" => scale_si_scale_code
                         .set(crate::xsd_util::read_string_enum(reader, "siScaleCode")?)?,

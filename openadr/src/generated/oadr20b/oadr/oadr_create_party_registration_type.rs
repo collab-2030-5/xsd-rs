@@ -7,7 +7,7 @@ pub struct OadrCreatePartyRegistrationType {
     /// Used for re-registering an existing registration
     pub ei_registration_id: Option<String>,
     pub ei_ven_id: Option<String>,
-    pub oadr_oadr_profile_name: String,
+    pub oadr_oadr_profile_name: crate::oadr20b::oadr::OadrProfileType,
     pub oadr_oadr_transport_name: crate::oadr20b::oadr::OadrTransportType,
     /// Address of this VEN. Not required if http pull model
     pub oadr_oadr_transport_address: Option<String>,
@@ -41,10 +41,10 @@ impl OadrCreatePartyRegistrationType {
         if let Some(elem) = &self.ei_ven_id {
             crate::xsd_util::write_simple_element(writer, "ei:venID", elem.as_str())?;
         }
-        crate::xsd_util::write_simple_element(
+        crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrProfileName",
-            self.oadr_oadr_profile_name.as_str(),
+            self.oadr_oadr_profile_name,
         )?;
         crate::xsd_util::write_string_enumeration(
             writer,
@@ -138,7 +138,9 @@ impl OadrCreatePartyRegistrationType {
         let mut pyld_request_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_registration_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
-        let mut oadr_oadr_profile_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_profile_name: crate::xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrProfileType,
+        > = Default::default();
         let mut oadr_oadr_transport_name: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrTransportType,
         > = Default::default();
@@ -175,8 +177,9 @@ impl OadrCreatePartyRegistrationType {
                         "registrationID" => ei_registration_id
                             .set(crate::xsd_util::read_string(reader, "registrationID")?)?,
                         "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
-                        "oadrProfileName" => oadr_oadr_profile_name
-                            .set(crate::xsd_util::read_string(reader, "oadrProfileName")?)?,
+                        "oadrProfileName" => oadr_oadr_profile_name.set(
+                            crate::xsd_util::read_string_enum(reader, "oadrProfileName")?,
+                        )?,
                         "oadrTransportName" => oadr_oadr_transport_name.set(
                             crate::xsd_util::read_string_enum(reader, "oadrTransportName")?,
                         )?,
