@@ -18,7 +18,7 @@ impl OadrService {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrServiceName",
-            self.oadr_oadr_service_name,
+            &self.oadr_oadr_service_name,
         )?;
         for item in &self.oadr_oadr_info {
             item.write_with_name(writer, "oadr:oadrInfo", false, false)?;

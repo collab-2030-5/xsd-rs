@@ -34,6 +34,8 @@ impl UnresolvedChoice {
     }
 
     pub(crate) fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
+        tracing::info!("Resolving choice: {}", self.type_id);
+
         let mut variants: Vec<ChoiceVariant> = Vec::new();
         for var in self.variants.iter() {
             match var.resolve(resolver) {
@@ -45,7 +47,9 @@ impl UnresolvedChoice {
         let choice = Choice {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
+            name: None,
             variants,
+            is_from_union: false,
         };
 
         Some(AnyType::Choice(Rc::new(choice)))

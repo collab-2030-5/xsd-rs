@@ -7,7 +7,7 @@ pub struct SpecifierPayloadType {
     pub ei_r_id: String,
     /// What is measured or tracked in this report (Units).
     pub emix_item_base: Option<crate::oadr20b::emix::ItemBaseType>,
-    pub ei_reading_type: String,
+    pub ei_reading_type: crate::oadr20b::ei::ReadingTypeType,
 }
 
 impl SpecifierPayloadType {
@@ -22,11 +22,7 @@ impl SpecifierPayloadType {
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
-        crate::xsd_util::write_simple_element(
-            writer,
-            "ei:readingType",
-            self.ei_reading_type.as_str(),
-        )?;
+        self.ei_reading_type.write(writer)?;
         Ok(())
     }
 
@@ -85,7 +81,8 @@ impl SpecifierPayloadType {
         let mut ei_r_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
-        let mut ei_reading_type: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_reading_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::ReadingTypeType> =
+            Default::default();
 
         loop {
             match reader.next()? {
@@ -249,9 +246,9 @@ impl SpecifierPayloadType {
                             )?,
                         ))?
                     }
-                    "readingType" => {
-                        ei_reading_type.set(crate::xsd_util::read_string(reader, "readingType")?)?
-                    }
+                    "readingType" => ei_reading_type.set(
+                        crate::reading_type_type::read_choice_enum(reader, "readingType")?,
+                    )?,
                     name => {
                         return Err(crate::xsd_util::ReadError::UnexpectedToken(
                             crate::xsd_util::ParentToken(parent_tag.to_owned()),

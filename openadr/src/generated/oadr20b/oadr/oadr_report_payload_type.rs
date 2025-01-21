@@ -11,7 +11,7 @@ pub struct OadrReportPayloadType {
     pub ei_accuracy: Option<f32>,
     pub ei_payload_base: crate::oadr20b::ei::PayloadBaseType,
     /// Enumerated value for the quality of this data item
-    pub oadr_oadr_data_quality: Option<String>,
+    pub oadr_oadr_data_quality: Option<crate::oadr20b::oadr::OadrDataQualityTypeType>,
 }
 
 impl OadrReportPayloadType {
@@ -31,7 +31,7 @@ impl OadrReportPayloadType {
         }
         self.ei_payload_base.write(writer)?;
         if let Some(elem) = &self.oadr_oadr_data_quality {
-            crate::xsd_util::write_simple_element(writer, "oadr:oadrDataQuality", elem.as_str())?;
+            elem.write(writer)?;
         }
         Ok(())
     }
@@ -93,7 +93,9 @@ impl OadrReportPayloadType {
         let mut ei_accuracy: crate::xsd_util::SetOnce<f32> = Default::default();
         let mut ei_payload_base: crate::xsd_util::SetOnce<crate::oadr20b::ei::PayloadBaseType> =
             Default::default();
-        let mut oadr_oadr_data_quality: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut oadr_oadr_data_quality: crate::xsd_util::SetOnce<
+            crate::oadr20b::oadr::OadrDataQualityTypeType,
+        > = Default::default();
 
         loop {
             match reader.next()? {
@@ -134,8 +136,12 @@ impl OadrReportPayloadType {
                             )?,
                         ))?
                     }
-                    "oadrDataQuality" => oadr_oadr_data_quality
-                        .set(crate::xsd_util::read_string(reader, "oadrDataQuality")?)?,
+                    "oadrDataQuality" => oadr_oadr_data_quality.set(
+                        crate::oadr_data_quality_type_type::read_choice_enum(
+                            reader,
+                            "oadrDataQuality",
+                        )?,
+                    )?,
                     name => {
                         return Err(crate::xsd_util::ReadError::UnexpectedToken(
                             crate::xsd_util::ParentToken(parent_tag.to_owned()),

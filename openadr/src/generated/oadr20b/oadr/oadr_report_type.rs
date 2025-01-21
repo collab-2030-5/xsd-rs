@@ -15,7 +15,7 @@ pub struct OadrReportType {
     /// Reference to Metadata report from which this report was derived.
     pub ei_report_specifier_id: String,
     /// Name possibly for use in a user interface.
-    pub ei_report_name: Option<String>,
+    pub ei_report_name: Option<crate::oadr20b::ei::ReportNameType>,
     pub ei_created_date_time: String,
 }
 
@@ -53,7 +53,7 @@ impl OadrReportType {
             self.ei_report_specifier_id.as_str(),
         )?;
         if let Some(elem) = &self.ei_report_name {
-            crate::xsd_util::write_simple_element(writer, "ei:reportName", elem.as_str())?;
+            elem.write(writer)?;
         }
         crate::xsd_util::write_simple_element(
             writer,
@@ -126,7 +126,8 @@ impl OadrReportType {
             Default::default();
         let mut ei_report_request_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_report_specifier_id: crate::xsd_util::SetOnce<String> = Default::default();
-        let mut ei_report_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_name: crate::xsd_util::SetOnce<crate::oadr20b::ei::ReportNameType> =
+            Default::default();
         let mut ei_created_date_time: crate::xsd_util::SetOnce<String> = Default::default();
 
         loop {
@@ -174,9 +175,9 @@ impl OadrReportType {
                         .set(crate::xsd_util::read_string(reader, "reportRequestID")?)?,
                     "reportSpecifierID" => ei_report_specifier_id
                         .set(crate::xsd_util::read_string(reader, "reportSpecifierID")?)?,
-                    "reportName" => {
-                        ei_report_name.set(crate::xsd_util::read_string(reader, "reportName")?)?
-                    }
+                    "reportName" => ei_report_name.set(
+                        crate::report_name_type::read_choice_enum(reader, "reportName")?,
+                    )?,
                     "createdDateTime" => ei_created_date_time
                         .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
                     name => {

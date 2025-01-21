@@ -6,7 +6,7 @@ use xml::writer::*;
 pub struct EiOptType {
     pub ei_opt_id: String,
     pub ei_opt_type: crate::oadr20b::ei::OptTypeType,
-    pub ei_opt_reason: String,
+    pub ei_opt_reason: crate::oadr20b::ei::OptReasonType,
     pub emix_market_context: Option<String>,
     pub ei_ven_id: String,
     pub xcal_vavailability: Option<crate::oadr20b::xcal::VavailabilityType>,
@@ -23,8 +23,8 @@ impl EiOptType {
         W: std::io::Write,
     {
         crate::xsd_util::write_simple_element(writer, "ei:optID", self.ei_opt_id.as_str())?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
-        crate::xsd_util::write_simple_element(writer, "ei:optReason", self.ei_opt_reason.as_str())?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:optType", &self.ei_opt_type)?;
+        self.ei_opt_reason.write(writer)?;
         if let Some(elem) = &self.emix_market_context {
             crate::xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
         }
@@ -101,7 +101,8 @@ impl EiOptType {
         let mut ei_opt_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_opt_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
             Default::default();
-        let mut ei_opt_reason: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_opt_reason: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptReasonType> =
+            Default::default();
         let mut emix_market_context: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut xcal_vavailability: crate::xsd_util::SetOnce<
@@ -131,33 +132,34 @@ impl EiOptType {
                 }
                 xml::reader::XmlEvent::StartElement {
                     name, attributes, ..
-                } => match name.local_name.as_str() {
-                    "optID" => ei_opt_id.set(crate::xsd_util::read_string(reader, "optID")?)?,
-                    "optType" => {
-                        ei_opt_type.set(crate::xsd_util::read_string_enum(reader, "optType")?)?
+                } => {
+                    match name.local_name.as_str() {
+                        "optID" => ei_opt_id.set(crate::xsd_util::read_string(reader, "optID")?)?,
+                        "optType" => ei_opt_type
+                            .set(crate::xsd_util::read_string_enum(reader, "optType")?)?,
+                        "optReason" => ei_opt_reason.set(
+                            crate::opt_reason_type::read_choice_enum(reader, "optReason")?,
+                        )?,
+                        "marketContext" => emix_market_context
+                            .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
+                        "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
+                        "vavailability" => xcal_vavailability.set(
+                            crate::oadr20b::xcal::VavailabilityType::read(
+                                reader,
+                                &attributes,
+                                "vavailability",
+                            )?,
+                        )?,
+                        "createdDateTime" => ei_created_date_time
+                            .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
+                        name => {
+                            return Err(crate::xsd_util::ReadError::UnexpectedToken(
+                                crate::xsd_util::ParentToken(parent_tag.to_owned()),
+                                crate::xsd_util::ChildToken(name.to_owned()),
+                            ))
+                        }
                     }
-                    "optReason" => {
-                        ei_opt_reason.set(crate::xsd_util::read_string(reader, "optReason")?)?
-                    }
-                    "marketContext" => emix_market_context
-                        .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
-                    "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,
-                    "vavailability" => {
-                        xcal_vavailability.set(crate::oadr20b::xcal::VavailabilityType::read(
-                            reader,
-                            &attributes,
-                            "vavailability",
-                        )?)?
-                    }
-                    "createdDateTime" => ei_created_date_time
-                        .set(crate::xsd_util::read_string(reader, "createdDateTime")?)?,
-                    name => {
-                        return Err(crate::xsd_util::ReadError::UnexpectedToken(
-                            crate::xsd_util::ParentToken(parent_tag.to_owned()),
-                            crate::xsd_util::ChildToken(name.to_owned()),
-                        ))
-                    }
-                },
+                }
                 // treat these events as errors
                 xml::reader::XmlEvent::StartDocument { .. } => {
                     return Err(crate::xsd_util::ReadError::UnexpectedEvent)

@@ -17,7 +17,7 @@ impl OadrTransport {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrTransportName",
-            self.oadr_oadr_transport_name,
+            &self.oadr_oadr_transport_name,
         )?;
         Ok(())
     }

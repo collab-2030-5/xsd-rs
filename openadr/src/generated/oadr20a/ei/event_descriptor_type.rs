@@ -37,7 +37,7 @@ impl EventDescriptorType {
             "ei:createdDateTime",
             self.created_date_time.as_str(),
         )?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:eventStatus", self.ei_event_status)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:eventStatus", &self.ei_event_status)?;
         if let Some(elem) = &self.test_event {
             crate::xsd_util::write_simple_element(writer, "ei:testEvent", elem.as_str())?;
         }

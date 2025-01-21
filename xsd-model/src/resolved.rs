@@ -54,7 +54,9 @@ pub struct Struct {
 pub struct Choice {
     pub comment: Option<String>,
     pub id: TypeId,
+    pub name: Option<TypeId>,
     pub variants: Vec<ChoiceVariant>,
+    pub is_from_union: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -248,6 +250,13 @@ impl Choice {
         }
 
         self.variants = variants;
+    }
+
+    pub fn name_w_namespace(&self) -> String {
+        match &self.name {
+            Some(name) => format!("{}:{}", name.ns, name.name),
+            None => self.id.name.to_owned(),
+        }
     }
 }
 

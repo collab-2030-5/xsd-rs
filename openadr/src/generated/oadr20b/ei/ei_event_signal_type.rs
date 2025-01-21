@@ -7,7 +7,7 @@ pub struct EiEventSignalType {
     /// Optionally identifies the device class associated with the signal. Only the endDeviceAsset subelement is used
     pub ei_ei_target: Option<crate::oadr20b::ei::EiTargetType>,
     /// Descriptive name for signal.
-    pub ei_signal_name: String,
+    pub ei_signal_name: crate::oadr20b::ei::SignalNameType,
     pub ei_signal_type: crate::oadr20b::ei::SignalTypeEnumeratedType,
     /// unique Identifier for a specific event signal
     pub signal_id: String,
@@ -29,12 +29,8 @@ impl EiEventSignalType {
         if let Some(elem) = &self.ei_ei_target {
             elem.write_with_name(writer, "ei:eiTarget", false, false)?;
         }
-        crate::xsd_util::write_simple_element(
-            writer,
-            "ei:signalName",
-            self.ei_signal_name.as_str(),
-        )?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
+        self.ei_signal_name.write(writer)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:signalType", &self.ei_signal_type)?;
         crate::xsd_util::write_simple_element(writer, "ei:signalID", self.signal_id.as_str())?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
@@ -101,7 +97,8 @@ impl EiEventSignalType {
             Default::default();
         let mut ei_ei_target: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
-        let mut ei_signal_name: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_signal_name: crate::xsd_util::SetOnce<crate::oadr20b::ei::SignalNameType> =
+            Default::default();
         let mut ei_signal_type: crate::xsd_util::SetOnce<
             crate::oadr20b::ei::SignalTypeEnumeratedType,
         > = Default::default();
@@ -135,9 +132,9 @@ impl EiEventSignalType {
                         &attributes,
                         "eiTarget",
                     )?)?,
-                    "signalName" => {
-                        ei_signal_name.set(crate::xsd_util::read_string(reader, "signalName")?)?
-                    }
+                    "signalName" => ei_signal_name.set(
+                        crate::signal_name_type::read_choice_enum(reader, "signalName")?,
+                    )?,
                     "signalType" => ei_signal_type
                         .set(crate::xsd_util::read_string_enum(reader, "signalType")?)?,
                     "signalID" => {

@@ -21,7 +21,7 @@ impl EiEventSignalType {
         self.strm_intervals
             .write_with_name(writer, "strm:intervals", false, false)?;
         crate::xsd_util::write_simple_element(writer, "ei:signalName", self.signal_name.as_str())?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:signalType", self.ei_signal_type)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:signalType", &self.ei_signal_type)?;
         crate::xsd_util::write_simple_element(writer, "ei:signalID", self.signal_id.as_str())?;
         self.ei_current_value
             .write_with_name(writer, "ei:currentValue", false, false)?;

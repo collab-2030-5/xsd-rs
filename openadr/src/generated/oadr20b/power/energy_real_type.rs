@@ -25,7 +25,7 @@ impl EnergyRealType {
         crate::xsd_util::write_string_enumeration(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code,
+            &self.scale_si_scale_code,
         )?;
         Ok(())
     }

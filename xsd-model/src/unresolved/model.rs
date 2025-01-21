@@ -155,7 +155,7 @@ impl UnresolvedModel {
 
     fn merge_enum(&mut self, en: &Enum, settings: &Settings) {
         for entity in en.subtypes.iter() {
-            tracing::debug!("enum sub-type: {:#?}", entity);
+            tracing::info!("enum sub-type: {:#?}", entity);
             self.merge_entity(entity, settings);
         }
 
@@ -164,17 +164,17 @@ impl UnresolvedModel {
                 let en = convert_restricted_enum(en, settings);
                 let type_id = en.type_id.clone();
                 let en = SimpleType::Wrapper(WrapperType::Enum(Rc::new(en)));
-                tracing::debug!("Adding {} as a restricted enum", type_id);
+                tracing::info!("Adding {} as a restricted enum", type_id);
                 self.simple_types.insert(type_id, en);
             }
             EnumSource::Choice => {
                 let choice = convert_choice_enum(en, settings);
-                tracing::debug!("Adding {} as an unresolved choice", choice.type_id);
+                tracing::info!("Adding {} as an unresolved choice", choice.type_id);
                 self.unresolved_types.push(UnresolvedType::Choice(choice));
             }
             EnumSource::Union => {
                 let union = convert_union_enum(en, settings);
-                tracing::debug!("Adding {} as an unresolved union", union.type_id);
+                tracing::info!("Adding {} as an unresolved union", union.type_id);
                 self.unresolved_types.push(UnresolvedType::Union(union));
             }
             _ => panic!("Unsupported enum source type: {:?} in {:#?}", en.source, en),
@@ -385,7 +385,9 @@ impl UnresolvedModel {
                 let choice = Choice {
                     comment: None,
                     id: result.clone(),
+                    name: None,
                     variants,
+                    is_from_union: false,
                 };
 
                 substitution_groups.insert(sg_type_id.clone(), choice);
@@ -606,6 +608,7 @@ fn convert_union_enum(en: &Enum, settings: &Settings) -> UnresolvedUnion {
         });
     }
     UnresolvedUnion {
+        name: TypeId::parse(&en.type_name, settings.namespace, settings.namespace_root),
         type_id: TypeId::parse(&en.name, settings.namespace, settings.namespace_root),
         comment: en.comment.clone(),
         variants,

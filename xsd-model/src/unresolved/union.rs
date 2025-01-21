@@ -1,10 +1,12 @@
 use crate::resolved::AnyType;
 use crate::resolver::Resolver;
 use crate::{PrimitiveType, SimpleType, StringConstraints, TypeId};
+use std::rc::Rc;
 
 /// One of multiple possible simple types
 #[derive(Clone, Debug)]
 pub struct UnresolvedUnion {
+    pub name: TypeId,
     pub type_id: TypeId,
     pub comment: Option<String>,
     pub variants: Vec<UnresolvedUnionVariant>,
@@ -18,42 +20,42 @@ pub struct UnresolvedUnionVariant {
 }
 
 impl UnresolvedUnion {
-    pub(crate) fn resolve(&self, _resolver: &Resolver) -> Option<AnyType> {
-        // just punt on this for now and make all unions strings
-        Some(SimpleType::Primitive(PrimitiveType::String(StringConstraints::default())).into())
+    pub(crate) fn resolve(&self, resolver: &Resolver) -> Option<AnyType> {
+        let mut variants: Vec<crate::resolved::ChoiceVariant> = Vec::new();
 
-        /*
-        let mut variants: Vec<UnionVariant> = Default::default();
+        tracing::info!("Resolving union variants: {:#?}", self.variants);
 
-        for v in self.variants.iter() {
-            let any = match resolver.resolve(&v.type_name) {
+        for variant in self.variants.iter() {
+            let any = match resolver.resolve(&variant.type_name) {
                 Some(x) => x,
                 None => return None,
             };
 
-            match any {
+            match &any {
                 AnyType::Simple(x) => {
-                    let variant = UnionVariant {
-                        comment: v.comment.clone(),
-                        name: v.name.name.clone(),
-                        type_info: x,
+                    let choice = crate::resolved::ChoiceVariant {
+                        comment: variant.comment.clone(),
+                        element_name: variant.name.name.clone(),
+                        type_info: any.clone(),
                     };
-                    variants.push(variant);
+
+                    variants.push(choice);
                 }
                 _ => panic!(
                     "Union variant {} resolved to complex type: {:#?}",
-                    v.name, any
+                    variant.name, any
                 ),
             }
         }
 
-        let resolved = Union {
+        let choice = crate::resolved::Choice {
             comment: self.comment.clone(),
             id: self.type_id.clone(),
+            name: Some(self.name.clone()),
             variants,
+            is_from_union: true,
         };
 
-        Some(AnyType::Union(Rc::new(resolved)))
-             */
+        Some(AnyType::Choice(Rc::new(choice)))
     }
 }

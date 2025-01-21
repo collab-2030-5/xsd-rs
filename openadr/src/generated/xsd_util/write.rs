@@ -32,7 +32,7 @@ where
 pub fn write_string_enumeration<W, E>(
     writer: &mut EventWriter<W>,
     tag_name: &str,
-    data: E,
+    data: &E,
 ) -> Result<(), xml::writer::Error>
 where
     W: std::io::Write,
