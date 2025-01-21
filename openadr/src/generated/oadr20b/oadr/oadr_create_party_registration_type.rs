@@ -44,12 +44,12 @@ impl OadrCreatePartyRegistrationType {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrProfileName",
-            self.oadr_oadr_profile_name,
+            &self.oadr_oadr_profile_name,
         )?;
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrTransportName",
-            self.oadr_oadr_transport_name,
+            &self.oadr_oadr_transport_name,
         )?;
         if let Some(elem) = &self.oadr_oadr_transport_address {
             crate::xsd_util::write_simple_element(

@@ -5,7 +5,7 @@ use xml::writer::*;
 pub struct OadrCreateOptType {
     pub ei_opt_id: String,
     pub ei_opt_type: crate::oadr20b::ei::OptTypeType,
-    pub ei_opt_reason: String,
+    pub ei_opt_reason: crate::oadr20b::ei::OptReasonType,
     pub emix_market_context: Option<String>,
     pub ei_ven_id: String,
     pub xcal_vavailability: Option<crate::oadr20b::xcal::VavailabilityType>,
@@ -26,8 +26,8 @@ impl OadrCreateOptType {
         W: std::io::Write,
     {
         crate::xsd_util::write_simple_element(writer, "ei:optID", self.ei_opt_id.as_str())?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
-        crate::xsd_util::write_simple_element(writer, "ei:optReason", self.ei_opt_reason.as_str())?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:optType", &self.ei_opt_type)?;
+        self.ei_opt_reason.write(writer)?;
         if let Some(elem) = &self.emix_market_context {
             crate::xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
         }
@@ -117,7 +117,8 @@ impl OadrCreateOptType {
         let mut ei_opt_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_opt_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptTypeType> =
             Default::default();
-        let mut ei_opt_reason: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_opt_reason: crate::xsd_util::SetOnce<crate::oadr20b::ei::OptReasonType> =
+            Default::default();
         let mut emix_market_context: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_ven_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut xcal_vavailability: crate::xsd_util::SetOnce<
@@ -160,9 +161,9 @@ impl OadrCreateOptType {
                         "optID" => ei_opt_id.set(crate::xsd_util::read_string(reader, "optID")?)?,
                         "optType" => ei_opt_type
                             .set(crate::xsd_util::read_string_enum(reader, "optType")?)?,
-                        "optReason" => {
-                            ei_opt_reason.set(crate::xsd_util::read_string(reader, "optReason")?)?
-                        }
+                        "optReason" => ei_opt_reason.set(
+                            crate::opt_reason_type::read_choice_enum(reader, "optReason")?,
+                        )?,
                         "marketContext" => emix_market_context
                             .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
                         "venID" => ei_ven_id.set(crate::xsd_util::read_string(reader, "venID")?)?,

@@ -22,11 +22,11 @@ impl PowerRealType {
             "power:itemDescription",
             self.item_description.as_str(),
         )?;
-        crate::xsd_util::write_string_enumeration(writer, "power:itemUnits", self.item_units)?;
+        crate::xsd_util::write_string_enumeration(writer, "power:itemUnits", &self.item_units)?;
         crate::xsd_util::write_string_enumeration(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code,
+            &self.scale_si_scale_code,
         )?;
         self.power_power_attributes.write_with_name(
             writer,

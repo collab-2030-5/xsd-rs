@@ -7,10 +7,10 @@ pub struct OadrReportDescriptionType {
     pub ei_r_id: String,
     pub ei_report_subject: Option<crate::oadr20b::ei::EiTargetType>,
     pub ei_report_data_source: Option<crate::oadr20b::ei::EiTargetType>,
-    pub ei_report_type: String,
+    pub ei_report_type: crate::oadr20b::ei::ReportTypeType,
     /// What is measured or tracked in this report (Units).
     pub emix_item_base: Option<crate::oadr20b::emix::ItemBaseType>,
-    pub ei_reading_type: String,
+    pub ei_reading_type: crate::oadr20b::ei::ReadingTypeType,
     pub emix_market_context: Option<String>,
     pub oadr_oadr_sampling_rate: Option<crate::oadr20b::oadr::OadrSamplingRateType>,
 }
@@ -30,19 +30,11 @@ impl OadrReportDescriptionType {
         if let Some(elem) = &self.ei_report_data_source {
             elem.write_with_name(writer, "ei:reportDataSource", false, false)?;
         }
-        crate::xsd_util::write_simple_element(
-            writer,
-            "ei:reportType",
-            self.ei_report_type.as_str(),
-        )?;
+        self.ei_report_type.write(writer)?;
         if let Some(elem) = &self.emix_item_base {
             elem.write(writer)?;
         }
-        crate::xsd_util::write_simple_element(
-            writer,
-            "ei:readingType",
-            self.ei_reading_type.as_str(),
-        )?;
+        self.ei_reading_type.write(writer)?;
         if let Some(elem) = &self.emix_market_context {
             crate::xsd_util::write_simple_element(writer, "emix:marketContext", elem.as_str())?;
         }
@@ -109,10 +101,12 @@ impl OadrReportDescriptionType {
             Default::default();
         let mut ei_report_data_source: crate::xsd_util::SetOnce<crate::oadr20b::ei::EiTargetType> =
             Default::default();
-        let mut ei_report_type: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_report_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::ReportTypeType> =
+            Default::default();
         let mut emix_item_base: crate::xsd_util::SetOnce<crate::oadr20b::emix::ItemBaseType> =
             Default::default();
-        let mut ei_reading_type: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_reading_type: crate::xsd_util::SetOnce<crate::oadr20b::ei::ReadingTypeType> =
+            Default::default();
         let mut emix_market_context: crate::xsd_util::SetOnce<String> = Default::default();
         let mut oadr_oadr_sampling_rate: crate::xsd_util::SetOnce<
             crate::oadr20b::oadr::OadrSamplingRateType,
@@ -147,9 +141,9 @@ impl OadrReportDescriptionType {
                             "reportDataSource",
                         )?)?
                     }
-                    "reportType" => {
-                        ei_report_type.set(crate::xsd_util::read_string(reader, "reportType")?)?
-                    }
+                    "reportType" => ei_report_type.set(
+                        crate::report_type_type::read_choice_enum(reader, "reportType")?,
+                    )?,
                     "Therm" => emix_item_base.set(crate::oadr20b::emix::ItemBaseType::Therm(
                         crate::oadr20b::oadr::ThermType::read(reader, &attributes, "Therm")?,
                     ))?,
@@ -297,9 +291,9 @@ impl OadrReportDescriptionType {
                             )?,
                         ))?
                     }
-                    "readingType" => {
-                        ei_reading_type.set(crate::xsd_util::read_string(reader, "readingType")?)?
-                    }
+                    "readingType" => ei_reading_type.set(
+                        crate::reading_type_type::read_choice_enum(reader, "readingType")?,
+                    )?,
                     "marketContext" => emix_market_context
                         .set(crate::xsd_util::read_string(reader, "marketContext")?)?,
                     "oadrSamplingRate" => oadr_oadr_sampling_rate.set(

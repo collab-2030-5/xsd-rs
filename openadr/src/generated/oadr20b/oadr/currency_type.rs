@@ -20,13 +20,13 @@ impl CurrencyType {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:itemDescription",
-            self.item_description,
+            &self.item_description,
         )?;
-        crate::xsd_util::write_string_enumeration(writer, "oadr:itemUnits", self.item_units)?;
+        crate::xsd_util::write_string_enumeration(writer, "oadr:itemUnits", &self.item_units)?;
         crate::xsd_util::write_string_enumeration(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code,
+            &self.scale_si_scale_code,
         )?;
         Ok(())
     }

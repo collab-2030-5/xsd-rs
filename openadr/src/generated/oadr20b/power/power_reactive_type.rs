@@ -26,7 +26,7 @@ impl PowerReactiveType {
         crate::xsd_util::write_string_enumeration(
             writer,
             "scale:siScaleCode",
-            self.scale_si_scale_code,
+            &self.scale_si_scale_code,
         )?;
         self.power_power_attributes.write_with_name(
             writer,

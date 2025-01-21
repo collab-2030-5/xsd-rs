@@ -18,7 +18,7 @@ impl OadrProfile {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrProfileName",
-            self.oadr_oadr_profile_name,
+            &self.oadr_oadr_profile_name,
         )?;
         self.oadr_oadr_transports
             .write_with_name(writer, "oadr:oadrTransports", false, false)?;

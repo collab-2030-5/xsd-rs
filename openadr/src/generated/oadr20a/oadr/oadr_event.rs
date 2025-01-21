@@ -21,7 +21,7 @@ impl OadrEvent {
         crate::xsd_util::write_string_enumeration(
             writer,
             "oadr:oadrResponseRequired",
-            self.oadr_response_required,
+            &self.oadr_response_required,
         )?;
         Ok(())
     }

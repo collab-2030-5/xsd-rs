@@ -33,7 +33,7 @@ impl EventResponse {
         )?;
         self.ei_qualified_event_id
             .write_with_name(writer, "ei:qualifiedEventID", false, false)?;
-        crate::xsd_util::write_string_enumeration(writer, "ei:optType", self.ei_opt_type)?;
+        crate::xsd_util::write_string_enumeration(writer, "ei:optType", &self.ei_opt_type)?;
         Ok(())
     }
 
