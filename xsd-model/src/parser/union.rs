@@ -33,11 +33,20 @@ pub fn parse_union(union: &Node) -> RsEntity {
             .collect(),
     );
 
+    let type_name = union
+        .parent()
+        .unwrap()
+        .prev_sibling_element()
+        .unwrap()
+        .attribute("name")
+        .unwrap_or_default()
+        .to_owned();
+
     let mut union_enum = Enum {
         cases,
         subtypes,
         comment: get_documentation(union),
-        type_name: "String".into(),
+        type_name,
         source: EnumSource::Union,
         ..Default::default()
     };

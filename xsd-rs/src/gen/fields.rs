@@ -154,6 +154,11 @@ impl ElementTransforms for WrapperType {
     fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
         match self {
             WrapperType::Enum(_) => {
+                let rust_field_name = match rust_field_name.starts_with("self.") {
+                    true => format!("&{}", rust_field_name),
+                    false => rust_field_name.to_string(),
+                };
+
                 format!(
                     "crate::xsd_util::write_string_enumeration(writer, \"{}\", {})?;",
                     xsd_field_name, rust_field_name

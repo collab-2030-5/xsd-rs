@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::io::Write;
 
 use xsd_model::config::*;
@@ -303,14 +304,22 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
                     indent(w, |w| {
                         for elem in elems {
                             if let AnyType::Choice(choice) = &elem.field_type {
-                                // ChoiceElems
-                                let choice_elems =
-                                    &split_fields_choice(&choice, &elem.multiplicity);
-
-                                for choice in choice_elems {
-                                    writeln!(w, "\"{}\" => {{", &choice.bare_name())?;
-                                    indent(w, |w| write_choice_element_handler(w, elem, choice))?;
+                                if choice.is_from_union {
+                                    writeln!(w, "\"{}\" => {{", &elem.bare_name())?;
+                                    indent(w, |w| write_choice_union_handler(w, elem, choice))?;
                                     writeln!(w, "}}")?;
+                                } else {
+                                    // ChoiceElems
+                                    let choice_elems =
+                                        &split_fields_choice(&choice, &elem.multiplicity);
+
+                                    for choice in choice_elems {
+                                        writeln!(w, "\"{}\" => {{", &choice.bare_name())?;
+                                        indent(w, |w| {
+                                            write_choice_element_handler(w, elem, choice)
+                                        })?;
+                                        writeln!(w, "}}")?;
+                                    }
                                 }
                             } else {
                                 writeln!(w, "\"{}\" => {{", &elem.bare_name())?;
@@ -343,6 +352,20 @@ fn write_elem_parse_loop(w: &mut dyn Write, elems: &[Element]) -> std::io::Resul
         writeln!(w, "}}")
     })?;
     writeln!(w, "}}")
+}
+
+fn write_choice_union_handler(
+    w: &mut dyn Write,
+    elem: &Element,
+    _choice: &Rc<Choice>,
+) -> std::io::Result<()> {
+    writeln!(
+        w,
+        "{}.set(crate::{}::read_choice_enum(reader, \"{}\")?)?",
+        elem.name.rust_field_name(),
+        elem.field_type.type_id().name.to_snake_case(),
+        elem.bare_name()
+    )
 }
 
 fn write_choice_element_handler(

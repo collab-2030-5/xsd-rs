@@ -60,7 +60,13 @@ fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::E
                     var.element_name.to_upper_camel_case()
                 )?;
                 indent(w, |w| {
-                    let tx = var.type_info.write_transform("x", &var.name_w_namespace());
+                    let tx = match choice.is_from_union {
+                        false => var.type_info.write_transform("x", &var.name_w_namespace()),
+                        true => var
+                            .type_info
+                            .write_transform("x", &choice.name_w_namespace()),
+                    };
+
                     writeln!(w, "{}", tx)?;
                     Ok(())
                 })?;
