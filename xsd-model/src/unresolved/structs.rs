@@ -164,13 +164,19 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
                     info,
                     t
                 );
-                // TODO: Change to SimpleType::Primitive(PrimitiveType::Wrapper(WrapperType::Enum(std::rc::Rc<Enumeration>)))
+                // TODO: To support Union in attribute change to:
+                // FieldType::Attribute(
+                //     attr_type.into(),
+                //     crate::SimpleType::Wrapper(crate::WrapperType::UnionChoice(
+                //         choice.id.clone(),
+                //         choice.clone(),
+                //     )),
+                // )
                 FieldType::Attribute(
-                    AttrMultiplicity::Optional,
+                    attr_type.into(),
                     crate::SimpleType::Primitive(crate::PrimitiveType::String(
                         crate::StringConstraints::default(),
-                    ))
-                    .into(),
+                    )),
                 )
             }
             AnyType::Simple(x) => FieldType::Attribute(attr_type.into(), x.clone()),
