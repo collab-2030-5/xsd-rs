@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -23,5 +24,12 @@ impl SchemaVersionType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            SchemaVersionType::SchemaVersionEnumeratedType(x) => x.to_str(),
+            SchemaVersionType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

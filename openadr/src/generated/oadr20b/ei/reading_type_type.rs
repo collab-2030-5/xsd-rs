@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 /// Type of Reading.
@@ -24,5 +25,12 @@ impl ReadingTypeType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            ReadingTypeType::ReadingTypeEnumeratedType(x) => x.to_str(),
+            ReadingTypeType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

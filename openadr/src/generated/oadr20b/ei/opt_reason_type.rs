@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 /// Reason for opting.
@@ -24,5 +25,12 @@ impl OptReasonType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            OptReasonType::OptReasonEnumeratedType(x) => x.to_str(),
+            OptReasonType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

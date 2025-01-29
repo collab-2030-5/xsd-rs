@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -23,5 +24,12 @@ impl OadrDataQualityTypeType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            OadrDataQualityTypeType::OadrDataQualityType(x) => x.to_str(),
+            OadrDataQualityTypeType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

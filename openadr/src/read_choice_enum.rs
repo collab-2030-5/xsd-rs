@@ -131,3 +131,17 @@ pub mod report_name_type {
         return Ok(ReportNameType::EiExtensionTokenType(value));
     }
 }
+
+pub mod schema_version_type {
+    use crate::oadr20b::ei::SchemaVersionType;
+    use crate::xsd_util::{ReadError, StringEnumeration};
+
+    pub fn convert_string_to_enum(value: &str) -> Result<SchemaVersionType, ReadError> {
+        if let Some(value) = crate::oadr20b::ei::SchemaVersionEnumeratedType::find(&value) {
+            return Ok(SchemaVersionType::SchemaVersionEnumeratedType(value));
+        }
+
+        // TODO: validate value against the regex: pattern="x-\S.*"
+        return Ok(SchemaVersionType::EiExtensionTokenType(value.to_string()));
+    }
+}

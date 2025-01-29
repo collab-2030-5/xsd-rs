@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -23,5 +24,12 @@ impl ReportNameType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            ReportNameType::ReportNameEnumeratedType(x) => x.to_str(),
+            ReportNameType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

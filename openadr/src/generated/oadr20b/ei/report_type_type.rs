@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 /// An enumerated value that gives the type of report being provided.
@@ -24,5 +25,12 @@ impl ReportTypeType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            ReportTypeType::ReportEnumeratedType(x) => x.to_str(),
+            ReportTypeType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

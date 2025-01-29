@@ -1,3 +1,4 @@
+use crate::xsd_util::StringEnumeration;
 use xml::writer::*;
 
 /// Signal name.
@@ -24,5 +25,12 @@ impl SignalNameType {
             }
         }
         Ok(())
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            SignalNameType::SignalNameEnumeratedType(x) => x.to_str(),
+            SignalNameType::EiExtensionTokenType(x) => x.as_str(),
+        }
     }
 }

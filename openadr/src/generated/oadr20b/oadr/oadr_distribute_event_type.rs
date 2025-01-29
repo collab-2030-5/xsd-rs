@@ -8,7 +8,7 @@ pub struct OadrDistributeEventType {
     pub ei_vtn_id: String,
     /// An object containing a demand response event
     pub oadr_event: Vec<crate::oadr20b::oadr::OadrEvent>,
-    pub ei_schema_version: Option<String>,
+    pub ei_schema_version: Option<crate::oadr20b::ei::SchemaVersionType>,
 }
 
 impl OadrDistributeEventType {
@@ -50,7 +50,11 @@ impl OadrDistributeEventType {
             events::XmlEvent::start_element(name)
         };
         // ---- start attributes ----
-        let start = match &self.ei_schema_version {
+        let ei_schema_version = self
+            .ei_schema_version
+            .as_ref()
+            .map(|x| x.as_str().to_string());
+        let start = match &ei_schema_version {
             Some(attr) => start.attr("ei:schemaVersion", attr.as_str()),
             None => start,
         };
@@ -97,12 +101,15 @@ impl OadrDistributeEventType {
         let mut pyld_request_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut ei_vtn_id: crate::xsd_util::SetOnce<String> = Default::default();
         let mut oadr_event: Vec<crate::oadr20b::oadr::OadrEvent> = Default::default();
-        let mut ei_schema_version: crate::xsd_util::SetOnce<String> = Default::default();
+        let mut ei_schema_version: crate::xsd_util::SetOnce<crate::oadr20b::ei::SchemaVersionType> =
+            Default::default();
 
         #[allow(clippy::single_match)]
         for attr in attrs.iter() {
             match attr.name.local_name.as_str() {
-                "schemaVersion" => ei_schema_version.set(attr.value.clone())?,
+                "schemaVersion" => ei_schema_version.set(
+                    crate::schema_version_type::convert_string_to_enum(&attr.value)?,
+                )?,
                 _ => {} // ignore unknown attributes
             };
         }
