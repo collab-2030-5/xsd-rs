@@ -503,6 +503,7 @@ enum AttributeTransform {
     NamedArray(Rc<NamedArray>),
     HexBitfield(Rc<BitField>),
     Duration(NumericDuration),
+    UnionChoice(Rc<Choice>),
 }
 
 impl AttributeTransform {
@@ -523,9 +524,12 @@ impl AttributeTransform {
                     format!("{}.as_secs().to_string()", name)
                 }
             },
+            Self::UnionChoice(_) => {
+                format!("{}.as_str().to_string()", name)
+            }
         }
     }
-    fn parse_from_string(&self) -> String {
+    fn parse_from_string(&self, attr: &Attribute) -> String {
         match self {
             Self::Number => "attr.value.parse()?".to_string(),
             Self::NumericEnum(e) => {
@@ -548,6 +552,12 @@ impl AttributeTransform {
                     }
                 },
             },
+            Self::UnionChoice(choice) => {
+                format!(
+                    "crate::{}::convert_string_to_enum(&attr.value)?",
+                    choice.id.name.to_snake_case(),
+                )
+            }
         }
     }
 }
@@ -567,6 +577,9 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
             WrapperType::NamedArray(_, x) => Some(AttributeTransform::NamedArray(x.clone())),
             WrapperType::HexBitField(_, x) => Some(AttributeTransform::HexBitfield(x.clone())),
             WrapperType::Enum(_) => unimplemented!(),
+            WrapperType::UnionChoice(_id, choice) => {
+                Some(AttributeTransform::UnionChoice(choice.clone()))
+            }
         },
     }
 }
@@ -574,7 +587,7 @@ fn get_attr_transform(attr_type: &SimpleType) -> Option<AttributeTransform> {
 fn parse_attribute(attr: &Attribute) -> String {
     match get_attr_transform(&attr.field_type) {
         None => "attr.value.clone()".to_string(),
-        Some(x) => x.parse_from_string(),
+        Some(x) => x.parse_from_string(attr),
     }
 }
 
@@ -586,6 +599,7 @@ where
     let self_name = format!("self.{}", &name);
     let transform = get_attr_transform(&attr.field_type);
 
+    // TODO: Given a choice attribute, use `read_choice_enum` to convert the string to the Choice type
     match attr.multiplicity {
         AttrMultiplicity::Single => {
             if let Some(tx) = &transform {
@@ -609,7 +623,7 @@ where
             let match_name = if let Some(tx) = &transform {
                 writeln!(
                     w,
-                    "let {} = self.{}.map(|x| {});",
+                    "let {} = self.{}.as_ref().map(|x| {});",
                     &name,
                     &name,
                     tx.transform_to_string("x")

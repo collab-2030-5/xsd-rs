@@ -158,19 +158,18 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
     match info {
         FieldTypeInfo::Attribute(attr_type) => match &t {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
-            AnyType::Choice(_choice) => {
+            AnyType::Choice(choice) => {
                 tracing::warn!(
-                    "Attributes referencing choice types not implemented.  Generating String type: {:#?} {:#?}",
+                    "Attributes referencing choice types is WIP.  Generating String type: {:#?} {:#?}",
                     info,
                     t
                 );
-                // TODO: Change to SimpleType::Primitive(PrimitiveType::Wrapper(WrapperType::Enum(std::rc::Rc<Enumeration>)))
                 FieldType::Attribute(
-                    AttrMultiplicity::Optional,
-                    crate::SimpleType::Primitive(crate::PrimitiveType::String(
-                        crate::StringConstraints::default(),
-                    ))
-                    .into(),
+                    attr_type.into(),
+                    crate::SimpleType::Wrapper(crate::WrapperType::UnionChoice(
+                        choice.id.clone(),
+                        choice.clone(),
+                    )),
                 )
             }
             AnyType::Simple(x) => FieldType::Attribute(attr_type.into(), x.clone()),

@@ -356,6 +356,8 @@ pub enum WrapperType {
     NamedArray(TypeId, std::rc::Rc<config::NamedArray>),
     /// Bitfield represented as Hex-bytes
     HexBitField(TypeId, std::rc::Rc<config::BitField>),
+
+    UnionChoice(TypeId, std::rc::Rc<resolved::Choice>),
 }
 
 impl WrapperType {
@@ -365,6 +367,7 @@ impl WrapperType {
             WrapperType::EnumU8(id, _) => id,
             WrapperType::NamedArray(id, _) => id,
             WrapperType::HexBitField(id, _) => id,
+            WrapperType::UnionChoice(id, _) => id,
         }
     }
 
@@ -374,6 +377,7 @@ impl WrapperType {
             WrapperType::EnumU8(_, x) => &x.name,
             WrapperType::NamedArray(_, x) => &x.name,
             WrapperType::HexBitField(_, x) => &x.name,
+            WrapperType::UnionChoice(id, _) => &id.name,
         }
     }
 }

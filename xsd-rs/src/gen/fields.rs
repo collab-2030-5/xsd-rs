@@ -6,6 +6,7 @@ use xsd_model::{PrimitiveType, SimpleType, WrapperType};
 pub(crate) trait ElementTransforms {
     fn read_transform(&self, elem_name: &str) -> String;
     fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String;
+    fn str_transform(&self, var_name: &str) -> String;
 }
 
 impl ElementTransforms for AnyType {
@@ -22,6 +23,13 @@ impl ElementTransforms for AnyType {
             AnyType::Simple(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Struct(x) => x.write_transform(rust_field_name, xsd_field_name),
             AnyType::Choice(x) => x.write_transform(rust_field_name, xsd_field_name),
+        }
+    }
+
+    fn str_transform(&self, var_name: &str) -> String {
+        match self {
+            AnyType::Simple(x) => x.str_transform(var_name),
+            _ => unimplemented!(),
         }
     }
 }
@@ -41,6 +49,10 @@ impl ElementTransforms for Struct {
             rust_field_name, xsd_field_name
         )
     }
+
+    fn str_transform(&self, var_name: &str) -> String {
+        unimplemented!("Structs should not be converted to strings")
+    }
 }
 
 impl ElementTransforms for Choice {
@@ -54,6 +66,10 @@ impl ElementTransforms for Choice {
 
     fn write_transform(&self, rust_field_name: &str, _xsd_field_name: &str) -> String {
         format!("{}.write(writer)?;", rust_field_name)
+    }
+
+    fn str_transform(&self, _var_name: &str) -> String {
+        unimplemented!("Choices should not be converted to strings")
     }
 }
 
@@ -69,6 +85,13 @@ impl ElementTransforms for SimpleType {
         match self {
             SimpleType::Primitive(x) => x.write_transform(rust_field_name, xsd_field_name),
             SimpleType::Wrapper(x) => x.write_transform(rust_field_name, xsd_field_name),
+        }
+    }
+
+    fn str_transform(&self, var_name: &str) -> String {
+        match self {
+            SimpleType::Primitive(x) => x.str_transform(var_name),
+            SimpleType::Wrapper(x) => x.str_transform(var_name),
         }
     }
 }
@@ -134,12 +157,21 @@ impl ElementTransforms for PrimitiveType {
             },
         }
     }
+
+    fn str_transform(&self, var_name: &str) -> String {
+        match self {
+            PrimitiveType::String(_) => {
+                format!("{}.as_str()", var_name)
+            }
+            _ => unimplemented!(),
+        }
+    }
 }
 
 impl ElementTransforms for WrapperType {
     fn read_transform(&self, elem_name: &str) -> String {
         match self {
-            WrapperType::Enum(_) => {
+            WrapperType::Enum(_) | WrapperType::UnionChoice(_, _) => {
                 format!(
                     "crate::xsd_util::read_string_enum(reader, \"{}\")?",
                     elem_name
@@ -153,7 +185,7 @@ impl ElementTransforms for WrapperType {
 
     fn write_transform(&self, rust_field_name: &str, xsd_field_name: &str) -> String {
         match self {
-            WrapperType::Enum(_) => {
+            WrapperType::Enum(_) | WrapperType::UnionChoice(_, _) => {
                 let rust_field_name = match rust_field_name.starts_with("self.") {
                     true => format!("&{}", rust_field_name),
                     false => rust_field_name.to_string(),
@@ -167,6 +199,14 @@ impl ElementTransforms for WrapperType {
             WrapperType::EnumU8(_, _) => unimplemented!(),
             WrapperType::NamedArray(_, _) => unimplemented!(),
             WrapperType::HexBitField(_, _) => unimplemented!(),
+        }
+    }
+
+    fn str_transform(&self, var_name: &str) -> String {
+        match self {
+            WrapperType::UnionChoice(_, _) => format!("{}.to_str()", var_name),
+            WrapperType::Enum(_) => format!("{}.to_str()", var_name),
+            _ => unimplemented!("str_transform {:#?}", self),
         }
     }
 }
