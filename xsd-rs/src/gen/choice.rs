@@ -8,6 +8,10 @@ use crate::{FatalError, RustType};
 
 pub(crate) fn write(w: &mut dyn Write, choice: &Choice) -> Result<(), FatalError> {
     writeln!(w, "use xml::writer::*;")?;
+    if choice.is_from_union {
+        writeln!(w, "use crate::xsd_util::StringEnumeration;")?;
+    }
+
     writeln!(w)?;
     write_definition(w, choice)?;
     writeln!(w)?;
@@ -40,6 +44,11 @@ fn write_impl(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::Error> 
     indent(w, |w| {
         write_serializer(w, choice)?;
         writeln!(w)?;
+        if choice.is_from_union {
+            write_as_str(w, choice)?;
+            writeln!(w)?;
+        }
+
         // write_deserializer(w, choice)?;
         Ok(())
     })?;
@@ -76,6 +85,31 @@ fn write_serializer(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::E
         })?;
         writeln!(w, "}}")?;
         writeln!(w, "Ok(())")?;
+        Ok(())
+    })?;
+    writeln!(w, "}}")?;
+    Ok(())
+}
+
+fn write_as_str(w: &mut dyn Write, choice: &Choice) -> Result<(), std::io::Error> {
+    writeln!(w, "pub fn as_str(&self) -> &str {{")?;
+    indent(w, |w| {
+        writeln!(w, "match self {{")?;
+        indent(w, |w| {
+            for var in choice.variants.iter() {
+                let transform = var.type_info.str_transform("x");
+
+                writeln!(
+                    w,
+                    "{}::{}(x) => {},",
+                    choice.id.name.to_upper_camel_case(),
+                    var.element_name.to_upper_camel_case(),
+                    transform
+                )?;
+            }
+            Ok(())
+        })?;
+        writeln!(w, "}}")?;
         Ok(())
     })?;
     writeln!(w, "}}")?;

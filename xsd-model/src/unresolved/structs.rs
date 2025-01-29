@@ -158,24 +158,17 @@ fn get_field_type(info: FieldTypeInfo, t: AnyType) -> FieldType {
     match info {
         FieldTypeInfo::Attribute(attr_type) => match &t {
             AnyType::Struct(_) => panic!("attributes may not reference struct types"),
-            AnyType::Choice(_choice) => {
+            AnyType::Choice(choice) => {
                 tracing::warn!(
-                    "Attributes referencing choice types not implemented.  Generating String type: {:#?} {:#?}",
+                    "Attributes referencing choice types is WIP.  Generating String type: {:#?} {:#?}",
                     info,
                     t
                 );
-                // TODO: To support Union in attribute change to:
-                // FieldType::Attribute(
-                //     attr_type.into(),
-                //     crate::SimpleType::Wrapper(crate::WrapperType::UnionChoice(
-                //         choice.id.clone(),
-                //         choice.clone(),
-                //     )),
-                // )
                 FieldType::Attribute(
                     attr_type.into(),
-                    crate::SimpleType::Primitive(crate::PrimitiveType::String(
-                        crate::StringConstraints::default(),
+                    crate::SimpleType::Wrapper(crate::WrapperType::UnionChoice(
+                        choice.id.clone(),
+                        choice.clone(),
                     )),
                 )
             }

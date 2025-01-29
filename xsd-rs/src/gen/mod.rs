@@ -54,6 +54,7 @@ impl GeneratedType {
                 WrapperType::EnumU8(_, x) => numeric_enum::write(w, x),
                 WrapperType::NamedArray(_, x) => named_array::write(w, x),
                 WrapperType::HexBitField(_, x) => bit_field::write(w, x),
+                WrapperType::UnionChoice(_, _) => Ok(()),
             },
         }
     }
