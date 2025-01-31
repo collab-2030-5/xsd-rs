@@ -5,7 +5,10 @@ use crate::gen::*;
 use crate::FatalError;
 
 pub(crate) fn write(w: &mut dyn Write, e: &NumericEnum<u8>) -> Result<(), FatalError> {
-    writeln!(w, "#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]")?;
+    writeln!(
+        w,
+        "#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]"
+    )?;
     writeln!(w, "pub enum {} {{", e.name)?;
     indent(w, |w| {
         for value in e.variants.values() {

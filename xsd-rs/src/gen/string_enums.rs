@@ -14,10 +14,14 @@ pub(crate) fn write(w: &mut dyn Write, en: &Enumeration) -> Result<(), FatalErro
 }
 
 fn write_definition(w: &mut dyn Write, en: &Enumeration) -> std::io::Result<()> {
-    writeln!(w, "#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]")?;
+    writeln!(
+        w,
+        "#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]"
+    )?;
     write_comment(w, &en.comment)?;
     writeln!(w, "pub enum {} {{", en.type_id.name.to_upper_camel_case())?;
     indent(w, |w| {
+        writeln!(w, "#[default]")?;
         for var in en.variants.iter() {
             write_comment(w, &var.comment)?;
             writeln!(w, "{},", var.name)?;

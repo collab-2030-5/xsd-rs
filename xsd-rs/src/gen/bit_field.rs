@@ -8,7 +8,7 @@ pub(crate) fn write(w: &mut dyn Write, bf: &BitField) -> Result<(), FatalError> 
     write_comment(w, &bf.comment)?;
     writeln!(
         w,
-        "#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]"
+        "#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq, Default)]"
     )?;
     writeln!(w, "pub struct {} {{", bf.name)?;
     indent(w, |w| {
