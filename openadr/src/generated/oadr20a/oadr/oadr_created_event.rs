@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrCreatedEvent {
     pub pyld_ei_created_event: crate::oadr20a::pyld::EiCreatedEvent,
 }

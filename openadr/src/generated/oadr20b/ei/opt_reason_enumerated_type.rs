@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// Enumerated reasons for opting.
 pub enum OptReasonEnumeratedType {
+    #[default]
     /// xml value == 'economic'
     Economic,
     /// xml value == 'emergency'

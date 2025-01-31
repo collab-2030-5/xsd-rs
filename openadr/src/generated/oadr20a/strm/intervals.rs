@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Intervals {
     pub ei_interval: Vec<crate::oadr20a::ei::IntervalType>,
 }

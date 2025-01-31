@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum ItemUnits {
+    #[default]
     /// xml value == 'W'
     W,
     /// xml value == 'J/s'

@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiTargetType {
     pub power_aggregated_pnode: Vec<crate::oadr20b::power::AggregatedPnodeType>,
     pub power_end_device_asset: Vec<crate::oadr20b::power::EndDeviceAssetType>,

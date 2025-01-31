@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Collection of Responses. When a service operation regards multiple referenceable items, each referenced item may have its own response. Always accompanied by an overall Response Type.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct ArrayofResponses {
     pub response: Vec<crate::oadr20b::ei::EiResponseType>,
 }

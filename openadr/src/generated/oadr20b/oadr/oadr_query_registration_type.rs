@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrQueryRegistrationType {
     pub pyld_request_id: String,
     pub ei_schema_version: Option<crate::oadr20b::ei::SchemaVersionType>,

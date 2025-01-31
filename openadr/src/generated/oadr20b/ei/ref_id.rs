@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Reference ID for a particular instance, transmittal, or artifact. Note: not the same as the native ID of the object being transmitted or shared.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct RefId {}
 
 impl RefId {

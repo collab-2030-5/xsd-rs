@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// Defines what type of response is requried
 pub enum ResponseRequiredType {
+    #[default]
     /// Always send a repsonse for every event received. (xml value == 'always')
     Always,
     /// Never repsond. (xml value == 'never')

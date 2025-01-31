@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Payload for use in Report Specifiers.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct SpecifierPayloadType {
     pub ei_r_id: String,
     /// What is measured or tracked in this report (Units).
@@ -192,33 +192,6 @@ impl SpecifierPayloadType {
                             )?,
                         ))?
                     }
-                    "energyApparent" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
-                            crate::oadr20b::power::EnergyApparentType::read(
-                                reader,
-                                &attributes,
-                                "energyApparent",
-                            )?,
-                        ))?
-                    }
-                    "energyReactive" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReactive(
-                            crate::oadr20b::power::EnergyReactiveType::read(
-                                reader,
-                                &attributes,
-                                "energyReactive",
-                            )?,
-                        ))?
-                    }
-                    "energyReal" => {
-                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReal(
-                            crate::oadr20b::power::EnergyRealType::read(
-                                reader,
-                                &attributes,
-                                "energyReal",
-                            )?,
-                        ))?
-                    }
                     "powerApparent" => {
                         emix_item_base.set(crate::oadr20b::emix::ItemBaseType::PowerApparent(
                             crate::oadr20b::power::PowerApparentType::read(
@@ -243,6 +216,33 @@ impl SpecifierPayloadType {
                                 reader,
                                 &attributes,
                                 "powerReal",
+                            )?,
+                        ))?
+                    }
+                    "energyApparent" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyApparent(
+                            crate::oadr20b::power::EnergyApparentType::read(
+                                reader,
+                                &attributes,
+                                "energyApparent",
+                            )?,
+                        ))?
+                    }
+                    "energyReactive" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReactive(
+                            crate::oadr20b::power::EnergyReactiveType::read(
+                                reader,
+                                &attributes,
+                                "energyReactive",
+                            )?,
+                        ))?
+                    }
+                    "energyReal" => {
+                        emix_item_base.set(crate::oadr20b::emix::ItemBaseType::EnergyReal(
+                            crate::oadr20b::power::EnergyRealType::read(
+                                reader,
+                                &attributes,
+                                "energyReal",
                             )?,
                         ))?
                     }

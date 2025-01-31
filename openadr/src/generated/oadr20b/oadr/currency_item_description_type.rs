@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum CurrencyItemDescriptionType {
+    #[default]
     /// xml value == 'currency'
     Currency,
     /// xml value == 'currencyPerKW'

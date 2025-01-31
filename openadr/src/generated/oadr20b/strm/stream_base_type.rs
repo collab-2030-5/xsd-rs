@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// abstract base for communication of schedules for signals and observations
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct StreamBaseType {
     pub xcal_dtstart: Option<crate::oadr20b::xcal::Dtstart>,
     pub xcal_duration: Option<crate::oadr20b::xcal::DurationPropType>,

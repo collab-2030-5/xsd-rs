@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// abstract base for communication of schedules for signals and observations
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct StreamBaseType {
     /// Indicates when the Designated Interval of the Stream begins. May be inherited from containing artifact.
     pub xcal_dtstart: Option<crate::oadr20a::xcal::Dtstart>,

@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// The MeterAsset is the physical device or devices that performs the role of the meter
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct MeterAssetType {
     pub power_mrid: String,
 }

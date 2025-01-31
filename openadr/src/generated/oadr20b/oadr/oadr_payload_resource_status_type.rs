@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrPayloadResourceStatusType {
     /// If true then resource/asset is online, if false then offline.
     pub oadr_online: bool,

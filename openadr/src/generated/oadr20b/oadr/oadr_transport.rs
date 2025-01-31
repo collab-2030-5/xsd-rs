@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrTransport {
     pub oadr_oadr_transport_name: crate::oadr20b::oadr::OadrTransportType,
 }

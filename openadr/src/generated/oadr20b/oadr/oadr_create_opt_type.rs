@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrCreateOptType {
     pub ei_opt_id: String,
     pub ei_opt_type: crate::oadr20b::ei::OptTypeType,

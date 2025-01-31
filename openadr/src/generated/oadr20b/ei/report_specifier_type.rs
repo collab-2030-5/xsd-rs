@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Parameters that define the content of a Report Stream
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct ReportSpecifierType {
     pub ei_report_specifier_id: String,
     /// How frequently the [measurement] is to be recorded.

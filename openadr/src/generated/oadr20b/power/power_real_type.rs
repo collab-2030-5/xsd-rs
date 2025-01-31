@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct PowerRealType {
     pub item_description: String,
     pub item_units: crate::oadr20b::power::ItemUnits,

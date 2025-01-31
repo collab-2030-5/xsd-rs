@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum OadrTransportType {
+    #[default]
     /// xml value == 'simpleHttp'
     SimpleHttp,
     /// xml value == 'xmpp'

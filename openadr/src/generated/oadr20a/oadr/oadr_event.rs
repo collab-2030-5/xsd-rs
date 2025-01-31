@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrEvent {
     pub ei_ei_event: crate::oadr20a::ei::EiEventType,
     /// oadr: This defines when repsonses are required Can be always or never

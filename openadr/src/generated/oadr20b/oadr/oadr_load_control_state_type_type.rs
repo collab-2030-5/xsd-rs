@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrLoadControlStateTypeType {
     pub oadr_min: Option<f32>,
     pub oadr_max: Option<f32>,

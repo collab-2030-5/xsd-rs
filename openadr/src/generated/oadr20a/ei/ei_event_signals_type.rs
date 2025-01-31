@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiEventSignalsType {
     pub ei_ei_event_signal: Vec<crate::oadr20a::ei::EiEventSignalType>,
 }

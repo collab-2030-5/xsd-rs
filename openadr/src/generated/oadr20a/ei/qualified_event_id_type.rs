@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Fully Qualified Event ID includes the eventID and the Modification Number
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct QualifiedEventIdType {
     pub ei_event_id: String,
     pub ei_modification_number: u32,

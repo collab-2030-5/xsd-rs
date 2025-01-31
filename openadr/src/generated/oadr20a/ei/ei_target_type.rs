@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiTargetType {
     pub ei_group_id: Vec<String>,
     pub ei_resource_id: Vec<String>,

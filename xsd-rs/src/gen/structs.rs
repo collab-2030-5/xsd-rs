@@ -28,7 +28,7 @@ pub(crate) fn write(w: &mut dyn Write, st: &Struct) -> Result<(), FatalError> {
 
 fn write_struct_definition(w: &mut dyn Write, st: &Struct) -> std::io::Result<()> {
     write_comment(w, &st.comment)?;
-    writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(w, "#[derive(Debug, Clone, PartialEq, Default)]")?;
     writeln!(w, "pub struct {} {{", st.id.name.to_upper_camel_case())?;
     indent(w, |w| write_struct_fields(w, st))?;
     writeln!(w, "}}")

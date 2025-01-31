@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum ReadingTypeEnumeratedType {
+    #[default]
     /// Reading is read from a device that increases monotonically, and usage must be computed from pairs of start and stop readings. (xml value == 'Direct Read')
     DirectRead,
     /// Meter or [resource] prepares its own calculation of total use over time. (xml value == 'Net')

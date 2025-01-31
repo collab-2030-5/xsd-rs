@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiEventSignalType {
     pub strm_intervals: crate::oadr20a::strm::Intervals,
     pub signal_name: String,

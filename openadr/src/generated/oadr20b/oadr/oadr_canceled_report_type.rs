@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrCanceledReportType {
     pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
     pub oadr_oadr_pending_reports: crate::oadr20b::oadr::OadrPendingReportsType,

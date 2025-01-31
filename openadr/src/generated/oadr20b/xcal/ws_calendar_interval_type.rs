@@ -4,7 +4,7 @@ use xml::writer::*;
 ///
 ///              An interval takes no sub-components.
 ///              
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct WsCalendarIntervalType {
     pub xcal_properties: crate::oadr20b::xcal::Properties,
 }

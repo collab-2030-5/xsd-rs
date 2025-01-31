@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrService {
     pub oadr_oadr_service_name: crate::oadr20b::oadr::OadrServiceNameType,
     pub oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo>,

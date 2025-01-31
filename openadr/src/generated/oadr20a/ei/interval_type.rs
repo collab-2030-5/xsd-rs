@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct IntervalType {
     pub xcal_duration: crate::oadr20a::xcal::DurationPropType,
     pub xcal_uid: crate::oadr20a::xcal::Uid,
