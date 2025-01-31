@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct CurrencyType {
     pub item_description: crate::oadr20b::oadr::CurrencyItemDescriptionType,
     /// ISO enumeration of currency types, such as USD

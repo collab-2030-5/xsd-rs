@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum SignalNameEnumeratedType {
+    #[default]
     /// Simple levels (OpenADR 2.0a compliant) (xml value == 'SIMPLE')
     Simple,
     /// depreciated - for backwards compatibility with A profile (xml value == 'simple')

@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum EventStatusEnumeratedType {
+    #[default]
     /// No event pending (xml value == 'none')
     None,
     /// Event pending in the far future. The exact definition of how far in the future this refers is dependent upon the market context, but typically means the next day. (xml value == 'far')

@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrEvent {
     pub ei_ei_event: crate::oadr20b::ei::EiEventType,
     pub oadr_oadr_response_required: crate::oadr20b::oadr::ResponseRequiredType,

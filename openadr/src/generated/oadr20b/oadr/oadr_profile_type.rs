@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum OadrProfileType {
+    #[default]
     /// xml value == '2.0a'
     E20a,
     /// xml value == '2.0b'

@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum OptTypeType {
+    #[default]
     /// xml value == 'optIn'
     OptIn,
     /// xml value == 'optOut'

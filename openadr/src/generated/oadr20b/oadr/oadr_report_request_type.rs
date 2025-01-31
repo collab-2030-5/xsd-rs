@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// This type is used to request an EiReport
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrReportRequestType {
     pub ei_report_request_id: String,
     pub ei_report_specifier: crate::oadr20b::ei::ReportSpecifierType,

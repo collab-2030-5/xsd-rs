@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiEventType {
     pub ei_event_descriptor: crate::oadr20a::ei::EventDescriptorType,
     pub ei_ei_active_period: crate::oadr20a::ei::EiActivePeriodType,

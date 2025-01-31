@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrExtension {
     pub oadr_extension_name: String,
     pub oadr_oadr_info: Vec<crate::oadr20b::oadr::OadrInfo>,

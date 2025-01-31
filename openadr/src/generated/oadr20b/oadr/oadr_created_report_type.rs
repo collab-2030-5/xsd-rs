@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrCreatedReportType {
     pub ei_ei_response: crate::oadr20b::ei::EiResponseType,
     /// List of periodic reports that have not yet been delivered

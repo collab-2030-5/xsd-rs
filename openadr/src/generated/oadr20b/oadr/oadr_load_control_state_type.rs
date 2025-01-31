@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrLoadControlStateType {
     pub oadr_capacity: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,
     pub oadr_level_offset: Option<crate::oadr20b::oadr::OadrLoadControlStateTypeType>,

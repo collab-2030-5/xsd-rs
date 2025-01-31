@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum ReportNameEnumeratedType {
+    #[default]
     /// xml value == 'METADATA_HISTORY_USAGE'
     MetadataHistoryUsage,
     /// xml value == 'HISTORY_USAGE'

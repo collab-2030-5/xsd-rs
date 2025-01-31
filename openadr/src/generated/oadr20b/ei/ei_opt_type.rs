@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// Opts are used by the VEN to temporarily override the pre-existing agreement. For example, a VEN may opt in to events during the evening, or opt out from events during the world series.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EiOptType {
     pub ei_opt_id: String,
     pub ei_opt_type: crate::oadr20b::ei::OptTypeType,

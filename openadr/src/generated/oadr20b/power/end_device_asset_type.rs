@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// The EndDeviceAssets are the physical device or devices which could be meters or other types of devices that may be of interest
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct EndDeviceAssetType {
     pub power_mrid: String,
 }

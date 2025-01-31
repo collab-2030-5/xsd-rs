@@ -13,12 +13,12 @@ pub enum ItemBaseType {
     PulseCount(crate::oadr20b::oadr::PulseCountType),
     Temperature(crate::oadr20b::oadr::TemperatureType),
     Voltage(crate::oadr20b::power::VoltageType),
-    EnergyApparent(crate::oadr20b::power::EnergyApparentType),
-    EnergyReactive(crate::oadr20b::power::EnergyReactiveType),
-    EnergyReal(crate::oadr20b::power::EnergyRealType),
     PowerApparent(crate::oadr20b::power::PowerApparentType),
     PowerReactive(crate::oadr20b::power::PowerReactiveType),
     PowerReal(crate::oadr20b::power::PowerRealType),
+    EnergyApparent(crate::oadr20b::power::EnergyApparentType),
+    EnergyReactive(crate::oadr20b::power::EnergyReactiveType),
+    EnergyReal(crate::oadr20b::power::EnergyRealType),
 }
 
 impl ItemBaseType {
@@ -63,15 +63,6 @@ impl ItemBaseType {
             ItemBaseType::Voltage(x) => {
                 x.write_with_name(writer, "power:voltage", false, false)?;
             }
-            ItemBaseType::EnergyApparent(x) => {
-                x.write_with_name(writer, "power:energyApparent", false, false)?;
-            }
-            ItemBaseType::EnergyReactive(x) => {
-                x.write_with_name(writer, "power:energyReactive", false, false)?;
-            }
-            ItemBaseType::EnergyReal(x) => {
-                x.write_with_name(writer, "power:energyReal", false, false)?;
-            }
             ItemBaseType::PowerApparent(x) => {
                 x.write_with_name(writer, "power:powerApparent", false, false)?;
             }
@@ -80,6 +71,15 @@ impl ItemBaseType {
             }
             ItemBaseType::PowerReal(x) => {
                 x.write_with_name(writer, "power:powerReal", false, false)?;
+            }
+            ItemBaseType::EnergyApparent(x) => {
+                x.write_with_name(writer, "power:energyApparent", false, false)?;
+            }
+            ItemBaseType::EnergyReactive(x) => {
+                x.write_with_name(writer, "power:energyReactive", false, false)?;
+            }
+            ItemBaseType::EnergyReal(x) => {
+                x.write_with_name(writer, "power:energyReal", false, false)?;
             }
         }
         Ok(())

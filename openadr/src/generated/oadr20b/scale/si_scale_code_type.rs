@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// Scale based on representations of SI scale as expressed in the unit multipliers
 pub enum SiScaleCodeType {
+    #[default]
     /// Pico 10**-12 (xml value == 'p')
     P,
     /// Nano 10**-9 (xml value == 'n')

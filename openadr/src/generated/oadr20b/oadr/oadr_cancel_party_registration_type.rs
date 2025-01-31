@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrCancelPartyRegistrationType {
     pub pyld_request_id: String,
     pub ei_registration_id: String,

@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// SignalTypeEnumerated lists the pre-defined types used to specify the payload types and conformance in a stream
 pub enum SignalTypeEnumeratedType {
+    #[default]
     /// Signal indicates the amount to change from what one would have used without the signal. (xml value == 'delta')
     Delta,
     /// Signal indicates a program level. (xml value == 'level')

@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrRequestEventType {
     pub pyld_ei_request_event: crate::oadr20b::pyld::EiRequestEvent,
     pub ei_schema_version: Option<crate::oadr20b::ei::SchemaVersionType>,

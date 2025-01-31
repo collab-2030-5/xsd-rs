@@ -1,5 +1,6 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 pub enum TemperatureUnitType {
+    #[default]
     /// xml value == 'celsius'
     Celsius,
     /// xml value == 'fahrenheit'

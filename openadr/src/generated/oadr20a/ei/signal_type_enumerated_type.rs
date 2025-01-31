@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// SignalTypeEnumerated lists the pre-defined Types used to specify the Payload Types and conformance in a Stream
 pub enum SignalTypeEnumeratedType {
+    #[default]
     /// Signal indicates the amount to change (denominated in Itembase or in the EMIX Product) from what one would have used without the Signal. This may or may not be accompanied by a baseline. Payload Type Quantity (xml value == 'delta')
     Delta,
     /// Signal indicates a Program Level. Payload Type is Program Level (xml value == 'level')

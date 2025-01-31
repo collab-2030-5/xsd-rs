@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct OadrPayload {
     pub oadr_oadr_signed_object: crate::oadr20b::oadr::OadrSignedObject,
 }

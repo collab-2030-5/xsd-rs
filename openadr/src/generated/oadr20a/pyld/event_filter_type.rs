@@ -1,6 +1,7 @@
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Default)]
 /// Used to restrict the Events exchanged in Event Requests.
 pub enum EventFilterType {
+    #[default]
     /// An event qualifies if it would qualify as either Active or Pending. (xml value == 'all')
     All,
 }

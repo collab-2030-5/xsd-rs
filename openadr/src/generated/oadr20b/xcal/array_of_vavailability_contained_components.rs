@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct ArrayOfVavailabilityContainedComponents {
     pub xcal_available: Vec<crate::oadr20b::xcal::AvailableType>,
 }

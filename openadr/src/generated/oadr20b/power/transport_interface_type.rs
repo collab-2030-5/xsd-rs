@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// The Transport Interface delineates the edges at either end of a transport segment.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct TransportInterfaceType {
     pub point_of_receipt: String,
     pub point_of_delivery: String,

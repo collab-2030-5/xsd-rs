@@ -2,7 +2,7 @@ use xml::common::Position;
 use xml::writer::*;
 
 /// The Service Area is the geographic region that is affected by the EMIX market condition
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct ServiceAreaType {
     pub gml_feature_collection: crate::oadr20b::gml::FeatureCollection,
 }

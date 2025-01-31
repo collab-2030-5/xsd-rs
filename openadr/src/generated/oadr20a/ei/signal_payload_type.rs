@@ -1,7 +1,7 @@
 use xml::common::Position;
 use xml::writer::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct SignalPayloadType {
     pub ei_payload_float: crate::oadr20a::ei::PayloadFloat,
 }
